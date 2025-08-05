@@ -53,8 +53,8 @@ yolo-training-module/
 
 1. **Clone and Start:**
    ```bash
-   git clone <repository-url>
-   cd yolo-training-module
+   git clone https://github.com/aikeymouse/model-training-module.git
+   cd model-training-module
    docker compose up --build
    ```
 
@@ -75,7 +75,7 @@ That's it! Your trained model will be automatically saved and available for test
 
 ### Overview
 ```
-┌─────────────────┐    WebSocket     ┌──────────────────┐    HTTP/WS    ┌─────────────────────┐
+┌─────────────────┐    WebSocket     ┌──────────────────┐    HTTP/WS     ┌─────────────────────┐
 │   Web Browser   │ ◄──────────────► │   Go Backend     │ ◄────────────► │  Python Training    │
 │                 │                  │  (Port 8080)     │                │  Service (Port 8000)│
 │ - Training UI   │                  │ - Static Files   │                │ - FastAPI           │

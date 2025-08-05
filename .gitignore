@@ -65,14 +65,6 @@ Thumbs.db
 # Docker
 .dockerignore
 
-# Model files (large files that shouldn't be in git)
-*.pt
-*.pth
-*.h5
-*.pkl
-*.model
-*.weights
-
 # Training data
 training_scripts/data/
 *.png
