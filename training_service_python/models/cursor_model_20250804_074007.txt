@@ -1,0 +1,17 @@
+Cursor Model Training Results - 20250804_074007
+==================================================
+
+Training Configuration:
+  Epochs: 25
+  Batch Size: 2
+  Image Size: 832×512
+  Base Model: /app/models/cursor_model_20250803_225348.pt
+  Training Images: 1600
+  Validation Images: 400
+
+Final Training Metrics:
+  Precision (P):    0.996
+  Recall (R):       0.922
+  mAP50:            0.958
+  mAP50-95:         0.634
+

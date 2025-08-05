@@ -1,0 +1,120 @@
+{
+  "pipeline": {
+    "selected_model_variable_reference": "model_path",
+    "confidence_threshold": 0.25,
+    "stages": [
+      {
+        "id": "validate",
+        "name": "Validate Dataset",
+        "description": "Validate custom dataset",
+        "scripts": [
+          {
+            "script": "training_yolov8/validate_data.py",
+            "args": []
+          },
+          {
+            "script": "training_yolov8/validate_data.py",
+            "args": [
+              "--clean"
+            ]
+          }
+        ],
+        "enabled": true,
+        "optional": false
+      },
+      {
+        "id": "generate",
+        "name": "Generate Synthetic Data",
+        "description": "Generate synthetic dataset",
+        "scripts": [
+          {
+            "script": "training_yolov8/generate_dataset.py",
+            "args": [
+              "--num-images",
+              "{synthetic_images}"
+            ]
+          }
+        ],
+        "enabled": true,
+        "optional": true
+      },
+      {
+        "id": "train",
+        "name": "Train Model",
+        "description": "Train YOLO model",
+        "scripts": [
+          {
+            "script": "training_yolov8/train.py",
+            "args": [
+              "--model",
+              "{model_path}",
+              "--epochs",
+              "{epochs}"
+            ]
+          }
+        ],
+        "enabled": true,
+        "optional": false
+      },
+      {
+        "id": "postprocess",
+        "name": "Post Process Testing",
+        "description": "Postprocess testing",
+        "scripts": [
+          {
+            "script": "training_yolov8/test_scritps.py",
+            "args": [
+              "--test",
+              "{variable_not_exist}"
+            ]
+          }
+        ],
+        "enabled": false,
+        "optional": false
+      }
+    ],
+    "variables": {
+      "synthetic_images": {
+        "type": "number",
+        "default": 500,
+        "min": 1,
+        "max": 10000,
+        "label": "Synthetic Images",
+        "display_in_ui": true
+      },
+      "epochs": {
+        "type": "number",
+        "default": 25,
+        "min": 1,
+        "max": 1000,
+        "label": "Epochs",
+        "display_in_ui": true
+      },
+      "model_path": {
+        "type": "selector",
+        "label": "Base Model",
+        "default": "demo_model.pt",
+        "options": [
+          "demo_model.pt"
+        ],
+        "display_in_ui": false
+      },
+      "test": {
+        "type": "text",
+        "label": "Test Label",
+        "default": "default text",
+        "display_in_ui": false
+      },
+      "boolean_flag": {
+        "type": "selector",
+        "label": "Bool Label",
+        "default": "False",
+        "options": [
+          "True",
+          "False"
+        ],
+        "display_in_ui": false
+      }
+    }
+  }
+}

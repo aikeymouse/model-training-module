@@ -1,0 +1,126 @@
+{
+  "pipeline": {
+    "selected_model_variable_reference": "model_path",
+    "confidence_threshold": 0.25,
+    "stages": [
+      {
+        "id": "validate",
+        "name": "Validate Dataset",
+        "description": "Validate custom dataset",
+        "scripts": [
+          {
+            "script": "training_pipeline_example/validate_data.py",
+            "args": []
+          },
+          {
+            "script": "training_pipeline_example/validate_data.py",
+            "args": [
+              "--clean"
+            ]
+          }
+        ],
+        "enabled": false,
+        "optional": false
+      },
+      {
+        "id": "generate",
+        "name": "Generate Synthetic Data",
+        "description": "Generate synthetic dataset",
+        "scripts": [
+          {
+            "script": "training_scripts/generate_dataset.py",
+            "args": [
+              "--num-images",
+              "{synthetic_images}",
+              "--preset-size",
+              "{preset_size}",
+              "--resize-method",
+              "pad",
+              "--target-name",
+              "{target_name}"
+            ]
+          }
+        ],
+        "enabled": true,
+        "optional": true
+      },
+      {
+        "id": "train",
+        "name": "Train Model",
+        "description": "Train YOLO model",
+        "scripts": [
+          {
+            "script": "training_scripts/train_yolov8.py",
+            "args": [
+              "--model",
+              "{model_path}",
+              "--epochs",
+              "{epochs}",
+              "--preset-size",
+              "{preset_size}",
+              "--batch-size",
+              "{batch_size}",
+              "--target-name",
+              "{target_name}"
+            ]
+          }
+        ],
+        "enabled": true,
+        "optional": false
+      }
+    ],
+    "variables": {
+      "synthetic_images": {
+        "type": "number",
+        "default": 500,
+        "min": 1,
+        "max": 10000,
+        "label": "Synthetic Images",
+        "display_in_ui": true
+      },
+      "epochs": {
+        "type": "number",
+        "default": 25,
+        "min": 1,
+        "max": 1000,
+        "label": "Epochs",
+        "display_in_ui": true
+      },
+      "preset_size": {
+        "type": "selector",
+        "label": "Preset Size",
+        "default": "yolo-m",
+        "options": [
+          "yolo-s",
+          "yolo-m",
+          "yolo-l",
+          "hd"
+        ],
+        "display_in_ui": true
+      },
+      "batch_size": {
+        "type": "number",
+        "default": 2,
+        "min": 1,
+        "max": 64,
+        "label": "Batch Size",
+        "display_in_ui": true
+      },
+      "model_path": {
+        "type": "selector",
+        "label": "Base Model",
+        "default": "cursor_model_20250804_074007.pt",
+        "options": [
+          "yolov8n.pt"
+        ],
+        "display_in_ui": false
+      },
+      "target_name": {
+        "type": "text",
+        "label": "Target Name",
+        "default": "cursor",
+        "display_in_ui": false
+      }
+    }
+  }
+}

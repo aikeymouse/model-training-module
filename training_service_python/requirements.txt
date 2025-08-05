@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+Pillow
+numpy
+opencv-python
+ultralytics
+scikit-learn
+pyyaml

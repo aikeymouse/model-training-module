@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/app.css">
+    <!-- Include the actual training module CSS from container -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Notification Container (required by training module) -->
+    <div id="notification-container"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>{{.Title}}</h1>
+            <p>This is an example Go application with integrated model training capabilities.</p>
+        </div>
+
+        <div class="training-section">
+            <h2>🤖 Model Training</h2>
+            <p>Click the button below to open the training module interface:</p>
+            
+            {{if .TrainingEnabled}}
+                <button id="open-model-modal-btn" class="btn-primary">Manage Models</button>
+            {{else}}
+                <p style="color: #dc3545;">Training module is not available</p>
+            {{end}}
+        </div>
+    </div>
+
+    <!-- Include modal HTML dynamically from frontend -->
+    {{.ModalHTML}}
+
+    <!-- Include the actual training module JavaScript from container -->
+    <script type="module" src="/js/model.js"></script>
+</body>
+</html>
