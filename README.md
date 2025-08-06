@@ -56,7 +56,7 @@ model-training-module/
    git clone https://github.com/aikeymouse/model-training-module.git
    cd model-training-module
    docker compose up --build
-   go run module_integration/examples/go-example/main.go
+   cd module_integration/examples/go-example && go run .
    ```
 
 2. **Open Interface:**
