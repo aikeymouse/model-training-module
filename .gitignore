@@ -65,6 +65,14 @@ Thumbs.db
 # Docker
 .dockerignore
 
+# Training data
+training_scripts/data/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+
 # Temporary files
 *.tmp
 *.temp
