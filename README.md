@@ -2,6 +2,8 @@
 
 A containerized YOLO model training system with real-time monitoring, configurable pipelines, and a modern web interface. Train custom object detection models with live feedback and professional-grade tooling.
 
+[![Patreon](https://img.shields.io/badge/Support-Patreon-orange?logo=patreon)](https://www.patreon.com/aikeymouse)
+
 ## 🚀 Quick Overview
 
 **What it does:** Train YOLO models through a web interface with real-time output streaming and configurable multi-stage pipelines.
