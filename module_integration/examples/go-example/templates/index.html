@@ -10,7 +10,7 @@
 </head>
 <body>
     <!-- Notification Container (required by training module) -->
-    <div id="notification-container"></div>
+    <div id="mt-notification-container"></div>
     
     <div class="container">
         <div class="header">
@@ -23,7 +23,7 @@
             <p>Click the button below to open the training module interface:</p>
             
             {{if .TrainingEnabled}}
-                <button id="open-model-modal-btn" class="btn-primary">Manage Models</button>
+                <button id="mt-open-model-modal-btn" class="btn-primary">Manage Models</button>
             {{else}}
                 <p style="color: #dc3545;">Training module is not available</p>
             {{end}}
