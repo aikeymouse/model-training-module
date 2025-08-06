@@ -136,7 +136,6 @@ See the [Pipeline Configuration Guide](frontend/config/README.md) for detailed c
 
 | Issue | Quick Fix |
 |-------|-----------|
-| Config file not found | Check `frontend/config/training-pipeline.json` exists |
 | WebSocket connection failed | Verify `docker compose ps` shows both services running |
 | Script execution error | Check script paths in training service container |
 | Model loading issues | Verify model file permissions and integrity |
@@ -190,12 +189,13 @@ docker compose up --build
 - **Configuration**: Validate JSON, provide defaults, maintain compatibility
 
 ### Areas for Contribution
-- Enhanced variable types and UI controls
-- Model versioning and comparison features
-- Performance optimizations and testing
-- Documentation improvements and examples
-
-See detailed contribution guidelines in individual component README files.
+- **Multi-Framework Support** - Extend beyond YOLO to support TensorFlow, PyTorch, OpenCV, and other ML frameworks
+- **GPU Acceleration** - Add CUDA/GPU support for training and detection (currently CPU-only)
+- **Advanced Model Support** - Integration with various model architectures and AI fine-tuning scripts
+- **Cross-Platform Integration** - Support for different platforms and deployment environments
+- **Model Versioning** - Model comparison features and version management
+- **Performance Optimization** - Training speed improvements and resource optimization
+- **Testing & Documentation** - Comprehensive test suites and expanded examples
 
 ## 📄 License
 
