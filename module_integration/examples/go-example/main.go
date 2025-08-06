@@ -3,14 +3,12 @@ package main
 import (
 	"embed"
 	"html/template"
-	"io"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
-	"github.com/gorilla/websocket"
+	"github.com/aikeymouse/model-training-module/module_integration/go-module/trainingmodule"
 )
 
 //go:embed static/*
@@ -19,129 +17,23 @@ var staticFiles embed.FS
 //go:embed templates/*
 var templateFiles embed.FS
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true // Allow all origins for development
-	},
-}
-
-// Copy the TrainingModuleIntegration code here or import it as a module
-// For this example, we'll include a minimal version
-
-// Minimal TrainingModuleIntegration struct for the example
-type TrainingModuleIntegration struct {
-	ServiceURL string
-}
-
-// NewTrainingModuleIntegration creates a new training module integration
-func NewTrainingModuleIntegration(serviceURL string) (*TrainingModuleIntegration, error) {
-	if serviceURL == "" {
-		serviceURL = "http://localhost:3000"
-	}
-	return &TrainingModuleIntegration{
-		ServiceURL: serviceURL,
-	}, nil
-}
-
-// RegisterRoutes registers the training module routes (proxy to Go backend service)
-func (t *TrainingModuleIntegration) RegisterRoutes(mux *http.ServeMux, pathPrefix string) {
-	// Proxy API calls to the Go backend service
-	mux.HandleFunc(pathPrefix+"/api/", func(w http.ResponseWriter, r *http.Request) {
-		// Remove the pathPrefix and forward to Go backend service
-		targetPath := strings.TrimPrefix(r.URL.Path, pathPrefix)
-		targetURL := t.ServiceURL + targetPath
-
-		// Create proxy request
-		req, err := http.NewRequest(r.Method, targetURL, r.Body)
-		if err != nil {
-			http.Error(w, "Failed to create proxy request", http.StatusInternalServerError)
-			return
-		}
-
-		// Copy headers
-		for key, values := range r.Header {
-			for _, value := range values {
-				req.Header.Add(key, value)
-			}
-		}
-
-		// Make request to Go backend service
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			http.Error(w, "Go backend service not available", http.StatusServiceUnavailable)
-			return
-		}
-		defer resp.Body.Close()
-
-		// Copy response
-		for key, values := range resp.Header {
-			for _, value := range values {
-				w.Header().Add(key, value)
-			}
-		}
-		w.WriteHeader(resp.StatusCode)
-		io.Copy(w, resp.Body)
-	})
-
-	mux.HandleFunc(pathPrefix+"/health", func(w http.ResponseWriter, r *http.Request) {
-		// Proxy health check to Go backend service
-		targetURL := t.ServiceURL + "/health"
-
-		resp, err := http.Get(targetURL)
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusServiceUnavailable)
-			w.Write([]byte(`{"status": "unavailable", "error": "Go backend service not reachable"}`))
-			return
-		}
-		defer resp.Body.Close()
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(resp.StatusCode)
-		io.Copy(w, resp.Body)
-	})
-}
-
 type Server struct {
-	trainingModule *TrainingModuleIntegration
+	trainingClient *trainingmodule.Client
 	templates      *template.Template
 	modalHTML      string
 }
 
-// loadModalHTMLFromAPI fetches the modal HTML from the Go backend API
-func (s *Server) loadModalHTMLFromAPI() (string, error) {
-	url := s.trainingModule.ServiceURL + "/api/modal-html"
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", nil // Return empty if not found, app will work without modal
-	}
-
-	content, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	return string(content), nil
-}
-
 func main() {
-	// Initialize training module integration
+	// Initialize training module client
 	trainingServiceURL := os.Getenv("TRAINING_SERVICE_URL")
 	if trainingServiceURL == "" {
-		trainingServiceURL = "http://localhost:3000" // Go backend service, not training service directly
+		trainingServiceURL = "http://localhost:3000"
 	}
 
-	trainingModule, err := NewTrainingModuleIntegration(trainingServiceURL)
-	if err != nil {
-		log.Fatal("Failed to initialize training module integration:", err)
-	}
+	trainingClient := trainingmodule.TrainingModuleClient(trainingmodule.Config{
+		ServiceURL:      trainingServiceURL,
+		AllowAllOrigins: true, // For development
+	})
 
 	// Parse templates
 	log.Println("Parsing templates...")
@@ -152,17 +44,16 @@ func main() {
 	log.Printf("Successfully parsed %d templates", len(templates.Templates()))
 
 	server := &Server{
-		trainingModule: trainingModule,
+		trainingClient: trainingClient,
 		templates:      templates,
-		modalHTML:      "", // Will be loaded dynamically
 	}
 
 	// Load modal HTML from API
 	log.Println("Loading modal HTML from Go backend API...")
-	modalHTML, err := server.loadModalHTMLFromAPI()
+	modalHTML, err := trainingClient.LoadModalHTML()
 	if err != nil {
 		log.Printf("Warning: Failed to load modal HTML from API: %v", err)
-		modalHTML = "" // Continue without modal HTML
+		modalHTML = ""
 	} else {
 		log.Println("Successfully loaded modal HTML from API")
 	}
@@ -179,26 +70,18 @@ func main() {
 	}
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
 
-	// Proxy frontend assets from training module container
-	mux.HandleFunc("/css/", server.proxyFrontendAssets)
-	mux.HandleFunc("/js/", server.proxyFrontendAssets)
-	mux.HandleFunc("/config/", server.proxyFrontendAssets)
+	// Register training module asset proxies
+	trainingClient.RegisterAssetProxies(mux)
 
-	// Proxy API calls to the Go backend service
-	mux.HandleFunc("/api/", server.proxyFrontendAssets)
-
-	// Handle WebSocket connections for script execution only
-	mux.HandleFunc("/api/script/ws/execute", server.handleWebSocket)
-
-	// Handle /ws endpoint - redirect or proxy as HTTP
-	mux.HandleFunc("/ws", server.proxyFrontendAssets)
+	// Register WebSocket proxy for script execution
+	trainingClient.RegisterWebSocketProxy(mux, "/api/script/ws/execute")
 
 	// Register training module routes
-	trainingModule.RegisterRoutes(mux, "/training-module")
+	trainingClient.RegisterRoutes(mux, "/training-module")
 
 	// Handle favicon.ico to prevent 404 errors
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNoContent) // 204 No Content
+		w.WriteHeader(http.StatusNoContent)
 	})
 
 	// Application routes (put this LAST to catch only the root path)
@@ -246,106 +129,4 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("Template executed successfully")
-}
-
-// handleWebSocket proxies WebSocket connections to the Go backend service
-func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
-	// Upgrade the connection to WebSocket
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Printf("Failed to upgrade WebSocket connection: %v", err)
-		return
-	}
-	defer conn.Close()
-
-	// Connect to the backend WebSocket
-	backendURL := strings.Replace(s.trainingModule.ServiceURL, "http://", "ws://", 1) + r.URL.Path
-	log.Printf("Connecting to backend WebSocket: %s", backendURL)
-
-	backendConn, _, err := websocket.DefaultDialer.Dial(backendURL, nil)
-	if err != nil {
-		log.Printf("Failed to connect to backend WebSocket: %v", err)
-		conn.WriteMessage(websocket.TextMessage, []byte("Failed to connect to backend service"))
-		return
-	}
-	defer backendConn.Close()
-
-	// Proxy messages between client and backend
-	go func() {
-		for {
-			messageType, message, err := conn.ReadMessage()
-			if err != nil {
-				log.Printf("Error reading from client: %v", err)
-				break
-			}
-			if err := backendConn.WriteMessage(messageType, message); err != nil {
-				log.Printf("Error writing to backend: %v", err)
-				break
-			}
-		}
-	}()
-
-	for {
-		messageType, message, err := backendConn.ReadMessage()
-		if err != nil {
-			log.Printf("Error reading from backend: %v", err)
-			break
-		}
-		if err := conn.WriteMessage(messageType, message); err != nil {
-			log.Printf("Error writing to client: %v", err)
-			break
-		}
-	}
-}
-
-// proxyFrontendAssets proxies frontend assets from the Go backend service
-func (s *Server) proxyFrontendAssets(w http.ResponseWriter, r *http.Request) {
-	// Build the URL to the Go backend service
-	targetURL := s.trainingModule.ServiceURL + r.URL.Path
-
-	// Only log important requests to reduce spam
-	if r.URL.Path != "/api/model/loaded" && r.URL.Path != "/ws" {
-		log.Printf("Proxying frontend asset: %s -> %s", r.URL.Path, targetURL)
-	}
-
-	// Create a new request to the Go backend service
-	req, err := http.NewRequest(r.Method, targetURL, r.Body)
-	if err != nil {
-		log.Printf("Failed to create proxy request: %v", err)
-		http.Error(w, "Failed to proxy request", http.StatusInternalServerError)
-		return
-	}
-
-	// Copy headers
-	for key, values := range r.Header {
-		for _, value := range values {
-			req.Header.Add(key, value)
-		}
-	}
-
-	// Make the request
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Printf("Failed to proxy request to Go backend service: %v", err)
-		http.Error(w, "Go backend service not available", http.StatusServiceUnavailable)
-		return
-	}
-	defer resp.Body.Close()
-
-	// Copy response headers
-	for key, values := range resp.Header {
-		for _, value := range values {
-			w.Header().Add(key, value)
-		}
-	}
-
-	// Set status code
-	w.WriteHeader(resp.StatusCode)
-
-	// Copy response body
-	_, err = io.Copy(w, resp.Body)
-	if err != nil {
-		log.Printf("Failed to copy response body: %v", err)
-	}
 }
