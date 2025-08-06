@@ -1,4 +1,4 @@
-module github.com/aikeymouse/model-training-module/module_integration/go-module
+module github.com/aikeymouse/model-training-module/module_integration/examples/go-module
 
 go 1.21
 

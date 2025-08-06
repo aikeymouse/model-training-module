@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/aikeymouse/model-training-module/module_integration/go-module/trainingmodule"
+	"github.com/aikeymouse/model-training-module/module_integration/examples/go-module/trainingmodule"
 )
 
 //go:embed static/*
