@@ -121,13 +121,17 @@ That's it! Your trained model will be automatically saved and available for test
 
 ### Environment Variables
 ```bash
-# Service configuration
-PYTHON_SERVICE_URL=http://training_service:8000
-DEBUG=true
+# Go Example App configuration
+PORT=8080                                    # Port for the Go example app (default: 8080)
+TRAINING_SERVICE_URL=http://localhost:3000   # URL of the Go backend service (default: http://localhost:3000)
 
-# Storage directories
-MODELS_DIR=/app/models
-LOGS_DIR=/app/logs
+# Docker service configuration  
+PYTHON_SERVICE_URL=http://training_service:8000  # Internal Docker service URL
+DEBUG=true                                   # Enable debug logging
+
+# Storage directories (for Docker containers)
+MODELS_DIR=/app/models                       # Model storage directory
+LOGS_DIR=/app/logs                          # Training execution logs
 ```
 
 ### Custom Pipelines
