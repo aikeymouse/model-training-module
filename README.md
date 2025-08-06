@@ -1,4 +1,4 @@
-# YOLO Training Module
+# Model Training Module
 
 A containerized YOLO model training system with real-time monitoring, configurable pipelines, and a modern web interface. Train custom object detection models with live feedback and professional-grade tooling.
 
@@ -13,7 +13,7 @@ A containerized YOLO model training system with real-time monitoring, configurab
 ## 📁 Project Structure
 
 ```
-yolo-training-module/
+model-training-module/
 ├── docker-compose.yml          # Multi-service orchestration
 ├── README.md                   # This overview documentation
 ├── backend_go/                 # Go HTTP server and WebSocket proxy
