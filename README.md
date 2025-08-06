@@ -72,6 +72,12 @@ model-training-module/
 
 That's it! Your trained model will be automatically saved and available for testing.
 
+### 📸 Training Interface Preview
+
+![Model Training Pipeline](training_service_python/training_pipeline_example/model_training_pipeline.png)
+
+*The web interface showing real-time training progress with configurable parameters and live log output.*
+
 ## 🔌 System Architecture
 
 ### Overview
