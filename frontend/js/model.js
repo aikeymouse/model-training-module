@@ -8,19 +8,19 @@ let pipelineConfig = null;
 
 // Notification System
 function showNotification(message, type = 'info', duration = 5000) {
-    const container = document.getElementById('notification-container');
+    const container = document.getElementById('mt-notification-container');
     if (!container) {
         console.warn('Notification container not found, falling back to console:', message);
         return;
     }
 
     const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
+    notification.className = `mt-notification ${type}`;
     
     notification.innerHTML = `
-        <div class="notification-content">
-            <div class="notification-icon"></div>
-            <div class="notification-message">${message}</div>
+        <div class="mt-notification-content">
+            <div class="mt-notification-icon"></div>
+            <div class="mt-notification-message">${message}</div>
         </div>
     `;
 
@@ -83,7 +83,7 @@ let models = []; // Store models at a higher scope
 
 // Function to render the list of models
 function renderModelList() {
-    const modelListContainer = document.getElementById('model-list-container');
+    const modelListContainer = document.getElementById('mt-model-list-container');
     if (!modelListContainer) return;
 
     // Clear previous content
@@ -100,10 +100,10 @@ function renderModelList() {
         });
 
         const modelList = document.createElement('div');
-        modelList.className = 'model-list'; // Add a class for styling
+        modelList.className = 'mt-model-list'; // Add a class for styling
         models.forEach(model => {
             const modelItem = document.createElement('div');
-            modelItem.className = 'model-item'; // Add a class for styling
+            modelItem.className = 'mt-model-item'; // Add a class for styling
             const lastModified = new Date(model.last_modified * 1000).toLocaleString();
             
             // Format the metrics if they exist
@@ -120,7 +120,7 @@ function renderModelList() {
                 const map50_95Star = model.map50_95 === bestMetrics.map50_95 ? '⭐' : '';
 
                 metricsHTML = `
-                    <span class="model-metrics">
+                    <span class="mt-model-metrics">
                         <small>
                             <b title="${pTitle}">P:</b> ${model.p.toFixed(3)}${pStar} | 
                             <b title="${rTitle}">R:</b> ${model.r.toFixed(3)}${rStar} | 
@@ -152,29 +152,29 @@ function renderModelList() {
             }
             
             const selectButtonHTML = isActive
-                ? `<button class="selected-model-btn" disabled>Selected</button>`
-                : `<button class="select-model-btn" title="Select" data-model-path="${model.path}">Select</button>`;
+                ? `<button class="mt-selected-model-btn" disabled>Selected</button>`
+                : `<button class="mt-select-model-btn" title="Select" data-model-path="${model.path}">Select</button>`;
 
             const deleteContainerHTML = `
-                <div class="delete-container">
-                    <button class="delete-model-btn" title="Delete" data-model-path="${model.path}" ${isActive ? 'disabled' : ''}>Delete</button>
-                    <div class="confirm-cancel-container" style="display: none;">
-                        <button class="confirm-delete-btn" title="Confirm" data-model-path="${model.path}">✔</button>
-                        <button class="cancel-delete-btn" title="Cancel">✖</button>
+                <div class="mt-delete-container">
+                    <button class="mt-delete-model-btn" title="Delete" data-model-path="${model.path}" ${isActive ? 'disabled' : ''}>Delete</button>
+                    <div class="mt-confirm-cancel-container" style="display: none;">
+                        <button class="mt-confirm-delete-btn" title="Confirm" data-model-path="${model.path}">✔</button>
+                        <button class="mt-cancel-delete-btn" title="Cancel">✖</button>
                     </div>
                 </div>`;
 
             modelItem.innerHTML = `
-                <div class="model-details">
-                    <div class="model-path-container">
-                        <span class="model-path" title="${tooltipText}"><b>${model.path}</b></span>
-                        ${model.has_report ? `<button class="info-icon" title="View Training Report" data-model-path="${model.path}">i</button>` : ''}
+                <div class="mt-model-details">
+                    <div class="mt-model-path-container">
+                        <span class="mt-model-path" title="${tooltipText}"><b>${model.path}</b></span>
+                        ${model.has_report ? `<button class="mt-info-icon" title="View Training Report" data-model-path="${model.path}">i</button>` : ''}
                     </div>
                     ${metricsHTML}
                     <br>
-                    <span class="model-date"><small>Last Modified: ${lastModified}</small></span>
+                    <span class="mt-model-date"><small>Last Modified: ${lastModified}</small></span>
                 </div>
-                <div class="model-actions">
+                <div class="mt-model-actions">
                     ${selectButtonHTML}
                     ${deleteContainerHTML}
                 </div>
@@ -184,7 +184,7 @@ function renderModelList() {
         modelListContainer.appendChild(modelList);
 
         // Add event listeners to the new "Select" buttons
-        modelListContainer.querySelectorAll('.select-model-btn').forEach(button => {
+        modelListContainer.querySelectorAll('.mt-select-model-btn').forEach(button => {
             button.addEventListener('click', async (event) => {
                 const modelPath = event.target.dataset.modelPath;
                 
@@ -260,28 +260,28 @@ function renderModelList() {
         });
 
         // Add event listeners for delete functionality
-        modelListContainer.querySelectorAll('.delete-model-btn').forEach(button => {
+        modelListContainer.querySelectorAll('.mt-delete-model-btn').forEach(button => {
             button.addEventListener('click', (event) => {
-                const deleteContainer = event.target.closest('.delete-container');
+                const deleteContainer = event.target.closest('.mt-delete-container');
                 if (deleteContainer) {
-                    deleteContainer.querySelector('.delete-model-btn').style.display = 'none';
-                    const confirmCancelContainer = deleteContainer.querySelector('.confirm-cancel-container');
+                    deleteContainer.querySelector('.mt-delete-model-btn').style.display = 'none';
+                    const confirmCancelContainer = deleteContainer.querySelector('.mt-confirm-cancel-container');
                     confirmCancelContainer.style.display = 'flex';
                 }
             });
         });
 
-        modelListContainer.querySelectorAll('.cancel-delete-btn').forEach(button => {
+        modelListContainer.querySelectorAll('.mt-cancel-delete-btn').forEach(button => {
             button.addEventListener('click', (event) => {
-                const deleteContainer = event.target.closest('.delete-container');
+                const deleteContainer = event.target.closest('.mt-delete-container');
                 if (deleteContainer) {
-                    deleteContainer.querySelector('.delete-model-btn').style.display = 'block';
-                    deleteContainer.querySelector('.confirm-cancel-container').style.display = 'none';
+                    deleteContainer.querySelector('.mt-delete-model-btn').style.display = 'block';
+                    deleteContainer.querySelector('.mt-confirm-cancel-container').style.display = 'none';
                 }
             });
         });
 
-        modelListContainer.querySelectorAll('.confirm-delete-btn').forEach(button => {
+        modelListContainer.querySelectorAll('.mt-confirm-delete-btn').forEach(button => {
             button.addEventListener('click', async (event) => {
                 const modelPath = event.target.dataset.modelPath;
                 try {
@@ -314,7 +314,7 @@ function renderModelList() {
         });
 
         // Add event listeners for info icons
-        modelListContainer.querySelectorAll('.info-icon').forEach(button => {
+        modelListContainer.querySelectorAll('.mt-info-icon').forEach(button => {
             button.addEventListener('click', (event) => {
                 const modelPath = event.target.dataset.modelPath;
                 openModelReportModal(modelPath);
@@ -324,7 +324,7 @@ function renderModelList() {
     } else {
         // Create a styled no models message
         const noModelsDiv = document.createElement('div');
-        noModelsDiv.className = 'no-models-message';
+        noModelsDiv.className = 'mt-no-models-message';
         noModelsDiv.textContent = 'No models found';
         modelListContainer.appendChild(noModelsDiv);
     }
@@ -357,7 +357,7 @@ async function initializePipelineConfig() {
         }
         
         // Generate dynamic controls based on pipeline variables
-        const dynamicControlsContainer = document.getElementById('dynamic-controls');
+        const dynamicControlsContainer = document.getElementById('mt-dynamic-controls');
         if (dynamicControlsContainer && pipelineConfig) {
             const controlsHTML = pipelineConfig.generateControlsHTML();
             dynamicControlsContainer.innerHTML = controlsHTML;
@@ -371,7 +371,7 @@ async function initializePipelineConfig() {
         }
 
         // Generate progress indicator based on pipeline stages
-        const progressContainer = document.getElementById('training-progress-indicator');
+        const progressContainer = document.getElementById('mt-training-progress-indicator');
         if (progressContainer && pipelineConfig) {
             progressContainer.innerHTML = pipelineConfig.generateProgressHTML();
         }
@@ -381,7 +381,7 @@ async function initializePipelineConfig() {
         showNotification('Failed to load pipeline configuration. Please check the configuration file.', 'error');
         
         // Show error in dynamic controls container
-        const dynamicControlsContainer = document.getElementById('dynamic-controls');
+        const dynamicControlsContainer = document.getElementById('mt-dynamic-controls');
         if (dynamicControlsContainer) {
             dynamicControlsContainer.innerHTML = `
                 <div style="color: red; padding: 20px; background-color: #ffebee; border: 2px solid #f44336; border-radius: 4px;">
@@ -395,7 +395,7 @@ async function initializePipelineConfig() {
 
 // Open pipeline configuration modal
 async function openPipelineConfigModal() {
-    const pipelineConfigModal = document.getElementById('pipeline-config-modal');
+    const pipelineConfigModal = document.getElementById('mt-pipeline-config-modal');
     if (!pipelineConfigModal) {
         console.error('Pipeline configuration modal not found');
         return;
@@ -420,8 +420,8 @@ function populatePipelineConfigModal() {
         return;
     }
 
-    const stagesContainer = document.getElementById('stages-container');
-    const variablesContainer = document.getElementById('variables-container');
+    const stagesContainer = document.getElementById('mt-stages-container');
+    const variablesContainer = document.getElementById('mt-variables-container');
 
     if (stagesContainer) {
         stagesContainer.innerHTML = generateStagesHTML();
@@ -446,21 +446,21 @@ function generateStagesHTML() {
 
     stages.forEach((stage, index) => {
         html += `
-            <div class="stage-item" data-stage-index="${index}">
-                <div class="stage-header">
+            <div class="mt-stage-item" data-stage-index="${index}">
+                <div class="mt-stage-header">
                     <h5>${stage.name} (${stage.id})</h5>
-                    <div class="stage-controls">
-                        <label class="stage-toggle">
+                    <div class="mt-stage-controls">
+                        <label class="mt-stage-toggle">
                             <input type="checkbox" ${stage.enabled ? 'checked' : ''} data-stage-id="${stage.id}">
                             Enabled
                         </label>
-                        <button class="delete-stage-btn" title="Delete Stage" data-stage-id="${stage.id}" data-stage-name="${stage.name}">
+                        <button class="mt-delete-stage-btn" title="Delete Stage" data-stage-id="${stage.id}" data-stage-name="${stage.name}">
                             ✖
                         </button>
                     </div>
                 </div>
-                <p class="stage-description">${stage.description}</p>
-                <div class="stage-scripts">
+                <p class="mt-stage-description">${stage.description}</p>
+                <div class="mt-stage-scripts">
                     <strong>Scripts:</strong>
                     <ul>
                         ${stage.scripts.map(script => `
@@ -489,31 +489,31 @@ function generateVariablesHTML() {
         const currentValue = pipelineConfig.getVariable(key);
 
         html += `
-            <div class="variable-item" data-variable-key="${key}">
-                <div class="variable-header">
+            <div class="mt-variable-item" data-variable-key="${key}">
+                <div class="mt-variable-header">
                     <h5>${variable.label || key}</h5>
-                    <div class="variable-controls-header">
-                        <span class="variable-type">${variable.type}</span>
-                        <label class="variable-hidden-toggle">
+                    <div class="mt-variable-controls-header">
+                        <span class="mt-variable-type">${variable.type}</span>
+                        <label class="mt-variable-hidden-toggle">
                             <input type="checkbox" ${!variable.display_in_ui ? 'checked' : ''} data-variable-key="${key}">
                             Hidden
                         </label>
-                        <button class="delete-variable-btn" title="Delete Variable" data-variable-key="${key}" data-variable-label="${variable.label || key}">
+                        <button class="mt-delete-variable-btn" title="Delete Variable" data-variable-key="${key}" data-variable-label="${variable.label || key}">
                             ✖
                         </button>
                     </div>
                 </div>
-                <div class="variable-input-controls">
+                <div class="mt-variable-input-controls">
                     ${generateVariableInput(key, variable, currentValue)}
                 </div>
                 ${variable.min !== undefined || variable.max !== undefined ? `
-                    <div class="variable-constraints">
+                    <div class="mt-variable-constraints">
                         ${variable.min !== undefined ? `Min: ${variable.min}` : ''}
                         ${variable.max !== undefined ? `Max: ${variable.max}` : ''}
                     </div>
                 ` : ''}
                 ${variable.options && variable.options.length > 0 ? `
-                    <div class="variable-constraints">
+                    <div class="mt-variable-constraints">
                         Options: ${variable.options.join(', ')}
                     </div>
                 ` : ''}
@@ -530,7 +530,7 @@ function generateVariableInput(key, variable, currentValue) {
         case 'number':
             return `
                 <input type="number" 
-                       id="var-${key}" 
+                       id="mt-var-${key}" 
                        value="${currentValue || variable.default || ''}" 
                        min="${variable.min || ''}" 
                        max="${variable.max || ''}"
@@ -539,7 +539,7 @@ function generateVariableInput(key, variable, currentValue) {
         case 'text':
             return `
                 <input type="text" 
-                       id="var-${key}" 
+                       id="mt-var-${key}" 
                        value="${currentValue || variable.default || ''}"
                        data-variable-key="${key}">
             `;
@@ -547,7 +547,7 @@ function generateVariableInput(key, variable, currentValue) {
             // Selector with defined options
             const valueToSelect = currentValue || variable.default;
             return `
-                <select id="var-${key}" data-variable-key="${key}">
+                <select id="mt-var-${key}" data-variable-key="${key}">
                     <option value="">Select an option...</option>
                     ${(variable.options || []).map(option => `
                         <option value="${option}" ${valueToSelect === option ? 'selected' : ''}>
@@ -559,7 +559,7 @@ function generateVariableInput(key, variable, currentValue) {
         default:
             return `
                 <input type="text" 
-                       id="var-${key}" 
+                       id="mt-var-${key}" 
                        value="${currentValue || variable.default || ''}"
                        data-variable-key="${key}">
             `;
@@ -569,69 +569,69 @@ function generateVariableInput(key, variable, currentValue) {
 // Add event listeners for pipeline configuration modal
 function addPipelineConfigEventListeners() {
     // Save configuration
-    const saveBtn = document.getElementById('save-pipeline-config-btn');
+    const saveBtn = document.getElementById('mt-save-pipeline-config-btn');
     if (saveBtn) {
         saveBtn.onclick = savePipelineConfiguration;
     }
 
     // Load default configuration
-    const loadDefaultBtn = document.getElementById('load-default-config-btn');
+    const loadDefaultBtn = document.getElementById('mt-load-default-config-btn');
     if (loadDefaultBtn) {
         loadDefaultBtn.onclick = loadDefaultConfiguration;
     }
 
     // Export configuration
-    const exportBtn = document.getElementById('export-config-btn');
+    const exportBtn = document.getElementById('mt-export-config-btn');
     if (exportBtn) {
         exportBtn.onclick = exportConfiguration;
     }
 
     // Import configuration
-    const importBtn = document.getElementById('import-config-btn');
-    const importInput = document.getElementById('import-config-input');
+    const importBtn = document.getElementById('mt-import-config-btn');
+    const importInput = document.getElementById('mt-import-config-input');
     if (importBtn && importInput) {
         importBtn.onclick = () => importInput.click();
         importInput.onchange = importConfiguration;
     }
 
     // Add Stage button
-    const addStageBtn = document.getElementById('add-stage-btn');
+    const addStageBtn = document.getElementById('mt-add-stage-btn');
     if (addStageBtn) {
         addStageBtn.onclick = showAddStageForm;
     }
 
     // Save Stage button
-    const saveStageBtn = document.getElementById('save-stage-btn');
+    const saveStageBtn = document.getElementById('mt-save-stage-btn');
     if (saveStageBtn) {
         saveStageBtn.onclick = saveNewStage;
     }
 
     // Cancel Stage button
-    const cancelStageBtn = document.getElementById('cancel-stage-btn');
+    const cancelStageBtn = document.getElementById('mt-cancel-stage-btn');
     if (cancelStageBtn) {
         cancelStageBtn.onclick = hideAddStageForm;
     }
 
     // Add Variable button
-    const addVariableBtn = document.getElementById('add-variable-btn');
+    const addVariableBtn = document.getElementById('mt-add-variable-btn');
     if (addVariableBtn) {
         addVariableBtn.onclick = showAddVariableForm;
     }
 
     // Save Variable button
-    const saveVariableBtn = document.getElementById('save-variable-btn');
+    const saveVariableBtn = document.getElementById('mt-save-variable-btn');
     if (saveVariableBtn) {
         saveVariableBtn.onclick = saveNewVariable;
     }
 
     // Cancel Variable button
-    const cancelVariableBtn = document.getElementById('cancel-variable-btn');
+    const cancelVariableBtn = document.getElementById('mt-cancel-variable-btn');
     if (cancelVariableBtn) {
         cancelVariableBtn.onclick = hideAddVariableForm;
     }
 
     // Variable type change handler
-    const variableTypeSelect = document.getElementById('variable-type-select');
+    const variableTypeSelect = document.getElementById('mt-variable-type-select');
     if (variableTypeSelect) {
         variableTypeSelect.onchange = handleVariableTypeChange;
     }
@@ -657,7 +657,7 @@ function addPipelineConfigEventListeners() {
     });
 
     // Delete stage buttons
-    document.querySelectorAll('.delete-stage-btn').forEach(button => {
+    document.querySelectorAll('.mt-delete-stage-btn').forEach(button => {
         button.addEventListener('click', (e) => {
             const stageId = e.target.dataset.stageId;
             const stageName = e.target.dataset.stageName;
@@ -666,7 +666,7 @@ function addPipelineConfigEventListeners() {
     });
 
     // Delete variable buttons
-    document.querySelectorAll('.delete-variable-btn').forEach(button => {
+    document.querySelectorAll('.mt-delete-variable-btn').forEach(button => {
         button.addEventListener('click', (e) => {
             const variableKey = e.target.dataset.variableKey;
             const variableLabel = e.target.dataset.variableLabel;
@@ -675,7 +675,7 @@ function addPipelineConfigEventListeners() {
     });
 
     // Variable hidden toggle
-    document.querySelectorAll('.variable-hidden-toggle input[type="checkbox"]').forEach(checkbox => {
+    document.querySelectorAll('.mt-variable-hidden-toggle input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', async (e) => {
             const variableKey = e.target.dataset.variableKey;
             const isHidden = e.target.checked;
@@ -686,8 +686,8 @@ function addPipelineConfigEventListeners() {
 
 // Show the add stage form
 function showAddStageForm() {
-    const form = document.getElementById('add-stage-form');
-    const addBtn = document.getElementById('add-stage-btn');
+    const form = document.getElementById('mt-add-stage-form');
+    const addBtn = document.getElementById('mt-add-stage-btn');
     
     if (form && addBtn) {
         form.style.display = 'block';
@@ -697,7 +697,7 @@ function showAddStageForm() {
         clearAddStageForm();
         
         // Focus on the first input
-        const firstInput = document.getElementById('stage-id-input');
+        const firstInput = document.getElementById('mt-stage-id-input');
         if (firstInput) {
             firstInput.focus();
         }
@@ -706,8 +706,8 @@ function showAddStageForm() {
 
 // Hide the add stage form
 function hideAddStageForm() {
-    const form = document.getElementById('add-stage-form');
-    const addBtn = document.getElementById('add-stage-btn');
+    const form = document.getElementById('mt-add-stage-form');
+    const addBtn = document.getElementById('mt-add-stage-btn');
     
     if (form && addBtn) {
         form.style.display = 'none';
@@ -718,24 +718,24 @@ function hideAddStageForm() {
 
 // Clear the add stage form
 function clearAddStageForm() {
-    document.getElementById('stage-id-input').value = '';
-    document.getElementById('stage-name-input').value = '';
-    document.getElementById('stage-description-input').value = '';
-    document.getElementById('stage-script-input').value = '';
-    document.getElementById('stage-args-input').value = '';
-    document.getElementById('stage-enabled-input').checked = true;
-    document.getElementById('stage-optional-input').checked = false;
+    document.getElementById('mt-stage-id-input').value = '';
+    document.getElementById('mt-stage-name-input').value = '';
+    document.getElementById('mt-stage-description-input').value = '';
+    document.getElementById('mt-stage-script-input').value = '';
+    document.getElementById('mt-stage-args-input').value = '';
+    document.getElementById('mt-stage-enabled-input').checked = true;
+    document.getElementById('mt-stage-optional-input').checked = false;
 }
 
 // Save new stage
 function saveNewStage() {
-    const stageId = document.getElementById('stage-id-input').value.trim();
-    const stageName = document.getElementById('stage-name-input').value.trim();
-    const stageDescription = document.getElementById('stage-description-input').value.trim();
-    const stageScript = document.getElementById('stage-script-input').value.trim();
-    const stageArgsText = document.getElementById('stage-args-input').value.trim();
-    const stageEnabled = document.getElementById('stage-enabled-input').checked;
-    const stageOptional = document.getElementById('stage-optional-input').checked;
+    const stageId = document.getElementById('mt-stage-id-input').value.trim();
+    const stageName = document.getElementById('mt-stage-name-input').value.trim();
+    const stageDescription = document.getElementById('mt-stage-description-input').value.trim();
+    const stageScript = document.getElementById('mt-stage-script-input').value.trim();
+    const stageArgsText = document.getElementById('mt-stage-args-input').value.trim();
+    const stageEnabled = document.getElementById('mt-stage-enabled-input').checked;
+    const stageOptional = document.getElementById('mt-stage-optional-input').checked;
 
     // Validate required fields
     if (!stageId || !stageName || !stageDescription || !stageScript) {
@@ -791,8 +791,8 @@ function saveNewStage() {
 
 // Show the add variable form
 function showAddVariableForm() {
-    const form = document.getElementById('add-variable-form');
-    const addBtn = document.getElementById('add-variable-btn');
+    const form = document.getElementById('mt-add-variable-form');
+    const addBtn = document.getElementById('mt-add-variable-btn');
     
     if (form && addBtn) {
         form.style.display = 'block';
@@ -802,7 +802,7 @@ function showAddVariableForm() {
         clearAddVariableForm();
         
         // Focus on the first input
-        const firstInput = document.getElementById('variable-key-input');
+        const firstInput = document.getElementById('mt-variable-key-input');
         if (firstInput) {
             firstInput.focus();
         }
@@ -811,8 +811,8 @@ function showAddVariableForm() {
 
 // Hide the add variable form
 function hideAddVariableForm() {
-    const form = document.getElementById('add-variable-form');
-    const addBtn = document.getElementById('add-variable-btn');
+    const form = document.getElementById('mt-add-variable-form');
+    const addBtn = document.getElementById('mt-add-variable-btn');
     
     if (form && addBtn) {
         form.style.display = 'none';
@@ -823,18 +823,18 @@ function hideAddVariableForm() {
 
 // Clear the add variable form
 function clearAddVariableForm() {
-    document.getElementById('variable-key-input').value = '';
-    document.getElementById('variable-label-input').value = '';
-    document.getElementById('variable-type-select').value = '';
-    document.getElementById('variable-default-input').value = '';
-    document.getElementById('variable-min-input').value = '';
-    document.getElementById('variable-max-input').value = '';
-    document.getElementById('variable-options-input').value = '';
-    document.getElementById('variable-display-input').checked = false;
+    document.getElementById('mt-variable-key-input').value = '';
+    document.getElementById('mt-variable-label-input').value = '';
+    document.getElementById('mt-variable-type-select').value = '';
+    document.getElementById('mt-variable-default-input').value = '';
+    document.getElementById('mt-variable-min-input').value = '';
+    document.getElementById('mt-variable-max-input').value = '';
+    document.getElementById('mt-variable-options-input').value = '';
+    document.getElementById('mt-variable-display-input').checked = false;
     
     // Hide type-specific constraints
-    const numberConstraints = document.getElementById('number-constraints');
-    const selectorOptions = document.getElementById('selector-options');
+    const numberConstraints = document.getElementById('mt-number-constraints');
+    const selectorOptions = document.getElementById('mt-selector-options');
     if (numberConstraints) {
         numberConstraints.style.display = 'none';
     }
@@ -845,10 +845,10 @@ function clearAddVariableForm() {
 
 // Handle variable type change
 function handleVariableTypeChange() {
-    const typeSelect = document.getElementById('variable-type-select');
-    const numberConstraints = document.getElementById('number-constraints');
-    const selectorOptions = document.getElementById('selector-options');
-    const defaultInput = document.getElementById('variable-default-input');
+    const typeSelect = document.getElementById('mt-variable-type-select');
+    const numberConstraints = document.getElementById('mt-number-constraints');
+    const selectorOptions = document.getElementById('mt-selector-options');
+    const defaultInput = document.getElementById('mt-variable-default-input');
     
     if (typeSelect && numberConstraints && selectorOptions && defaultInput) {
         const selectedType = typeSelect.value;
@@ -878,14 +878,14 @@ function handleVariableTypeChange() {
 
 // Save new variable
 function saveNewVariable() {
-    const variableKey = document.getElementById('variable-key-input').value.trim();
-    const variableLabel = document.getElementById('variable-label-input').value.trim();
-    const variableType = document.getElementById('variable-type-select').value;
-    const variableDefault = document.getElementById('variable-default-input').value.trim();
-    const variableMin = document.getElementById('variable-min-input').value;
-    const variableMax = document.getElementById('variable-max-input').value;
-    const variableOptions = document.getElementById('variable-options-input').value.trim();
-    const variableHidden = document.getElementById('variable-display-input').checked;
+    const variableKey = document.getElementById('mt-variable-key-input').value.trim();
+    const variableLabel = document.getElementById('mt-variable-label-input').value.trim();
+    const variableType = document.getElementById('mt-variable-type-select').value;
+    const variableDefault = document.getElementById('mt-variable-default-input').value.trim();
+    const variableMin = document.getElementById('mt-variable-min-input').value;
+    const variableMax = document.getElementById('mt-variable-max-input').value;
+    const variableOptions = document.getElementById('mt-variable-options-input').value.trim();
+    const variableHidden = document.getElementById('mt-variable-display-input').checked;
 
     // Validate required fields
     if (!variableKey || !variableLabel || !variableType) {
@@ -981,7 +981,7 @@ async function savePipelineConfiguration() {
 
     try {
         // Show saving status
-        const saveBtn = document.getElementById('save-pipeline-config-btn');
+        const saveBtn = document.getElementById('mt-save-pipeline-config-btn');
         const originalText = saveBtn ? saveBtn.textContent : '';
         if (saveBtn) {
             saveBtn.textContent = 'Saving...';
@@ -1005,13 +1005,13 @@ async function savePipelineConfiguration() {
         const result = await response.json();
         
         // Update the dynamic controls in the main modal
-        const dynamicControlsContainer = document.getElementById('dynamic-controls');
+        const dynamicControlsContainer = document.getElementById('mt-dynamic-controls');
         if (dynamicControlsContainer && pipelineConfig) {
             dynamicControlsContainer.innerHTML = pipelineConfig.generateControlsHTML();
         }
 
         // Update progress indicator in main modal
-        const progressContainer = document.getElementById('training-progress-indicator');
+        const progressContainer = document.getElementById('mt-training-progress-indicator');
         if (progressContainer && pipelineConfig) {
             progressContainer.innerHTML = pipelineConfig.generateProgressHTML();
         }
@@ -1023,7 +1023,7 @@ async function savePipelineConfiguration() {
         showNotification(`Error saving configuration: ${error.message}`, 'error');
     } finally {
         // Restore button state
-        const saveBtn = document.getElementById('save-pipeline-config-btn');
+        const saveBtn = document.getElementById('mt-save-pipeline-config-btn');
         if (saveBtn) {
             saveBtn.textContent = 'Save Configuration';
             saveBtn.disabled = false;
@@ -1104,7 +1104,7 @@ async function updateVariableVisibility(variableKey, displayInUI) {
         variable.display_in_ui = displayInUI;
         
         // Update the dynamic controls in the main modal
-        const dynamicControlsContainer = document.getElementById('dynamic-controls');
+        const dynamicControlsContainer = document.getElementById('mt-dynamic-controls');
         if (dynamicControlsContainer && pipelineConfig) {
             dynamicControlsContainer.innerHTML = pipelineConfig.generateControlsHTML();
         }
@@ -1258,8 +1258,8 @@ function validatePipelineConfiguration(pipelineConfig) {
 
 // Function to open the modal and fetch model data
 export async function openModal() {
-    const modelInfoModal = document.getElementById('model-info-modal');
-    const modelListContainer = document.getElementById('model-list-container');
+    const modelInfoModal = document.getElementById('mt-model-info-modal');
+    const modelListContainer = document.getElementById('mt-model-list-container');
 
     if (!modelInfoModal || !modelListContainer) {
         console.error("Modal elements not found in the DOM");
@@ -1328,18 +1328,18 @@ export async function openModal() {
 
 // Function to close the modal
 export function closeModal() {
-    const modelInfoModal = document.getElementById('model-info-modal');
+    const modelInfoModal = document.getElementById('mt-model-info-modal');
     if (modelInfoModal) {
         modelInfoModal.style.display = 'none';
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const modelInfoModal = document.getElementById('model-info-modal');
-    const closeButton = modelInfoModal ? modelInfoModal.querySelector('.close-button') : null;
-    const openModalButton = document.getElementById('open-model-modal-btn');
-    const configurePipelineBtn = document.getElementById('configure-pipeline-btn');
-    const testModelBtn = document.getElementById('test-model-btn');
+    const modelInfoModal = document.getElementById('mt-model-info-modal');
+    const closeButton = modelInfoModal ? modelInfoModal.querySelector('.mt-close-button') : null;
+    const openModalButton = document.getElementById('mt-open-model-modal-btn');
+    const configurePipelineBtn = document.getElementById('mt-configure-pipeline-btn');
+    const testModelBtn = document.getElementById('mt-test-model-btn');
     
     if (closeButton) {
         closeButton.addEventListener('click', closeModal);
@@ -1363,7 +1363,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTestModelButtonState();
     }
 
-    const trainModelBtn = document.getElementById('train-model-btn');
+    const trainModelBtn = document.getElementById('mt-train-model-btn');
         let currentExecutor = null; // Track the current pipeline executor for cancellation
         
         if (trainModelBtn) {
@@ -1399,7 +1399,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     configurePipelineBtn.disabled = true;
                 }
 
-                const logContainer = document.getElementById('script-log-container');
+                const logContainer = document.getElementById('mt-script-log-container');
                 logContainer.innerHTML = ''; // Clear previous logs
                 
                 // Reset any previous error styling
@@ -1408,9 +1408,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Get progress steps
                 const progressSteps = {
-                    validate: document.getElementById('validate-step'),
-                    generate: document.getElementById('generate-step'),
-                    train: document.getElementById('train-step')
+                    validate: document.getElementById('mt-validate-step'),
+                    generate: document.getElementById('mt-generate-step'),
+                    train: document.getElementById('mt-mt-train-step')
                 };
                 
                 // Reset progress indicator and styling (including error styling)
@@ -1466,7 +1466,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     
                                     // Apply red background to problematic stage
                                     if (stageHasError) {
-                                        const stageElement = document.getElementById(`${stage.id}-step`);
+                                        const stageElement = document.getElementById(`mt-${stage.id}-step`);
                                         if (stageElement) {
                                             stageElement.style.backgroundColor = '#ffebee';
                                             stageElement.style.borderColor = '#f44336';
@@ -1489,7 +1489,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             if (variable.display_in_ui) {
                                 // Get value from UI element
-                                const element = document.getElementById(`var-${key}`);
+                                const element = document.getElementById(`mt-var-${key}`);
                                 if (element) {
                                     value = variable.type === 'number' ? 
                                         parseFloat(element.value) || variable.default : 
@@ -1560,7 +1560,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Close pipeline config modal if user clicks outside
-    const pipelineConfigModal = document.getElementById('pipeline-config-modal');
+    const pipelineConfigModal = document.getElementById('mt-pipeline-config-modal');
     if (pipelineConfigModal) {
         window.addEventListener('click', (event) => {
             if (event.target === pipelineConfigModal) {
@@ -1569,7 +1569,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Add close button listener for pipeline config modal
-        const pipelineCloseButton = pipelineConfigModal.querySelector('.close-button');
+        const pipelineCloseButton = pipelineConfigModal.querySelector('.mt-close-button');
         if (pipelineCloseButton) {
             pipelineCloseButton.addEventListener('click', () => {
                 pipelineConfigModal.style.display = 'none';
@@ -1578,7 +1578,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Close model report modal if user clicks outside
-    const modelReportModal = document.getElementById('model-report-modal');
+    const modelReportModal = document.getElementById('mt-model-report-modal');
     if (modelReportModal) {
         window.addEventListener('click', (event) => {
             if (event.target === modelReportModal) {
@@ -1588,7 +1588,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Close test model modal if user clicks outside
-    const testModelModal = document.getElementById('test-model-modal');
+    const testModelModal = document.getElementById('mt-test-model-modal');
     if (testModelModal) {
         window.addEventListener('click', (event) => {
             if (event.target === testModelModal) {
@@ -1600,7 +1600,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Test Model Modal Functions
 async function updateTestModelButtonState() {
-    const testModelBtn = document.getElementById('test-model-btn');
+    const testModelBtn = document.getElementById('mt-test-model-btn');
     if (!testModelBtn) return;
     
     try {
@@ -1622,7 +1622,7 @@ async function updateTestModelButtonState() {
 }
 
 async function openTestModelModal() {
-    const modal = document.getElementById('test-model-modal');
+    const modal = document.getElementById('mt-test-model-modal');
     if (!modal) {
         console.error('Test model modal not found');
         return;
@@ -1663,7 +1663,7 @@ async function openTestModelModal() {
 }
 
 function closeTestModelModal() {
-    const modal = document.getElementById('test-model-modal');
+    const modal = document.getElementById('mt-test-model-modal');
     if (modal) {
         modal.style.display = 'none';
     }
@@ -1674,11 +1674,11 @@ function closeTestModelModal() {
 
 function resetTestModelForm() {
     // Reset image upload
-    const imageInput = document.getElementById('test-image-input');
-    const imagePreview = document.getElementById('selected-image-preview');
-    const uploadArea = document.getElementById('file-upload-area');
-    const resultImageContainer = document.getElementById('result-image-container');
-    const combinedImageArea = document.getElementById('combined-image-area');
+    const imageInput = document.getElementById('mt-test-image-input');
+    const imagePreview = document.getElementById('mt-selected-image-preview');
+    const uploadArea = document.getElementById('mt-file-upload-area');
+    const resultImageContainer = document.getElementById('mt-result-image-container');
+    const combinedImageArea = document.getElementById('mt-combined-image-area');
     
     if (imageInput) {
         imageInput.value = '';
@@ -1702,7 +1702,7 @@ function resetTestModelForm() {
     }
     
     // Reset test button
-    const testBtn = document.getElementById('run-test-btn');
+    const testBtn = document.getElementById('mt-run-test-btn');
     if (testBtn) {
         testBtn.disabled = true;
         testBtn.textContent = 'Detect';
@@ -1710,14 +1710,14 @@ function resetTestModelForm() {
     }
     
     // Reset detection results to default message
-    const resultsContent = document.getElementById('test-results-content');
+    const resultsContent = document.getElementById('mt-test-results-content');
     if (resultsContent) {
-        resultsContent.innerHTML = '<p class="no-results">Select an image and click Detect to see results</p>';
+        resultsContent.innerHTML = '<p class="mt-no-results">Select an image and click Detect to see results</p>';
     }
 }
 
 async function loadTestModelOptions() {
-    const modelSelect = document.getElementById('test-model-select');
+    const modelSelect = document.getElementById('mt-test-model-select');
     if (!modelSelect) return;
     
     try {
@@ -1752,10 +1752,10 @@ async function loadTestModelOptions() {
 }
 
 function setupTestModelEventListeners() {
-    const modelSelect = document.getElementById('test-model-select');
-    const imageInput = document.getElementById('test-image-input');
-    const uploadArea = document.getElementById('file-upload-area');
-    const testBtn = document.getElementById('run-test-btn');
+    const modelSelect = document.getElementById('mt-test-model-select');
+    const imageInput = document.getElementById('mt-test-image-input');
+    const uploadArea = document.getElementById('mt-file-upload-area');
+    const testBtn = document.getElementById('mt-run-test-btn');
     
     // Model selection handler
     if (modelSelect) {
@@ -1790,7 +1790,7 @@ function setupTestModelEventListeners() {
     }
     
     // Confidence threshold change handler
-    const confidenceInput = document.getElementById('confidence-threshold-input');
+    const confidenceInput = document.getElementById('mt-confidence-threshold-input');
     if (confidenceInput) {
         confidenceInput.removeEventListener('change', saveConfidenceThreshold);
         confidenceInput.addEventListener('change', saveConfidenceThreshold);
@@ -1809,14 +1809,14 @@ async function loadConfidenceThreshold() {
         const config = await response.json();
         const confidenceThreshold = config?.pipeline?.confidence_threshold || 0.25;
         
-        const confidenceInput = document.getElementById('confidence-threshold-input');
+        const confidenceInput = document.getElementById('mt-confidence-threshold-input');
         if (confidenceInput) {
             confidenceInput.value = confidenceThreshold;
         }
     } catch (error) {
         console.error('Error loading confidence threshold:', error);
         // Use default value if loading fails
-        const confidenceInput = document.getElementById('confidence-threshold-input');
+        const confidenceInput = document.getElementById('mt-confidence-threshold-input');
         if (confidenceInput) {
             confidenceInput.value = 0.25;
         }
@@ -1824,7 +1824,7 @@ async function loadConfidenceThreshold() {
 }
 
 async function saveConfidenceThreshold() {
-    const confidenceInput = document.getElementById('confidence-threshold-input');
+    const confidenceInput = document.getElementById('mt-confidence-threshold-input');
     if (!confidenceInput) return;
     
     const value = parseFloat(confidenceInput.value);
@@ -1880,7 +1880,7 @@ function handleImageSelection(event) {
 }
 
 function triggerFileSelection() {
-    const imageInput = document.getElementById('test-image-input');
+    const imageInput = document.getElementById('mt-test-image-input');
     if (imageInput) {
         imageInput.click();
     }
@@ -1912,7 +1912,7 @@ function handleDrop(event) {
         const file = files[0];
         if (file.type.startsWith('image/')) {
             // Update the file input
-            const imageInput = document.getElementById('test-image-input');
+            const imageInput = document.getElementById('mt-test-image-input');
             if (imageInput) {
                 // Create a new FileList-like object
                 const dt = new DataTransfer();
@@ -1927,10 +1927,10 @@ function handleDrop(event) {
 }
 
 function processSelectedImage(file) {
-    const imagePreview = document.getElementById('selected-image-preview');
-    const previewImage = document.getElementById('preview-image');
-    const uploadArea = document.getElementById('file-upload-area');
-    const combinedImageArea = document.getElementById('combined-image-area');
+    const imagePreview = document.getElementById('mt-selected-image-preview');
+    const previewImage = document.getElementById('mt-preview-image');
+    const uploadArea = document.getElementById('mt-file-upload-area');
+    const combinedImageArea = document.getElementById('mt-combined-image-area');
     
     if (!imagePreview || !previewImage) return;
     
@@ -1955,8 +1955,8 @@ function processSelectedImage(file) {
 }
 
 function checkTestReadiness() {
-    const imageInput = document.getElementById('test-image-input');
-    const testBtn = document.getElementById('run-test-btn');
+    const imageInput = document.getElementById('mt-test-image-input');
+    const testBtn = document.getElementById('mt-run-test-btn');
     
     if (!imageInput || !testBtn) return;
     
@@ -1966,9 +1966,9 @@ function checkTestReadiness() {
 }
 
 async function runModelTest() {
-    const imageInput = document.getElementById('test-image-input');
-    const testBtn = document.getElementById('run-test-btn');
-    const resultsContent = document.getElementById('test-results-content');
+    const imageInput = document.getElementById('mt-test-image-input');
+    const testBtn = document.getElementById('mt-run-test-btn');
+    const resultsContent = document.getElementById('mt-test-results-content');
     
     if (!imageInput || !testBtn || !resultsContent) {
         showNotification('Missing required elements', 'error');
@@ -1995,7 +1995,7 @@ async function runModelTest() {
     
     try {
         // Get confidence threshold value
-        const confidenceInput = document.getElementById('confidence-threshold-input');
+        const confidenceInput = document.getElementById('mt-confidence-threshold-input');
         const confidence = confidenceInput ? parseFloat(confidenceInput.value) || 0.25 : 0.25;
         
         // Create FormData for the request
@@ -2032,7 +2032,7 @@ async function runModelTest() {
         
         // Show error in results
         resultsContent.innerHTML = `
-            <div class="error-message">
+            <div class="mt-error-message">
                 <strong>Detection Failed:</strong> ${error.message}
             </div>
         `;
@@ -2045,12 +2045,12 @@ async function runModelTest() {
 }
 
 function displayTestResults(result) {
-    const resultsContent = document.getElementById('test-results-content');
-    const resultImageContainer = document.getElementById('result-image-container');
-    const resultImage = document.getElementById('result-image');
-    const uploadArea = document.getElementById('file-upload-area');
-    const imagePreview = document.getElementById('selected-image-preview');
-    const combinedImageArea = document.getElementById('combined-image-area');
+    const resultsContent = document.getElementById('mt-test-results-content');
+    const resultImageContainer = document.getElementById('mt-result-image-container');
+    const resultImage = document.getElementById('mt-result-image');
+    const uploadArea = document.getElementById('mt-file-upload-area');
+    const imagePreview = document.getElementById('mt-selected-image-preview');
+    const combinedImageArea = document.getElementById('mt-combined-image-area');
     
     if (!resultsContent) return;
     
@@ -2073,25 +2073,25 @@ function displayTestResults(result) {
     
     if (result.detections && result.detections.length > 0) {
         // Show detection statistics
-        html += '<div class="detection-stats">';
-        html += `<div class="stat-item">
-                    <span class="stat-label">Detections Found:</span>
-                    <span class="stat-value">${result.detections.length}</span>
+        html += '<div class="mt-detection-stats">';
+        html += `<div class="mt-stat-item">
+                    <span class="mt-stat-label">Detections Found:</span>
+                    <span class="mt-stat-value">${result.detections.length}</span>
                 </div>`;
         
         // Show individual detections
         result.detections.forEach((detection, index) => {
             const confidence = (detection.confidence * 100).toFixed(1);
-            html += `<div class="stat-item">
-                        <span class="stat-label">Target ${index + 1} Confidence:</span>
-                        <span class="stat-value">${confidence}%</span>
+            html += `<div class="mt-stat-item">
+                        <span class="mt-stat-label">Target ${index + 1} Confidence:</span>
+                        <span class="mt-stat-value">${confidence}%</span>
                     </div>`;
         });
         
         if (result.processing_time) {
-            html += `<div class="stat-item">
-                        <span class="stat-label">Processing Time:</span>
-                        <span class="stat-value">${result.processing_time.toFixed(2)}s</span>
+            html += `<div class="mt-stat-item">
+                        <span class="mt-stat-label">Processing Time:</span>
+                        <span class="mt-stat-value">${result.processing_time.toFixed(2)}s</span>
                     </div>`;
         }
         
@@ -2100,7 +2100,7 @@ function displayTestResults(result) {
     } else {
         // No detections found
         html += `
-            <div class="no-detections">
+            <div class="mt-no-detections">
                 <h4>No Target Detected</h4>
                 <p>The model did not detect any target in the provided image.</p>
                 ${result.processing_time ? `<p>Processing time: ${result.processing_time.toFixed(2)}s</p>` : ''}
@@ -2116,9 +2116,9 @@ window.closeTestModelModal = closeTestModelModal;
 
 // Model Report Modal Functions
 function openModelReportModal(modelPath) {
-    const modal = document.getElementById('model-report-modal');
-    const title = document.getElementById('report-modal-title');
-    const iframe = document.getElementById('report-iframe');
+    const modal = document.getElementById('mt-model-report-modal');
+    const title = document.getElementById('mt-report-modal-title');
+    const iframe = document.getElementById('mt-report-iframe');
     
     if (!modal || !title || !iframe) {
         console.error('Model report modal elements not found');
@@ -2145,8 +2145,8 @@ function openModelReportModal(modelPath) {
 }
 
 function closeModelReportModal() {
-    const modal = document.getElementById('model-report-modal');
-    const iframe = document.getElementById('report-iframe');
+    const modal = document.getElementById('mt-model-report-modal');
+    const iframe = document.getElementById('mt-report-iframe');
     
     if (modal) {
         modal.style.display = 'none';

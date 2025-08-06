@@ -81,18 +81,18 @@ export class PipelineConfig {
             switch (variable.type) {
                 case 'number':
                     html += `
-                        <div class="${key}-control">
-                            <label for="var-${key}">${variable.label}:</label>
-                            <input type="number" id="var-${key}" value="${variable.default}" 
+                        <div class="mt-${key}-control">
+                            <label for="mt-var-${key}">${variable.label}:</label>
+                            <input type="number" id="mt-var-${key}" value="${variable.default}" 
                                    min="${variable.min || 1}" max="${variable.max || 1000}">
                         </div>
                     `;
                     break;
                 case 'text':
                     html += `
-                        <div class="${key}-control">
-                            <label for="var-${key}">${variable.label}:</label>
-                            <input type="text" id="var-${key}" value="${variable.default || ''}">
+                        <div class="mt-${key}-control">
+                            <label for="mt-var-${key}">${variable.label}:</label>
+                            <input type="text" id="mt-var-${key}" value="${variable.default || ''}">
                         </div>
                     `;
                     break;
@@ -100,9 +100,9 @@ export class PipelineConfig {
                     // All selectors use options array
                     const options = variable.options || [];
                     html += `
-                        <div class="${key}-control">
-                            <label for="var-${key}">${variable.label}:</label>
-                            <select id="var-${key}">
+                        <div class="mt-${key}-control">
+                            <label for="mt-var-${key}">${variable.label}:</label>
+                            <select id="mt-var-${key}">
                                 <option value="">Select an option...</option>
                                 ${options.map(option => `
                                     <option value="${option}" ${variable.default === option ? 'selected' : ''}>
@@ -118,7 +118,7 @@ export class PipelineConfig {
 
         // If no controls were generated, show placeholder
         if (html === '') {
-            html = '<div class="empty-controls-placeholder">No training parameters configured</div>';
+            html = '<div class="mt-empty-controls-placeholder">No training parameters configured</div>';
         }
 
         return html;
@@ -127,7 +127,7 @@ export class PipelineConfig {
     // Generate progress indicator HTML
     generateProgressHTML() {
         const stages = this.getEnabledStages();
-        let html = '<div id="training-progress-indicator" class="progress-indicator';
+        let html = '<div id="mt-training-progress-indicator" class="mt-progress-indicator';
         
         if (stages.length === 0) {
             html += ' empty">';
@@ -135,7 +135,7 @@ export class PipelineConfig {
         } else {
             html += '">';
             stages.forEach((stage, index) => {
-                html += `<span class="progress-step" id="${stage.id}-step">${index + 1}. ${stage.description}</span>`;
+                html += `<span class="mt-progress-step" id="mt-${stage.id}-step">${index + 1}. ${stage.description}</span>`;
             });
         }
         
@@ -179,7 +179,7 @@ export class PipelineExecutor {
     initializeProgressSteps() {
         const stages = this.config.getEnabledStages();
         stages.forEach(stage => {
-            this.progressSteps[stage.id] = document.getElementById(`${stage.id}-step`);
+            this.progressSteps[stage.id] = document.getElementById(`mt-${stage.id}-step`);
         });
     }
 

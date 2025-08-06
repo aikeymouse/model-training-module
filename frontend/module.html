@@ -8,243 +8,243 @@
 </head>
 <body>
     <!-- Notification Container -->
-    <div id="notification-container"></div>
+    <div id="mt-notification-container"></div>
     
     <!-- This file now contains only the modal components that get injected into integrating applications -->
     <!-- The standalone UI has been moved to the Go example app -->
 
     <!-- Model Info Modal -->
-    <div id="model-info-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <div class="modal-header">
+    <div id="mt-model-info-modal" class="mt-modal-overlay" style="display: none;">
+        <div class="mt-modal-content">
+            <span class="mt-close-button">&times;</span>
+            <div class="mt-modal-header">
                 <h3>Model Training Pipeline</h3>
             </div>
-            <div class="training-controls">
-                <div id="training-progress-indicator" class="progress-indicator">
+            <div class="mt-training-controls">
+                <div id="mt-training-progress-indicator" class="mt-progress-indicator">
                     <!-- Progress steps will be dynamically generated -->
                 </div>
-                <div class="modal-actions">
-                    <div id="dynamic-controls">
+                <div class="mt-modal-actions">
+                    <div id="mt-dynamic-controls">
                         <!-- Dynamic controls will be generated based on pipeline config -->
                     </div>
-                    <div class="action-buttons">
-                        <button id="train-model-btn" class="train-model-btn">Train New Model</button>
-                        <button id="configure-pipeline-btn" class="configure-pipeline-btn">Configure Pipeline</button>
-                        <button id="test-model-btn" class="test-model-btn">Test Model</button>
+                    <div class="mt-action-buttons">
+                        <button id="mt-train-model-btn" class="mt-train-model-btn">Train New Model</button>
+                        <button id="mt-configure-pipeline-btn" class="mt-configure-pipeline-btn">Configure Pipeline</button>
+                        <button id="mt-test-model-btn" class="mt-test-model-btn">Test Model</button>
                     </div>
                 </div>
             </div>
-            <div class="modal-columns-container">
-                <div id="model-list-column" class="modal-column">
-                    <div id="model-list-container">
+            <div class="mt-modal-columns-container">
+                <div id="mt-model-list-column" class="mt-modal-column">
+                    <div id="mt-model-list-container">
                         <!-- Model list will be populated by JavaScript -->
                     </div>
                 </div>
-                <div id="script-log-column" class="modal-column">
-                    <div id="script-log-container"></div>
+                <div id="mt-script-log-column" class="mt-modal-column">
+                    <div id="mt-script-log-container"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Pipeline Configuration Modal -->
-    <div id="pipeline-config-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content pipeline-config-content">
-            <span class="close-button" id="close-pipeline-config">&times;</span>
-            <div class="modal-header">
+    <div id="mt-pipeline-config-modal" class="mt-modal-overlay" style="display: none;">
+        <div class="mt-modal-content mt-pipeline-config-content">
+            <span class="mt-close-button" id="mt-close-pipeline-config">&times;</span>
+            <div class="mt-modal-header">
                 <h3>Configure Training Pipeline</h3>
             </div>
-            <div class="pipeline-config-body">
-                <div class="config-section">
+            <div class="mt-pipeline-config-body">
+                <div class="mt-config-section">
                     <h4>Pipeline Stages</h4>
-                    <div id="stages-container">
+                    <div id="mt-stages-container">
                         <!-- Stages will be dynamically generated -->
                     </div>
                     
                     <!-- Add New Stage Form -->
-                    <div id="add-stage-form" class="add-stage-form" style="display: none;">
+                    <div id="mt-add-stage-form" class="mt-add-stage-form" style="display: none;">
                         <h5>Add New Stage</h5>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="stage-id-input">Stage ID:</label>
-                                <input type="text" id="stage-id-input" placeholder="e.g., preprocess" required>
+                        <div class="mt-form-row">
+                            <div class="mt-form-group">
+                                <label for="mt-stage-id-input">Stage ID:</label>
+                                <input type="text" id="mt-stage-id-input" placeholder="e.g., preprocess" required>
                             </div>
-                            <div class="form-group">
-                                <label for="stage-name-input">Stage Name:</label>
-                                <input type="text" id="stage-name-input" placeholder="e.g., Data Preprocessing" required>
+                            <div class="mt-form-group">
+                                <label for="mt-stage-name-input">Stage Name:</label>
+                                <input type="text" id="mt-stage-name-input" placeholder="e.g., Data Preprocessing" required>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="stage-description-input">Description:</label>
-                            <input type="text" id="stage-description-input" placeholder="e.g., Preprocess training data" required>
+                        <div class="mt-form-group">
+                            <label for="mt-stage-description-input">Description:</label>
+                            <input type="text" id="mt-stage-description-input" placeholder="e.g., Preprocess training data" required>
                         </div>
-                        <div class="form-group">
-                            <label for="stage-script-input">Script Path:</label>
-                            <input type="text" id="stage-script-input" placeholder="e.g., training_yolov8/preprocess.py" required>
+                        <div class="mt-form-group">
+                            <label for="mt-stage-script-input">Script Path:</label>
+                            <input type="text" id="mt-stage-script-input" placeholder="e.g., training_yolov8/preprocess.py" required>
                         </div>
-                        <div class="form-group">
-                            <label for="stage-args-input">Arguments (comma-separated):</label>
-                            <input type="text" id="stage-args-input" placeholder="e.g., --input, {data_path}, --output, ./processed">
+                        <div class="mt-form-group">
+                            <label for="mt-stage-args-input">Arguments (comma-separated):</label>
+                            <input type="text" id="mt-stage-args-input" placeholder="e.g., --input, {data_path}, --output, ./processed">
                         </div>
-                        <div class="form-group">
+                        <div class="mt-form-group">
                             <label>
-                                <input type="checkbox" id="stage-enabled-input" checked>
+                                <input type="checkbox" id="mt-stage-enabled-input" checked>
                                 Enabled by default
                             </label>
                         </div>
-                        <div class="form-group">
+                        <div class="mt-form-group">
                             <label>
-                                <input type="checkbox" id="stage-optional-input">
+                                <input type="checkbox" id="mt-stage-optional-input">
                                 Optional stage
                             </label>
                         </div>
-                        <div class="form-actions">
-                            <button type="button" id="save-stage-btn" class="save-btn">Save Stage</button>
-                            <button type="button" id="cancel-stage-btn" class="cancel-btn">Cancel</button>
+                        <div class="mt-form-actions">
+                            <button type="button" id="mt-save-stage-btn" class="mt-save-btn">Save Stage</button>
+                            <button type="button" id="mt-cancel-stage-btn" class="mt-cancel-btn">Cancel</button>
                         </div>
                     </div>
                     
-                    <button id="add-stage-btn" class="add-stage-btn">Add Stage</button>
+                    <button id="mt-add-stage-btn" class="mt-add-stage-btn">Add Stage</button>
                 </div>
-                <div class="config-section">
+                <div class="mt-config-section">
                     <h4>Variables</h4>
-                    <div id="variables-container">
+                    <div id="mt-variables-container">
                         <!-- Variables will be dynamically generated -->
                     </div>
                     
                     <!-- Add New Variable Form -->
-                    <div id="add-variable-form" class="add-variable-form" style="display: none;">
+                    <div id="mt-add-variable-form" class="mt-add-variable-form" style="display: none;">
                         <h5>Add New Variable</h5>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="variable-key-input">Variable Key:</label>
-                                <input type="text" id="variable-key-input" placeholder="e.g., batch_size" required>
+                        <div class="mt-form-row">
+                            <div class="mt-form-group">
+                                <label for="mt-variable-key-input">Variable Key:</label>
+                                <input type="text" id="mt-variable-key-input" placeholder="e.g., batch_size" required>
                             </div>
-                            <div class="form-group">
-                                <label for="variable-label-input">Label:</label>
-                                <input type="text" id="variable-label-input" placeholder="e.g., Batch Size" required>
+                            <div class="mt-form-group">
+                                <label for="mt-variable-label-input">Label:</label>
+                                <input type="text" id="mt-variable-label-input" placeholder="e.g., Batch Size" required>
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="variable-type-select">Variable Type:</label>
-                                <select id="variable-type-select" required>
+                        <div class="mt-form-row">
+                            <div class="mt-form-group">
+                                <label for="mt-variable-type-select">Variable Type:</label>
+                                <select id="mt-variable-type-select" required>
                                     <option value="">Select Type...</option>
                                     <option value="number">Number</option>
                                     <option value="text">Text</option>
                                     <option value="selector">Selector</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="variable-default-input">Default Value:</label>
-                                <input type="text" id="variable-default-input" placeholder="e.g., 32">
+                            <div class="mt-form-group">
+                                <label for="mt-variable-default-input">Default Value:</label>
+                                <input type="text" id="mt-variable-default-input" placeholder="e.g., 32">
                             </div>
                         </div>
-                        <div id="number-constraints" class="form-row" style="display: none;">
-                            <div class="form-group">
-                                <label for="variable-min-input">Minimum Value:</label>
-                                <input type="number" id="variable-min-input" placeholder="e.g., 1">
+                        <div id="mt-number-constraints" class="mt-form-row" style="display: none;">
+                            <div class="mt-form-group">
+                                <label for="mt-variable-min-input">Minimum Value:</label>
+                                <input type="number" id="mt-variable-min-input" placeholder="e.g., 1">
                             </div>
-                            <div class="form-group">
-                                <label for="variable-max-input">Maximum Value:</label>
-                                <input type="number" id="variable-max-input" placeholder="e.g., 1000">
+                            <div class="mt-form-group">
+                                <label for="mt-variable-max-input">Maximum Value:</label>
+                                <input type="number" id="mt-variable-max-input" placeholder="e.g., 1000">
                             </div>
                         </div>
-                        <div id="selector-options" class="form-row" style="display: none;">
-                            <div class="form-group">
-                                <label for="variable-options-input">Options (comma-separated):</label>
-                                <input type="text" id="variable-options-input" placeholder="e.g., option1, option2, option3">
+                        <div id="mt-selector-options" class="mt-form-row" style="display: none;">
+                            <div class="mt-form-group">
+                                <label for="mt-variable-options-input">Options (comma-separated):</label>
+                                <input type="text" id="mt-variable-options-input" placeholder="e.g., option1, option2, option3">
                                 <small>Enter available options separated by commas</small>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="mt-form-group">
                             <label>
-                                <input type="checkbox" id="variable-display-input">
+                                <input type="checkbox" id="mt-variable-display-input">
                                 Hidden
                             </label>
                         </div>
-                        <div class="form-actions">
-                            <button type="button" id="save-variable-btn" class="save-btn">Save Variable</button>
-                            <button type="button" id="cancel-variable-btn" class="cancel-btn">Cancel</button>
+                        <div class="mt-form-actions">
+                            <button type="button" id="mt-save-variable-btn" class="mt-save-btn">Save Variable</button>
+                            <button type="button" id="mt-cancel-variable-btn" class="mt-cancel-btn">Cancel</button>
                         </div>
                     </div>
                     
-                    <button id="add-variable-btn" class="add-variable-btn">Add Variable</button>
+                    <button id="mt-add-variable-btn" class="mt-add-variable-btn">Add Variable</button>
                 </div>
-                <div class="config-actions">
-                    <button id="save-pipeline-config-btn" class="save-config-btn">Save Configuration</button>
-                    <button id="load-default-config-btn" class="load-default-btn">Load Default</button>
-                    <button id="export-config-btn" class="export-config-btn">Export Config</button>
-                    <input type="file" id="import-config-input" accept=".json" style="display: none;">
-                    <button id="import-config-btn" class="import-config-btn">Import Config</button>
+                <div class="mt-config-actions">
+                    <button id="mt-save-pipeline-config-btn" class="mt-save-config-btn">Save Configuration</button>
+                    <button id="mt-load-default-config-btn" class="mt-load-default-btn">Load Default</button>
+                    <button id="mt-export-config-btn" class="mt-export-config-btn">Export Config</button>
+                    <input type="file" id="mt-import-config-input" accept=".json" style="display: none;">
+                    <button id="mt-import-config-btn" class="mt-import-config-btn">Import Config</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Model Report Modal -->
-    <div id="model-report-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content report-modal-content">
-            <span class="close-button" onclick="closeModelReportModal()">&times;</span>
-            <div class="modal-header">
-                <h3 id="report-modal-title">Model Training Report</h3>
+    <div id="mt-model-report-modal" class="mt-modal-overlay" style="display: none;">
+        <div class="mt-modal-content mt-report-modal-content">
+            <span class="mt-close-button" onclick="closeModelReportModal()">&times;</span>
+            <div class="mt-modal-header">
+                <h3 id="mt-report-modal-title">Model Training Report</h3>
             </div>
-            <div id="report-content-container">
-                <iframe id="report-iframe" style="width: 100%; height: 70vh; border: none;"></iframe>
+            <div id="mt-report-content-container">
+                <iframe id="mt-report-iframe" style="width: 100%; height: 70vh; border: none;"></iframe>
             </div>
         </div>
     </div>
 
     <!-- Test Model Modal -->
-    <div id="test-model-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content test-modal-content">
-            <span class="close-button" onclick="closeTestModelModal()">&times;</span>
-            <div class="modal-header">
+    <div id="mt-test-model-modal" class="mt-modal-overlay" style="display: none;">
+        <div class="mt-modal-content mt-test-modal-content">
+            <span class="mt-close-button" onclick="closeTestModelModal()">&times;</span>
+            <div class="mt-modal-header">
                 <h3>Test Model on Image</h3>
             </div>
-            <div class="test-model-body">
-                <div class="test-model-content">
+            <div class="mt-test-model-body">
+                <div class="mt-test-model-content">
                 <!-- Combined Image Area -->
-                <div class="test-section">
-                    <div class="combined-image-area" id="combined-image-area">
+                <div class="mt-test-section">
+                    <div class="mt-combined-image-area" id="mt-combined-image-area">
                         <!-- Upload Area -->
-                        <div class="file-upload-area" id="file-upload-area">
-                            <div class="upload-content">
-                                <div class="upload-icon">📁</div>
+                        <div class="mt-file-upload-area" id="mt-file-upload-area">
+                            <div class="mt-upload-content">
+                                <div class="mt-upload-icon">📁</div>
                                 <p>Click to select an image or drag and drop</p>
-                                <p class="upload-hint">Supported formats: JPG, PNG, JPEG</p>
+                                <p class="mt-upload-hint">Supported formats: JPG, PNG, JPEG</p>
                             </div>
-                            <input type="file" id="test-image-input" accept="image/*" style="display: none;">
+                            <input type="file" id="mt-test-image-input" accept="image/*" style="display: none;">
                         </div>
                         
                         <!-- Image Preview -->
-                        <div id="selected-image-preview" class="image-preview" style="display: none;">
-                            <img id="preview-image" alt="Selected image">
+                        <div id="mt-selected-image-preview" class="mt-image-preview" style="display: none;">
+                            <img id="mt-preview-image" alt="Selected image">
                         </div>
                         
                         <!-- Result Image -->
-                        <div id="result-image-container" class="result-image-container" style="display: none;">
-                            <img id="result-image" alt="Detection results" class="result-image">
+                        <div id="mt-result-image-container" class="mt-result-image-container" style="display: none;">
+                            <img id="mt-result-image" alt="Detection results" class="mt-result-image">
                         </div>
                     </div>
                 </div>
                 
                 <!-- Detection Results Section (Always Visible) -->
-                <div class="test-section">
+                <div class="mt-test-section">
                     <h4>Detection Results</h4>
-                    <div id="test-results-content" class="detection-results-content">
-                        <p class="no-results">Select an image and click Detect to see results</p>
+                    <div id="mt-test-results-content" class="mt-detection-results-content">
+                        <p class="mt-no-results">Select an image and click Detect to see results</p>
                     </div>
                 </div>
                 
                 <!-- Detection Settings -->
-                <div class="test-section">
+                <div class="mt-test-section">
                     <h4>Detection Settings</h4>
-                    <div class="detection-settings">
-                        <div class="form-group">
-                            <label for="confidence-threshold-input">Confidence Threshold:</label>
-                            <input type="number" id="confidence-threshold-input" 
+                    <div class="mt-detection-settings">
+                        <div class="mt-form-group">
+                            <label for="mt-confidence-threshold-input">Confidence Threshold:</label>
+                            <input type="number" id="mt-confidence-threshold-input" 
                                    min="0.01" max="1.0" step="0.01" value="0.25"
                                    placeholder="0.25">
                             <small>Minimum confidence for detections (0.01 - 1.0)</small>
@@ -253,8 +253,8 @@
                 </div>
                 
                 <!-- Detect Button -->
-                <div class="test-section">
-                    <button id="run-test-btn" class="run-test-btn" disabled>Detect</button>
+                <div class="mt-test-section">
+                    <button id="mt-run-test-btn" class="mt-run-test-btn" disabled>Detect</button>
                 </div>
                 </div>
             </div>
