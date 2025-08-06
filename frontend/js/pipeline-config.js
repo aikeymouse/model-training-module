@@ -192,7 +192,6 @@ export class PipelineExecutor {
                 // Close the socket
                 this.activeSocket.close(4001, 'User cancelled execution');
             } catch (error) {
-                console.log('Error sending cancel message:', error);
                 // Force close if send fails
                 this.activeSocket.close(4001, 'User cancelled execution');
             }
@@ -344,7 +343,6 @@ export class PipelineExecutor {
             return await this.executeScript(scriptPath, args);
         } catch (error) {
             if (retryCount < maxRetries && error.message.includes('WebSocket connection closed unexpectedly')) {
-                console.log(`Retrying script execution (attempt ${retryCount + 1}/${maxRetries + 1}):`, scriptPath);
                 this.logContainer.innerHTML += `<div style="color: orange;"><em>Connection failed, retrying in 3 seconds... (${retryCount + 1}/${maxRetries + 1})</em></div>`;
                 
                 // Wait before retry
@@ -456,7 +454,6 @@ export class PipelineExecutor {
             // The process will continue on the server even if WebSocket disconnects
 
             socket.onopen = () => {
-                console.log('WebSocket connected, sending script execution request:', { script_path: scriptPath, args: args });
                 socket.send(JSON.stringify({ script_path: scriptPath, args: args }));
             };
 
@@ -465,7 +462,6 @@ export class PipelineExecutor {
 
                 if (message === 'EXECUTION_FINISHED') {
                     this.logContainer.innerHTML += `<div style="color: green;"><em>✅ Finished: ${scriptPath}</em></div><hr>`;
-                    console.log('Script execution completed, closing WebSocket normally');
                     lastTrainingProgressDiv = null; // Reset progress tracking
                     lastValidationProgressDiv = null; // Reset progress tracking
                     
@@ -481,7 +477,6 @@ export class PipelineExecutor {
                     socket.close(4000, 'Execution error');
                 } else if (message.startsWith('HEARTBEAT:')) {
                     // Filter out heartbeat messages from display
-                    console.log('Heartbeat received:', message);
                 } else if (message.startsWith('MEMORY_MONITOR:') || message.startsWith('MEMORY_ERROR:') || message.startsWith('MEMORY_FINAL:') || message.startsWith('MEMORY_INITIAL:')) {
                     // Highlight memory monitoring messages with yellow bold font
                     // Don't reset lastProgressDiv - memory messages should not interrupt progress tracking
@@ -518,8 +513,6 @@ export class PipelineExecutor {
             };
 
             socket.onclose = (event) => {
-                console.log('WebSocket closed with code:', event.code, 'reason:', event.reason);
-                
                 // Clear active socket reference
                 if (this.activeSocket === socket) {
                     this.activeSocket = null;
@@ -529,11 +522,9 @@ export class PipelineExecutor {
                     // User cancelled execution
                     reject(new Error('Script execution was cancelled by user'));
                 } else if (event.code === 1000 && executionCompleted) {
-                    console.log('Script execution completed successfully');
                     resolve();
                 } else if (event.code === 1006 && executionCompleted) {
                     // Code 1006 (abnormal closure) but we already received EXECUTION_FINISHED
-                    console.log('Script execution completed successfully (abnormal close after completion)');
                     resolve();
                 } else if (event.code === 4000 || executionFailed) {
                     // Extract error message from the last EXECUTION_ERROR message
@@ -542,7 +533,6 @@ export class PipelineExecutor {
                 } else {
                     // For any other disconnection, show a message but continue
                     const infoMsg = `WebSocket disconnected (Code: ${event.code}) - script continues running on server. You can close the browser safely.`;
-                    console.log(infoMsg);
                     this.logContainer.innerHTML += `<div style="color: blue;"><strong>ℹ️ Info:</strong> ${infoMsg}</div>`;
                     
                     // Don't reject - just resolve and let the user know the process continues

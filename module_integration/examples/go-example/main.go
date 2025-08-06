@@ -196,6 +196,11 @@ func main() {
 	// Register training module routes
 	trainingModule.RegisterRoutes(mux, "/training-module")
 
+	// Handle favicon.ico to prevent 404 errors
+	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent) // 204 No Content
+	})
+
 	// Application routes (put this LAST to catch only the root path)
 	mux.HandleFunc("/", server.handleHome)
 

@@ -69,8 +69,6 @@ async function setModel(modelPath) {
         // Assuming there is a global function to log messages
         if (window.addLogMessage) {
             window.addLogMessage(`${result.message}`);
-        } else {
-            console.log(`${result.message}`);
         }
     } catch (error) {
         console.error('Error setting model:', error);
@@ -209,7 +207,6 @@ function renderModelList() {
                     }
                     
                     const loadResult = await loadResponse.json();
-                    console.log('Model loaded for testing:', loadResult);
                     
                     // Update the backend's active model for training
                     await setModel(modelPath);
@@ -232,7 +229,6 @@ function renderModelList() {
                                 });
                                 
                                 if (response.ok) {
-                                    console.log(`Updated ${selectedModelVarRef} variable to: ${modelPath}`);
                                     showNotification(`Model "${modelPath}" selected and loaded for testing (${loadResult.load_time}s)`, 'success');
                                 }
                             } catch (saveError) {
@@ -303,8 +299,6 @@ function renderModelList() {
                     const result = await response.json();
                     if (window.addLogMessage) {
                         window.addLogMessage(`Model ${modelPath} deleted: ${result.message}`);
-                    } else {
-                        console.log(`Model ${modelPath} deleted: ${result.message}`);
                     }
                     // Fetch models again and re-render
                     const modelsResponse = await fetch('/api/models');
@@ -351,17 +345,15 @@ async function initializePipelineConfig() {
                 if (serverConfig && serverConfig.pipeline) {
                     pipelineConfig.config = serverConfig;
                     configLoaded = true;
-                    console.log('Loaded pipeline configuration from server');
                 }
             }
         } catch (serverError) {
-            console.log('Server config not available, trying static file:', serverError.message);
+            // Fallback to static configuration file
         }
         
         // Fallback to static configuration file
         if (!configLoaded) {
             await pipelineConfig.loadConfig();
-            console.log('Loaded pipeline configuration from static file');
         }
         
         // Generate dynamic controls based on pipeline variables
@@ -384,7 +376,6 @@ async function initializePipelineConfig() {
             progressContainer.innerHTML = pipelineConfig.generateProgressHTML();
         }
 
-        console.log('Pipeline configuration initialized successfully');
     } catch (error) {
         console.error('Failed to load pipeline configuration:', error);
         showNotification('Failed to load pipeline configuration. Please check the configuration file.', 'error');
@@ -412,7 +403,6 @@ async function openPipelineConfigModal() {
 
     // Ensure pipeline config is loaded
     if (!pipelineConfig) {
-        console.log('Pipeline config not loaded, initializing...');
         await initializePipelineConfig();
     }
 
@@ -653,7 +643,6 @@ function addPipelineConfigEventListeners() {
             const value = e.target.value;
             if (pipelineConfig) {
                 pipelineConfig.setVariable(key, value);
-                console.log(`Updated variable ${key} to: ${value}`);
             }
         });
     });
@@ -794,7 +783,6 @@ function saveNewStage() {
         // Hide the form
         hideAddStageForm();
 
-        console.log('Added new stage:', newStage);
         showNotification(`Stage "${stageName}" added successfully!`, 'success');
     } else {
         showNotification('Error: Pipeline configuration not available', 'error');
@@ -977,7 +965,6 @@ function saveNewVariable() {
         // Hide the form
         hideAddVariableForm();
 
-        console.log('Added new variable:', variableKey, newVariable);
         showNotification(`Variable "${variableLabel}" added successfully!`, 'success');
     } else {
         showNotification('Error: Pipeline configuration not available', 'error');
@@ -1016,7 +1003,6 @@ async function savePipelineConfiguration() {
         }
 
         const result = await response.json();
-        console.log('Pipeline configuration saved:', result);
         
         // Update the dynamic controls in the main modal
         const dynamicControlsContainer = document.getElementById('dynamic-controls');
@@ -1051,7 +1037,6 @@ async function loadDefaultConfiguration() {
         pipelineConfig.config = pipelineConfig.getDefaultConfig();
         pipelineConfig.initializeVariables();
         populatePipelineConfigModal();
-        console.log('Loaded default configuration');
     }
 }
 
@@ -1087,7 +1072,6 @@ function importConfiguration(event) {
                 pipelineConfig.config = config;
                 pipelineConfig.initializeVariables();
                 populatePipelineConfigModal();
-                console.log('Imported configuration successfully');
             }
         } catch (error) {
             console.error('Error importing configuration:', error);
@@ -1106,7 +1090,6 @@ function updateStageEnabled(stageId, enabled) {
     const stage = pipelineConfig.config.pipeline.stages.find(s => s.id === stageId);
     if (stage) {
         stage.enabled = enabled;
-        console.log(`Stage ${stageId} ${enabled ? 'enabled' : 'disabled'}`);
     }
 }
 
@@ -1119,7 +1102,6 @@ async function updateVariableVisibility(variableKey, displayInUI) {
     const variable = pipelineConfig.config.pipeline.variables[variableKey];
     if (variable) {
         variable.display_in_ui = displayInUI;
-        console.log(`Variable ${variableKey} ${displayInUI ? 'shown' : 'hidden'} in UI`);
         
         // Update the dynamic controls in the main modal
         const dynamicControlsContainer = document.getElementById('dynamic-controls');
@@ -1148,7 +1130,6 @@ function deleteStage(stageId, stageName) {
         // Refresh the display
         populatePipelineConfigModal();
         
-        console.log(`Deleted stage: ${stageId}`);
         showNotification(`Stage "${stageName}" deleted successfully!`, 'success');
     } else {
         showNotification(`Error: Stage "${stageId}" not found.`, 'error');
@@ -1186,7 +1167,6 @@ function deleteVariable(variableKey, variableLabel) {
     // Refresh the display
     populatePipelineConfigModal();
     
-    console.log(`Deleted variable: ${variableKey}`);
     showNotification(`Variable "${variableLabel}" deleted successfully!`, 'success');
 }
 
@@ -1310,7 +1290,6 @@ export async function openModal() {
                     // Backend has a model loaded, use that
                     selectedModel = loadedModelData.model_path;
                     backendHasLoadedModel = true;
-                    console.log(`Using backend loaded model: ${selectedModel}`);
                 }
             }
         } catch (error) {
@@ -1322,14 +1301,12 @@ export async function openModal() {
             const selectedModelVarRef = pipelineConfig.config.pipeline.selected_model_variable_reference;
             if (selectedModelVarRef && pipelineConfig.config.pipeline.variables && pipelineConfig.config.pipeline.variables[selectedModelVarRef]) {
                 selectedModel = pipelineConfig.config.pipeline.variables[selectedModelVarRef].default || '';
-                console.log(`Using pipeline config model: ${selectedModel} from variable: ${selectedModelVarRef} (backend not loaded)`);
             }
         }
         
         // Fallback to default model if no pipeline config available
         if (!selectedModel) {
             selectedModel = 'yolov8n.pt';
-            console.log(`Using default model: ${selectedModel}`);
         }
         
         // Set active model path for rendering (use models directory path)
@@ -2160,10 +2137,6 @@ function openModelReportModal(modelPath) {
     modal.style.display = 'flex';
     
     // Handle iframe load errors
-    iframe.onload = function() {
-        console.log('Report loaded successfully');
-    };
-    
     iframe.onerror = function() {
         console.error('Error loading report');
         showNotification('Error loading model report', 'error');
