@@ -100,7 +100,7 @@ func main() {
 	}
 
 	// API endpoint to serve modal HTML for integration
-	http.HandleFunc("/api/modal-html", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/model/modal-html", func(w http.ResponseWriter, r *http.Request) {
 		// Read the frontend module.html file
 		content, err := os.ReadFile("./frontend/module.html")
 		if err != nil {

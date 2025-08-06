@@ -64,7 +64,7 @@ func (c *Client) RegisterWebSocketProxy(mux *http.ServeMux, path string) {
 
 // LoadModalHTML fetches modal HTML from the training service API
 func (c *Client) LoadModalHTML() (string, error) {
-	url := c.ServiceURL + "/api/modal-html"
+	url := c.ServiceURL + "/api/model/modal-html"
 
 	resp, err := http.Get(url)
 	if err != nil {
