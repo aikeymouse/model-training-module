@@ -83,11 +83,19 @@ That's it! Your trained model will be automatically saved and available for test
 ### Overview
 ```
 ┌─────────────────┐    WebSocket     ┌──────────────────┐    HTTP/WS     ┌─────────────────────┐
-│   Web Browser   │ ◄──────────────► │   Go Backend     │ ◄────────────► │  Python Training    │
-│                 │                  │  (Port 8080)     │                │  Service (Port 8000)│
-│ - Training UI   │                  │ - Static Files   │                │ - FastAPI           │
-│ - Real-time Logs│                  │ - WebSocket Proxy│                │ - Model Training    │
+│   Web Browser   │ ◄──────────────► │   Go Example     │ ◄────────────► │   Go Backend        │
+│                 │                  │  (Port 8080)     │                │  (Port 3000)        │
+│ - Training UI   │                  │ - Static Files   │                │ - WebSocket Proxy   │
+│ - Real-time Logs│                  │ - Integration    │                │ - API Endpoints     │
 └─────────────────┘                  └──────────────────┘                └─────────────────────┘
+                                                                                     │ HTTP/WS
+                                                                                     ▼
+                                                                          ┌─────────────────────┐
+                                                                          │  Python Training    │
+                                                                          │  Service (Port 3001)│
+                                                                          │ - FastAPI           │
+                                                                          │ - Model Training    │
+                                                                          └─────────────────────┘
 ```
 
 ### Key Technologies
