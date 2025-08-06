@@ -170,8 +170,8 @@ We welcome contributions! Here's how to get started:
 
 ### Development Setup
 ```bash
-git clone https://github.com/your-username/yolo-training-module
-cd yolo-training-module
+git clone https://github.com/aikeymouse/model-training-module.git
+cd model-training-module
 git checkout -b feature/your-feature
 docker compose up --build
 ```
