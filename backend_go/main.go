@@ -101,11 +101,11 @@ func main() {
 
 	// API endpoint to serve modal HTML for integration
 	http.HandleFunc("/api/modal-html", func(w http.ResponseWriter, r *http.Request) {
-		// Read the frontend index.html file
-		content, err := os.ReadFile("./frontend/index.html")
+		// Read the frontend module.html file
+		content, err := os.ReadFile("./frontend/module.html")
 		if err != nil {
 			http.Error(w, "Failed to read modal HTML", http.StatusInternalServerError)
-			log.Printf("Error reading index.html: %v", err)
+			log.Printf("Error reading module.html: %v", err)
 			return
 		}
 

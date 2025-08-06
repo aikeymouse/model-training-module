@@ -22,11 +22,11 @@ model-training-module/
 │   ├── main.go                # Static file server and WebSocket routing
 │   └── Dockerfile             # Go build configuration
 ├── frontend/                   # Web interface
-│   ├── index.html             # Main application interface
+│   ├── module.html             # Main application interface
 │   ├── config/
 │   │   ├── training-pipeline.json  # Pipeline configuration
 │   │   └── README.md          # 📖 Configuration documentation
-│   ├── css/style.css          # Application styling
+│   ├── css/training-module.css # Application styling
 │   └── js/                    # Frontend JavaScript modules
 └── training_service_python/    # Python training service
     ├── main_v8.py             # FastAPI backend server
