@@ -56,6 +56,7 @@ yolo-training-module/
    git clone https://github.com/aikeymouse/model-training-module.git
    cd model-training-module
    docker compose up --build
+   go run module_integration/examples/go-example/main.go
    ```
 
 2. **Open Interface:**

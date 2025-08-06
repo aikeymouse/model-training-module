@@ -99,6 +99,36 @@ func main() {
 		log.Fatal("Could not create proxy:", err)
 	}
 
+	// API endpoint to serve modal HTML for integration
+	http.HandleFunc("/api/modal-html", func(w http.ResponseWriter, r *http.Request) {
+		// Read the frontend index.html file
+		content, err := os.ReadFile("./frontend/index.html")
+		if err != nil {
+			http.Error(w, "Failed to read modal HTML", http.StatusInternalServerError)
+			log.Printf("Error reading index.html: %v", err)
+			return
+		}
+
+		html := string(content)
+
+		// Extract modal sections - everything between modal comments
+		startMarker := `<!-- Model Info Modal -->`
+		endMarker := `<script type="module"`
+
+		startIdx := strings.Index(html, startMarker)
+		endIdx := strings.Index(html, endMarker)
+
+		var modalHTML string
+		if startIdx != -1 && endIdx != -1 && endIdx > startIdx {
+			modalHTML = html[startIdx:endIdx]
+		} else {
+			modalHTML = "" // Return empty if modal section not found
+		}
+
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(modalHTML))
+	})
+
 	// API-only backend - no HTML pages served
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {

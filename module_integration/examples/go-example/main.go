@@ -109,31 +109,26 @@ type Server struct {
 	modalHTML      string
 }
 
-// loadModalHTMLFromFrontend reads the modal HTML from the frontend index.html file
-func loadModalHTMLFromFrontend() (string, error) {
-	frontendPath := "../../../frontend/index.html"
-	content, err := os.ReadFile(frontendPath)
+// loadModalHTMLFromAPI fetches the modal HTML from the Go backend API
+func (s *Server) loadModalHTMLFromAPI() (string, error) {
+	url := s.trainingModule.ServiceURL + "/api/modal-html"
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", nil // Return empty if not found, app will work without modal
+	}
+
+	content, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
 
-	// Since the backend no longer serves HTML directly, we can load the entire
-	// modal section from the frontend index.html for integration into our template
-	html := string(content)
-
-	// Extract modal sections - everything between modal comments
-	startMarker := `<!-- Model Info Modal -->`
-	endMarker := `<script type="module"`
-
-	startIdx := strings.Index(html, startMarker)
-	endIdx := strings.Index(html, endMarker)
-
-	if startIdx != -1 && endIdx != -1 && endIdx > startIdx {
-		return html[startIdx:endIdx], nil
-	}
-
-	// If we can't find the modal section, return empty (app will work without modal)
-	return "", nil
+	return string(content), nil
 }
 
 func main() {
@@ -156,21 +151,22 @@ func main() {
 	}
 	log.Printf("Successfully parsed %d templates", len(templates.Templates()))
 
-	// Load modal HTML from frontend
-	log.Println("Loading modal HTML from frontend...")
-	modalHTML, err := loadModalHTMLFromFrontend()
-	if err != nil {
-		log.Printf("Warning: Failed to load modal HTML from frontend: %v", err)
-		modalHTML = "" // Continue without modal HTML
-	} else {
-		log.Println("Successfully loaded modal HTML from frontend")
-	}
-
 	server := &Server{
 		trainingModule: trainingModule,
 		templates:      templates,
-		modalHTML:      modalHTML,
+		modalHTML:      "", // Will be loaded dynamically
 	}
+
+	// Load modal HTML from API
+	log.Println("Loading modal HTML from Go backend API...")
+	modalHTML, err := server.loadModalHTMLFromAPI()
+	if err != nil {
+		log.Printf("Warning: Failed to load modal HTML from API: %v", err)
+		modalHTML = "" // Continue without modal HTML
+	} else {
+		log.Println("Successfully loaded modal HTML from API")
+	}
+	server.modalHTML = modalHTML
 
 	// Create HTTP mux
 	mux := http.NewServeMux()
