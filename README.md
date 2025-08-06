@@ -184,6 +184,10 @@ For detailed troubleshooting, see the specific documentation:
 
 ## 🤝 Contributing
 
+[![Patreon](https://img.shields.io/badge/Support-Patreon-orange?logo=patreon)](https://www.patreon.com/aikeymouse)
+
+Support the development of advanced ML/AI tools and automation frameworks! Your contribution helps maintain and expand this project.
+
 We welcome contributions! Here's how to get started:
 
 ### Development Setup
