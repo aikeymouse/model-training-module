@@ -90,13 +90,18 @@ model-training-module/
    mkdir model-training-module && cd model-training-module
    
    # Create persistent directories for data
-   mkdir -p models logs frontend/config
+   mkdir -p models logs frontend/config training_scripts/data/cursors training_scripts/data/backgrounds
    
    # Download production Docker Compose file
    curl -o docker-compose.yml https://raw.githubusercontent.com/aikeymouse/model-training-module/main/docker-compose.prod.yml
    
    # Download sample configuration
    curl -o frontend/config/training-pipeline.json https://raw.githubusercontent.com/aikeymouse/model-training-module/main/frontend/config/training-pipeline.json
+   
+   # Download training scripts and sample data
+   curl -o training_scripts/train_yolov8.py https://raw.githubusercontent.com/aikeymouse/model-training-module/main/training_service_python/training_scripts/train_yolov8.py
+   curl -o training_scripts/generate_dataset.py https://raw.githubusercontent.com/aikeymouse/model-training-module/main/training_service_python/training_scripts/generate_dataset.py
+   curl -o models/yolov8n.pt https://raw.githubusercontent.com/aikeymouse/model-training-module/main/training_service_python/models/yolov8n.pt
    
    # Start the training module
    docker compose up
@@ -127,7 +132,9 @@ model-training-module/
    ```
    model-training-module/
    ├── models/                    # 📁 Your trained models (persistent)
-   │   ├── cursor_model_xyz.pt   # Trained model files
+   │   ├── yolov8n.pt            # Base YOLOv8 model for training
+   │   ├── cursor_model_*.pt     # Example trained cursor models
+   │   ├── cursor_model_xyz.pt   # Your new trained model files
    │   └── cursor_model_xyz.html # Training reports
    ├── logs/                     # 📁 Training logs (persistent)  
    │   └── pipeline.log          # Training pipeline execution logs
@@ -137,9 +144,9 @@ model-training-module/
    ├── training_scripts/         # 🐍 Python scripts and data (editable)
    │   ├── train_yolov8.py      # Main training script
    │   ├── generate_dataset.py  # Dataset generation
-   │   └── data/                # Training data (cursors, backgrounds)
-   │       ├── cursors/         # Cursor images for training
-   │       └── backgrounds/     # Background images
+   │   └── data/                # Training data (ready to use)
+   │       ├── cursors/         # Sample cursor images
+   │       └── backgrounds/     # Sample background images
    └── docker-compose.yml        # Container orchestration (production config)
    ```
 
