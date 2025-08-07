@@ -95,7 +95,7 @@ Write-Host "✅ Setup complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "🎯 Next steps:" -ForegroundColor Cyan
 Write-Host "1. Start the training module:" -ForegroundColor White
-Write-Host "   docker compose up" -ForegroundColor Gray
+Write-Host "   docker compose pull; docker compose up" -ForegroundColor Gray
 Write-Host ""
 Write-Host "2. Open the interface:" -ForegroundColor White
 Write-Host "   http://localhost:3000/container" -ForegroundColor Gray

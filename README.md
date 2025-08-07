@@ -73,7 +73,7 @@ model-training-module/
    ```bash
    curl -s https://raw.githubusercontent.com/aikeymouse/model-training-module/main/setup-standalone.sh | bash
    cd model-training-module
-   docker compose up
+   docker compose pull && docker compose up
    ```
    
    **Windows (PowerShell):**
@@ -81,7 +81,7 @@ model-training-module/
    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aikeymouse/model-training-module/main/setup-standalone.ps1" -OutFile "setup.ps1"
    .\setup.ps1
    cd model-training-module
-   docker compose up
+   docker compose pull; docker compose up
    ```
    
    **Manual Setup (All Platforms):**
@@ -104,7 +104,7 @@ model-training-module/
    curl -o models/yolov8n.pt https://raw.githubusercontent.com/aikeymouse/model-training-module/main/training_service_python/models/yolov8n.pt
    
    # Start the training module
-   docker compose up
+   docker compose pull && docker compose up
    ```
    
    **Option B: Full Source (For Development):**
@@ -117,7 +117,7 @@ model-training-module/
    
    # Use production setup with pre-built multi-platform images
    cp docker-compose.prod.yml docker-compose.yml
-   docker compose up
+   docker compose pull && docker compose up
    cd module_integration/examples/go-example && go run .
    ```
 
@@ -243,6 +243,7 @@ See the [Pipeline Configuration Guide](frontend/config/README.md) for detailed c
 | WebSocket connection failed | Verify `docker compose ps` shows both services running |
 | Script execution error | Check script paths in training service container |
 | Model loading issues | Verify model file permissions and integrity |
+| Using old Docker images | Run `docker compose pull` before `docker compose up` |
 
 ### Debug Commands
 ```bash
@@ -265,6 +266,7 @@ docker compose exec training_service bash
 ### Complete Reset
 ```bash
 docker compose down -v --remove-orphans
+docker compose pull  # Get latest images
 docker compose build --no-cache
 docker compose up -d
 ```
