@@ -1,0 +1,32 @@
+services:
+  backend:
+    image: aikeymouse/training-module-backend:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - PYTHON_SERVICE_URL=http://training_service:3001
+    depends_on:
+      - training_service
+    volumes:
+      - ./frontend:/app/frontend # Mount frontend for live dev changes
+      - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket for script execution
+      - ./training_service_python:/workspace # Mount Python scripts directory
+
+  training_service:
+    image: aikeymouse/training-module-python:latest
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./training_service_python/models:/app/models
+      - ./training_service_python/logs:/app/logs
+      - ./frontend:/app/frontend # Mount frontend so config changes are visible on host
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+volumes:
+  models_data:
+  logs_data:

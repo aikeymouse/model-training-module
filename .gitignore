@@ -81,3 +81,4 @@ training_scripts/data/
 *.tmp
 *.temp
 .cache/
+DOCKER_SETUP.md

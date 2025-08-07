@@ -61,13 +61,22 @@ model-training-module/
    cd module_integration/examples/go-example && go run .
    ```
 
-2. **Open Interface:**
+2. **Or Use Pre-built Images (Faster):**
+   ```bash
+   git clone https://github.com/aikeymouse/model-training-module.git
+   cd model-training-module
+   cp docker-compose.prod.yml docker-compose.yml
+   docker compose up
+   cd module_integration/examples/go-example && go run .
+   ```
+
+3. **Open Interface:**
    - Navigate to `http://localhost:8080` (Go Example App)
    - Backend API available at `http://localhost:3000`
    - Training service at `http://localhost:3001`
    - Click "Manage Models" to open training interface
 
-3. **Train Your First Model:**
+4. **Train Your First Model:**
    - Adjust training parameters (epochs, synthetic images)
    - Click "Train New Model"
    - Watch real-time training progress
@@ -212,6 +221,7 @@ docker compose up --build
 - **Training Data Management** - Web UI for uploading, reviewing, and managing training datasets in the training_scripts/data folder
 - **Advanced Model Support** - Integration with various model architectures and AI fine-tuning scripts
 - **Cross-Platform Integration** - Support for different platforms and deployment environments
+- **Automated Multi-Platform Builds** - GitHub Actions workflow for Intel/AMD64 and ARM64 Docker images
 - **Model Versioning** - Model comparison features and version management
 - **Performance Optimization** - Training speed improvements and resource optimization
 - **Testing & Documentation** - Comprehensive test suites and expanded examples
