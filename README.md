@@ -128,7 +128,7 @@ PORT=8080                                    # Port for the Go example app (defa
 TRAINING_SERVICE_URL=http://localhost:3000   # URL of the Go backend service (default: http://localhost:3000)
 
 # Docker service configuration  
-PYTHON_SERVICE_URL=http://training_service:8000  # Internal Docker service URL
+PYTHON_SERVICE_URL=http://training_service:3001  # Internal Docker service URL
 DEBUG=true                                   # Enable debug logging
 
 # Storage directories (for Docker containers)

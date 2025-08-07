@@ -286,7 +286,7 @@ The service expects model files to follow this naming convention:
 
 ## Environment Variables
 
-- `PYTHON_SERVICE_URL`: URL of the Python service (default: http://localhost:8000)
+- `PYTHON_SERVICE_URL`: URL of the Python service (default: http://localhost:3001)
 
 ## Dependencies
 
@@ -299,7 +299,7 @@ The service expects model files to follow this naming convention:
 
 ## Usage
 
-1. Start the service: `uvicorn main_v8:app --host 0.0.0.0 --port 8000`
+1. Start the service: `uvicorn main_v8:app --host 0.0.0.0 --port 3001`
 2. Load a model using `/api/model/load`
 3. Test the model using `/api/model/test` or `/api/model/detect`
 4. Execute training scripts using WebSocket `/api/script/ws/execute`

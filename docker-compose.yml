@@ -4,7 +4,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - PYTHON_SERVICE_URL=http://training_service:8000
+      - PYTHON_SERVICE_URL=http://training_service:3001
     depends_on:
       - training_service
     volumes:
@@ -15,7 +15,7 @@ services:
   training_service:
     build: ./training_service_python
     ports:
-      - "3001:8000"
+      - "3001:3001"
     volumes:
       - ./training_service_python/models:/app/models
       - ./training_service_python/logs:/app/logs

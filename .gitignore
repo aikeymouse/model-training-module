@@ -75,6 +75,7 @@ training_scripts/data/
 
 # Exception: Allow documentation screenshots
 !**/model_training_pipeline.png
+!**/model_training_report.png
 
 # Temporary files
 *.tmp
