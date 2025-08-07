@@ -119,7 +119,8 @@ model-training-module/
    ```
 
 3. **Open Interface:**
-   - Navigate to `http://localhost:8080` (Go Example App)
+   - **Standalone Access**: Navigate to `http://localhost:3000/container` (Direct container access)
+   - **Go Example App**: Navigate to `http://localhost:8080` (Full integration example - requires Option B)
    - Backend API available at `http://localhost:3000`
    - Training service at `http://localhost:3001`
    - Click "Manage Models" to open training interface

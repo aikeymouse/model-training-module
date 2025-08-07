@@ -133,10 +133,22 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"message": "Training Module Backend API", "status": "running", "frontend_url": "http://localhost:8080"}`))
+			w.Write([]byte(`{"message": "Training Module Backend API", "status": "running", "frontend_url": "http://localhost:3000/container"}`))
 		} else {
 			http.NotFound(w, r)
 		}
+	})
+
+	// Serve the full training module interface at /container
+	http.HandleFunc("/container", func(w http.ResponseWriter, r *http.Request) {
+		content, err := os.ReadFile("./frontend/module.html")
+		if err != nil {
+			http.Error(w, "Failed to read module HTML", http.StatusInternalServerError)
+			log.Printf("Error reading module.html: %v", err)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write(content)
 	})
 
 	// Serve frontend assets (CSS, JS) but not HTML pages
