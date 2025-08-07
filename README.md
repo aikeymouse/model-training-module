@@ -65,6 +65,25 @@ model-training-module/
    
    **✅ Works on ALL platforms:** Mac (Intel/M1/M2), Windows, Linux via Docker Desktop
    
+   **Option A: Standalone (No Git Clone Required):**
+   ```bash
+   # Create project directory
+   mkdir model-training-module && cd model-training-module
+   
+   # Create persistent directories for data
+   mkdir -p models logs frontend/config
+   
+   # Download production Docker Compose file
+   curl -o docker-compose.yml https://raw.githubusercontent.com/aikeymouse/model-training-module/main/docker-compose.prod.yml
+   
+   # Download sample configuration
+   curl -o frontend/config/training-pipeline.json https://raw.githubusercontent.com/aikeymouse/model-training-module/main/frontend/config/training-pipeline.json
+   
+   # Start the training module
+   docker compose up
+   ```
+   
+   **Option B: Full Source (For Development):**
    ```bash
    git clone https://github.com/aikeymouse/model-training-module.git
    cd model-training-module
