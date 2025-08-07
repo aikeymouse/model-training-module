@@ -17,16 +17,12 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - ./training_service_python/models:/app/models
-      - ./training_service_python/logs:/app/logs
-      - ./frontend:/app/frontend # Mount frontend so config changes are visible on host
+      - ./models:/app/models              # Persistent models on host
+      - ./logs:/app/logs                  # Persistent logs on host  
+      - ./frontend:/app/frontend          # Config access from host
     deploy:
       resources:
         limits:
           memory: 8G
         reservations:
           memory: 4G
-
-volumes:
-  models_data:
-  logs_data:

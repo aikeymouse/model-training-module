@@ -65,9 +65,28 @@ model-training-module/
    ```bash
    git clone https://github.com/aikeymouse/model-training-module.git
    cd model-training-module
+   
+   # Create persistent directories for data
+   mkdir -p models logs
+   
+   # Use production setup with pre-built images
    cp docker-compose.prod.yml docker-compose.yml
    docker compose up
    cd module_integration/examples/go-example && go run .
+   ```
+
+   **Directory Structure After Setup:**
+   ```
+   model-training-module/
+   ├── models/                    # 📁 Your trained models (persistent)
+   │   ├── cursor_model_xyz.pt   # Trained model files
+   │   └── cursor_model_xyz.html # Training reports
+   ├── logs/                     # 📁 Training logs (persistent)  
+   │   └── training_session.log  # Debug and training output
+   ├── frontend/                 # 📁 Configuration (editable)
+   │   └── config/
+   │       └── training-pipeline.json  # Customize training pipeline
+   └── docker-compose.yml        # Production container setup
    ```
 
 3. **Open Interface:**
