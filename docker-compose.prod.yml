@@ -8,9 +8,8 @@ services:
     depends_on:
       - training_service
     volumes:
-      - ./frontend:/app/frontend # Mount frontend for live dev changes
+      - ./frontend/config:/app/frontend/config # Only mount config for user customization
       - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket for script execution
-      - ./training_service_python:/workspace # Mount Python scripts directory
 
   training_service:
     image: aikeymouse/training-module-python:latest
@@ -19,7 +18,7 @@ services:
     volumes:
       - ./models:/app/models              # Persistent models on host
       - ./logs:/app/logs                  # Persistent logs on host  
-      - ./frontend:/app/frontend          # Config access from host
+      - ./frontend/config:/app/frontend/config # Config access from host
     deploy:
       resources:
         limits:

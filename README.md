@@ -66,6 +66,25 @@ model-training-module/
    **✅ Works on ALL platforms:** Mac (Intel/M1/M2), Windows, Linux via Docker Desktop
    
    **Option A: Standalone (No Git Clone Required):**
+   
+   **Quick Setup Scripts:**
+   
+   **macOS/Linux:**
+   ```bash
+   curl -s https://raw.githubusercontent.com/aikeymouse/model-training-module/main/setup-standalone.sh | bash
+   cd model-training-module
+   docker compose up
+   ```
+   
+   **Windows (PowerShell):**
+   ```powershell
+   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aikeymouse/model-training-module/main/setup-standalone.ps1" -OutFile "setup.ps1"
+   .\setup.ps1
+   cd model-training-module
+   docker compose up
+   ```
+   
+   **Manual Setup (All Platforms):**
    ```bash
    # Create project directory
    mkdir model-training-module && cd model-training-module
