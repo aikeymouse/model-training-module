@@ -209,6 +209,7 @@ docker compose up --build
 ### Areas for Contribution
 - **Multi-Framework Support** - Extend beyond YOLO to support TensorFlow, PyTorch, OpenCV, and other ML frameworks
 - **GPU Acceleration** - Add CUDA/GPU support for training and detection (currently CPU-only)
+- **Training Data Management** - Web UI for uploading, reviewing, and managing training datasets in the training_scripts/data folder
 - **Advanced Model Support** - Integration with various model architectures and AI fine-tuning scripts
 - **Cross-Platform Integration** - Support for different platforms and deployment environments
 - **Model Versioning** - Model comparison features and version management
