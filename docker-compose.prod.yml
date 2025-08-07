@@ -19,6 +19,7 @@ services:
       - ./models:/app/models              # Persistent models on host
       - ./logs:/app/logs                  # Persistent logs on host  
       - ./frontend/config:/app/frontend/config # Config access from host
+      - ./training_scripts:/app/training_scripts # Training scripts and data access
     deploy:
       resources:
         limits:

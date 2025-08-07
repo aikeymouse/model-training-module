@@ -130,11 +130,17 @@ model-training-module/
    │   ├── cursor_model_xyz.pt   # Trained model files
    │   └── cursor_model_xyz.html # Training reports
    ├── logs/                     # 📁 Training logs (persistent)  
-   │   └── training_session.log  # Debug and training output
+   │   └── pipeline.log          # Training pipeline execution logs
    ├── frontend/                 # 📁 Configuration (editable)
    │   └── config/
    │       └── training-pipeline.json  # Customize training pipeline
-   └── docker-compose.yml        # Production container setup
+   ├── training_scripts/         # 🐍 Python scripts and data (editable)
+   │   ├── train_yolov8.py      # Main training script
+   │   ├── generate_dataset.py  # Dataset generation
+   │   └── data/                # Training data (cursors, backgrounds)
+   │       ├── cursors/         # Cursor images for training
+   │       └── backgrounds/     # Background images
+   └── docker-compose.yml        # Container orchestration (production config)
    ```
 
 3. **Open Interface:**
