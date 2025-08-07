@@ -61,7 +61,10 @@ model-training-module/
    cd module_integration/examples/go-example && go run .
    ```
 
-2. **Or Use Pre-built Images (Faster):**
+2. **Or Use Pre-built Images (Faster & Universal):**
+   
+   **✅ Works on ALL platforms:** Mac (Intel/M1/M2), Windows, Linux via Docker Desktop
+   
    ```bash
    git clone https://github.com/aikeymouse/model-training-module.git
    cd model-training-module
@@ -69,10 +72,17 @@ model-training-module/
    # Create persistent directories for data
    mkdir -p models logs
    
-   # Use production setup with pre-built images
+   # Use production setup with pre-built multi-platform images
    cp docker-compose.prod.yml docker-compose.yml
    docker compose up
    cd module_integration/examples/go-example && go run .
+   ```
+
+   **Verify Multi-Platform Images:**
+   ```bash
+   # Check that Docker automatically pulled the right architecture
+   docker image inspect aikeymouse/training-module-python:latest | grep Architecture
+   # Should show: arm64 (Mac M1/M2) or amd64 (Intel/Windows)
    ```
 
    **Directory Structure After Setup:**
