@@ -43,6 +43,7 @@ model-training-module/
 - **[API Reference](training_service_python/README.md)** - Complete FastAPI backend documentation
 - **[Training Scripts](training_service_python/training_scripts/README.md)** - Dataset generation and model training guides  
 - **[Pipeline Configuration](frontend/config/README.md)** - JSON configuration system documentation
+- **[Go Module Integration](module_integration/examples/go-module/README.md)** - Complete Go integration guide with setup instructions
 
 ##  Quick Start
 
