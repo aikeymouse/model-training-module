@@ -43,29 +43,27 @@ func TrainingModuleClient(config Config) *Client {
 
 // RegisterRoutes registers the training module routes with the provided mux
 func (c *Client) RegisterRoutes(mux *http.ServeMux, pathPrefix string) {
-	// Proxy API calls to the Go backend service
-	mux.HandleFunc(pathPrefix+"/api/", c.handleAPIProxy)
+	// Only register health check - API routes are handled by RegisterAssetProxies with specific patterns
 	mux.HandleFunc(pathPrefix+"/health", c.handleHealthCheck)
 }
 
 // RegisterAssetProxies registers handlers for frontend assets (CSS, JS, config)
 func (c *Client) RegisterAssetProxies(mux *http.ServeMux) {
-	// Register WebSocket proxy for training execution - use the same route as standalone
-	mux.HandleFunc("/api/script/ws/execute", c.handleWebSocketProxy)
+	// Register WebSocket proxy for training execution - both prefixed and non-prefixed
+	mux.HandleFunc("/model-training/api/script/ws/execute", c.handleWebSocketProxy)
+	mux.HandleFunc("/api/script/ws/execute", c.handleWebSocketProxy) // For frontend JS compatibility
 
-	// Register API proxy for direct API calls (like /api/pipeline/load, /api/model/loaded)
-	mux.HandleFunc("/api/", c.handleAPIProxy)
-
-	// Register frontend asset routes (both with and without /model-training prefix)
+	// Register frontend asset routes with /model-training prefix only
 	mux.HandleFunc("/model-training/", c.handleAssetProxy)
 	mux.HandleFunc("/model-training/config/", c.handleAssetProxy)
 	mux.HandleFunc("/model-training/css/", c.handleAssetProxy)
 	mux.HandleFunc("/model-training/js/", c.handleAssetProxy)
 
-	// Also handle direct CSS/JS requests (for when frontend uses absolute paths)
-	mux.HandleFunc("/css/", c.handleAssetProxy)
-	mux.HandleFunc("/js/", c.handleAssetProxy)
-	mux.HandleFunc("/config/", c.handleAssetProxy)
+	// Register specific API endpoints used by frontend JavaScript (non-generic to avoid conflicts)
+	mux.HandleFunc("/api/models", c.handleAPIProxy)                      // Specific endpoint
+	mux.HandleFunc("/api/model/", c.handleAPIProxy)                      // All /api/model/* endpoints
+	mux.HandleFunc("/api/pipeline/", c.handleAPIProxy)                   // All /api/pipeline/* endpoints
+	mux.HandleFunc("/config/training-pipeline.json", c.handleAssetProxy) // Specific config file
 }
 
 // LoadModalHTML fetches modal HTML from the training service API
