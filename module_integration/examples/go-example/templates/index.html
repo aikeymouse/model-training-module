@@ -9,9 +9,6 @@
     <link rel="stylesheet" href="/model-training/css/training-module.css">
 </head>
 <body>
-    <!-- Notification Container (required by training module) -->
-    <div id="mt-notification-container"></div>
-    
     <div class="container">
         <div class="header">
             <h1>{{.Title}}</h1>
@@ -32,11 +29,6 @@
 
     <!-- Include modal HTML dynamically from frontend -->
     {{.ModalHTML}}
-
-    <!-- Configure training module base path for API calls -->
-    <script>
-        window.TRAINING_MODULE_BASE_PATH = '/model-training';
-    </script>
 
     <!-- Include the actual training module JavaScript from container -->
     <script type="module" src="/model-training/js/model.js"></script>

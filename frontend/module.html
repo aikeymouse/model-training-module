@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-        <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Model Training Module</title>
     <link rel="stylesheet" href="css/training-module.css">
 </head>
+
 <body>
-    <!-- Notification Container -->
-    <div id="mt-notification-container"></div>
-    
     <!-- Main Interface -->
     <div class="mt-main-interface">
         <h1>Model Training Module</h1>
         <button id="mt-open-model-modal-btn" class="btn-primary">Manage Models</button>
     </div>
-    
+
     <!-- This file now contains only the modal components that get injected into integrating applications -->
     <!-- The standalone UI has been moved to the Go example app -->
 
     <!-- Model Info Modal -->
+    <!-- Notification Container -->
+    <div id="mt-notification-container"></div>
+
     <div id="mt-model-info-modal" class="mt-modal-overlay" style="display: none;">
         <div class="mt-modal-content">
             <span class="mt-close-button">&times;</span>
@@ -36,7 +38,8 @@
                     </div>
                     <div class="mt-action-buttons">
                         <button id="mt-train-model-btn" class="mt-train-model-btn">Train New Model</button>
-                        <button id="mt-configure-pipeline-btn" class="mt-configure-pipeline-btn">Configure Pipeline</button>
+                        <button id="mt-configure-pipeline-btn" class="mt-configure-pipeline-btn">Configure
+                            Pipeline</button>
                         <button id="mt-test-model-btn" class="mt-test-model-btn">Test Model</button>
                     </div>
                 </div>
@@ -67,7 +70,7 @@
                     <div id="mt-stages-container">
                         <!-- Stages will be dynamically generated -->
                     </div>
-                    
+
                     <!-- Add New Stage Form -->
                     <div id="mt-add-stage-form" class="mt-add-stage-form" style="display: none;">
                         <h5>Add New Stage</h5>
@@ -78,20 +81,24 @@
                             </div>
                             <div class="mt-form-group">
                                 <label for="mt-stage-name-input">Stage Name:</label>
-                                <input type="text" id="mt-stage-name-input" placeholder="e.g., Data Preprocessing" required>
+                                <input type="text" id="mt-stage-name-input" placeholder="e.g., Data Preprocessing"
+                                    required>
                             </div>
                         </div>
                         <div class="mt-form-group">
                             <label for="mt-stage-description-input">Description:</label>
-                            <input type="text" id="mt-stage-description-input" placeholder="e.g., Preprocess training data" required>
+                            <input type="text" id="mt-stage-description-input"
+                                placeholder="e.g., Preprocess training data" required>
                         </div>
                         <div class="mt-form-group">
                             <label for="mt-stage-script-input">Script Path:</label>
-                            <input type="text" id="mt-stage-script-input" placeholder="e.g., training_yolov8/preprocess.py" required>
+                            <input type="text" id="mt-stage-script-input"
+                                placeholder="e.g., training_yolov8/preprocess.py" required>
                         </div>
                         <div class="mt-form-group">
                             <label for="mt-stage-args-input">Arguments (comma-separated):</label>
-                            <input type="text" id="mt-stage-args-input" placeholder="e.g., --input, {data_path}, --output, ./processed">
+                            <input type="text" id="mt-stage-args-input"
+                                placeholder="e.g., --input, {data_path}, --output, ./processed">
                         </div>
                         <div class="mt-form-group">
                             <label>
@@ -110,7 +117,7 @@
                             <button type="button" id="mt-cancel-stage-btn" class="mt-cancel-btn">Cancel</button>
                         </div>
                     </div>
-                    
+
                     <button id="mt-add-stage-btn" class="mt-add-stage-btn">Add Stage</button>
                 </div>
                 <div class="mt-config-section">
@@ -118,7 +125,7 @@
                     <div id="mt-variables-container">
                         <!-- Variables will be dynamically generated -->
                     </div>
-                    
+
                     <!-- Add New Variable Form -->
                     <div id="mt-add-variable-form" class="mt-add-variable-form" style="display: none;">
                         <h5>Add New Variable</h5>
@@ -160,7 +167,8 @@
                         <div id="mt-selector-options" class="mt-form-row" style="display: none;">
                             <div class="mt-form-group">
                                 <label for="mt-variable-options-input">Options (comma-separated):</label>
-                                <input type="text" id="mt-variable-options-input" placeholder="e.g., option1, option2, option3">
+                                <input type="text" id="mt-variable-options-input"
+                                    placeholder="e.g., option1, option2, option3">
                                 <small>Enter available options separated by commas</small>
                             </div>
                         </div>
@@ -175,7 +183,7 @@
                             <button type="button" id="mt-cancel-variable-btn" class="mt-cancel-btn">Cancel</button>
                         </div>
                     </div>
-                    
+
                     <button id="mt-add-variable-btn" class="mt-add-variable-btn">Add Variable</button>
                 </div>
                 <div class="mt-config-actions">
@@ -211,57 +219,57 @@
             </div>
             <div class="mt-test-model-body">
                 <div class="mt-test-model-content">
-                <!-- Combined Image Area -->
-                <div class="mt-test-section">
-                    <div class="mt-combined-image-area" id="mt-combined-image-area">
-                        <!-- Upload Area -->
-                        <div class="mt-file-upload-area" id="mt-file-upload-area">
-                            <div class="mt-upload-content">
-                                <div class="mt-upload-icon">📁</div>
-                                <p>Click to select an image or drag and drop</p>
-                                <p class="mt-upload-hint">Supported formats: JPG, PNG, JPEG</p>
+                    <!-- Combined Image Area -->
+                    <div class="mt-test-section">
+                        <div class="mt-combined-image-area" id="mt-combined-image-area">
+                            <!-- Upload Area -->
+                            <div class="mt-file-upload-area" id="mt-file-upload-area">
+                                <div class="mt-upload-content">
+                                    <div class="mt-upload-icon">📁</div>
+                                    <p>Click to select an image or drag and drop</p>
+                                    <p class="mt-upload-hint">Supported formats: JPG, PNG, JPEG</p>
+                                </div>
+                                <input type="file" id="mt-test-image-input" accept="image/*" style="display: none;">
                             </div>
-                            <input type="file" id="mt-test-image-input" accept="image/*" style="display: none;">
-                        </div>
-                        
-                        <!-- Image Preview -->
-                        <div id="mt-selected-image-preview" class="mt-image-preview" style="display: none;">
-                            <img id="mt-preview-image" alt="Selected image">
-                        </div>
-                        
-                        <!-- Result Image -->
-                        <div id="mt-result-image-container" class="mt-result-image-container" style="display: none;">
-                            <img id="mt-result-image" alt="Detection results" class="mt-result-image">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Detection Results Section (Always Visible) -->
-                <div class="mt-test-section">
-                    <h4>Detection Results</h4>
-                    <div id="mt-test-results-content" class="mt-detection-results-content">
-                        <p class="mt-no-results">Select an image and click Detect to see results</p>
-                    </div>
-                </div>
-                
-                <!-- Detection Settings -->
-                <div class="mt-test-section">
-                    <h4>Detection Settings</h4>
-                    <div class="mt-detection-settings">
-                        <div class="mt-form-group">
-                            <label for="mt-confidence-threshold-input">Confidence Threshold:</label>
-                            <input type="number" id="mt-confidence-threshold-input" 
-                                   min="0.01" max="1.0" step="0.01" value="0.25"
-                                   placeholder="0.25">
-                            <small>Minimum confidence for detections (0.01 - 1.0)</small>
+
+                            <!-- Image Preview -->
+                            <div id="mt-selected-image-preview" class="mt-image-preview" style="display: none;">
+                                <img id="mt-preview-image" alt="Selected image">
+                            </div>
+
+                            <!-- Result Image -->
+                            <div id="mt-result-image-container" class="mt-result-image-container"
+                                style="display: none;">
+                                <img id="mt-result-image" alt="Detection results" class="mt-result-image">
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Detect Button -->
-                <div class="mt-test-section">
-                    <button id="mt-run-test-btn" class="mt-run-test-btn" disabled>Detect</button>
-                </div>
+
+                    <!-- Detection Results Section (Always Visible) -->
+                    <div class="mt-test-section">
+                        <h4>Detection Results</h4>
+                        <div id="mt-test-results-content" class="mt-detection-results-content">
+                            <p class="mt-no-results">Select an image and click Detect to see results</p>
+                        </div>
+                    </div>
+
+                    <!-- Detection Settings -->
+                    <div class="mt-test-section">
+                        <h4>Detection Settings</h4>
+                        <div class="mt-detection-settings">
+                            <div class="mt-form-group">
+                                <label for="mt-confidence-threshold-input">Confidence Threshold:</label>
+                                <input type="number" id="mt-confidence-threshold-input" min="0.01" max="1.0" step="0.01"
+                                    value="0.25" placeholder="0.25">
+                                <small>Minimum confidence for detections (0.01 - 1.0)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detect Button -->
+                    <div class="mt-test-section">
+                        <button id="mt-run-test-btn" class="mt-run-test-btn" disabled>Detect</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -269,4 +277,5 @@
 
     <script type="module" src="js/model.js"></script>
 </body>
+
 </html>
