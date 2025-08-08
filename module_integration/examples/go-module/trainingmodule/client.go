@@ -123,7 +123,10 @@ func (c *Client) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
 
 // handleAssetProxy proxies frontend assets from the backend service
 func (c *Client) handleAssetProxy(w http.ResponseWriter, r *http.Request) {
-	targetURL := c.ServiceURL + r.URL.Path
+	// Strip the /model-training prefix if present before forwarding to backend
+	targetPath := r.URL.Path
+	targetPath = strings.TrimPrefix(targetPath, "/model-training")
+	targetURL := c.ServiceURL + targetPath
 
 	// Set proper MIME types based on file extension
 	if strings.HasSuffix(r.URL.Path, ".css") {
