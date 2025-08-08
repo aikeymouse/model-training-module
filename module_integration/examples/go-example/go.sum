@@ -1,3 +1,5 @@
+github.com/aikeymouse/model-training-module/module_integration/examples/go-module v1.0.1 h1:AeIxKLB2FX0pCJ/dyyBR4arE99DDbXV/TSzTVOXKob8=
+github.com/aikeymouse/model-training-module/module_integration/examples/go-module v1.0.1/go.mod h1:Qm0CNuONTxzqOhNWLYvABJfZB1VTDHB4bjwa8cY+RI8=
 github.com/gorilla/websocket v1.5.1 h1:gmztn0JnHVt9JZquRuzLw3g4wouNVzKL15iLr/zn/QY=
 github.com/gorilla/websocket v1.5.1/go.mod h1:x3kM2JMyaluk02fnUJpQuwD2dCS5NDG2ZHL0uE0tcaY=
 golang.org/x/net v0.17.0 h1:pVaXccu2ozPjCXewfr1S7xza/zcXTity9cCdXQYSjIM=
