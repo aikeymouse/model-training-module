@@ -175,6 +175,12 @@ func main() {
 	// Handle WebSocket connections for script execution
 	http.HandleFunc("/api/script/ws/execute", handleScriptExecution)
 
+	// Health check endpoint
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status": "ok", "service": "training-backend", "python_proxy": "` + pythonServiceURL + `"}`))
+	})
+
 	log.Println("Go backend server starting on :3000")
 	if err := http.ListenAndServe(":3000", nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
