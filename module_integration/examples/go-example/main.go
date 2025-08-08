@@ -73,11 +73,8 @@ func main() {
 	// Register training module asset proxies
 	trainingClient.RegisterAssetProxies(mux)
 
-	// Register WebSocket proxy for script execution
-	trainingClient.RegisterWebSocketProxy(mux, "/api/script/ws/execute")
-
 	// Register training module routes
-	trainingClient.RegisterRoutes(mux, "/training-module")
+	trainingClient.RegisterRoutes(mux, "/model-training")
 
 	// Handle favicon.ico to prevent 404 errors
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {

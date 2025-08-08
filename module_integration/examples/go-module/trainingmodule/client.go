@@ -50,16 +50,22 @@ func (c *Client) RegisterRoutes(mux *http.ServeMux, pathPrefix string) {
 
 // RegisterAssetProxies registers handlers for frontend assets (CSS, JS, config)
 func (c *Client) RegisterAssetProxies(mux *http.ServeMux) {
+	// Register WebSocket proxy for training execution - use the same route as standalone
+	mux.HandleFunc("/api/script/ws/execute", c.handleWebSocketProxy)
+
+	// Register API proxy for direct API calls (like /api/pipeline/load, /api/model/loaded)
+	mux.HandleFunc("/api/", c.handleAPIProxy)
+
+	// Register frontend asset routes (both with and without /model-training prefix)
+	mux.HandleFunc("/model-training/", c.handleAssetProxy)
+	mux.HandleFunc("/model-training/config/", c.handleAssetProxy)
+	mux.HandleFunc("/model-training/css/", c.handleAssetProxy)
+	mux.HandleFunc("/model-training/js/", c.handleAssetProxy)
+
+	// Also handle direct CSS/JS requests (for when frontend uses absolute paths)
 	mux.HandleFunc("/css/", c.handleAssetProxy)
 	mux.HandleFunc("/js/", c.handleAssetProxy)
 	mux.HandleFunc("/config/", c.handleAssetProxy)
-	mux.HandleFunc("/api/", c.handleAssetProxy)
-	mux.HandleFunc("/ws", c.handleAssetProxy)
-}
-
-// RegisterWebSocketProxy registers WebSocket proxy for script execution
-func (c *Client) RegisterWebSocketProxy(mux *http.ServeMux, path string) {
-	mux.HandleFunc(path, c.handleWebSocketProxy)
 }
 
 // LoadModalHTML fetches modal HTML from the training service API
@@ -86,14 +92,18 @@ func (c *Client) LoadModalHTML() (string, error) {
 
 // handleAPIProxy proxies API calls to the backend service
 func (c *Client) handleAPIProxy(w http.ResponseWriter, r *http.Request) {
+	// Don't proxy WebSocket upgrade requests - they should be handled by the WebSocket handler
+	if r.Header.Get("Upgrade") == "websocket" {
+		http.NotFound(w, r)
+		return
+	}
+
 	// Remove the pathPrefix and forward to Go backend service
-	targetPath := strings.TrimPrefix(r.URL.Path, "/training-module")
+	targetPath := strings.TrimPrefix(r.URL.Path, "/model-training")
 	targetURL := c.ServiceURL + targetPath
 
 	c.proxyRequest(w, r, targetURL)
-}
-
-// handleHealthCheck proxies health check to the backend service
+} // handleHealthCheck proxies health check to the backend service
 func (c *Client) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
 	targetURL := c.ServiceURL + "/health"
 
@@ -114,6 +124,16 @@ func (c *Client) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
 // handleAssetProxy proxies frontend assets from the backend service
 func (c *Client) handleAssetProxy(w http.ResponseWriter, r *http.Request) {
 	targetURL := c.ServiceURL + r.URL.Path
+
+	// Set proper MIME types based on file extension
+	if strings.HasSuffix(r.URL.Path, ".css") {
+		w.Header().Set("Content-Type", "text/css")
+	} else if strings.HasSuffix(r.URL.Path, ".js") {
+		w.Header().Set("Content-Type", "application/javascript")
+	} else if strings.HasSuffix(r.URL.Path, ".json") {
+		w.Header().Set("Content-Type", "application/json")
+	}
+
 	c.proxyRequest(w, r, targetURL)
 }
 
@@ -126,8 +146,21 @@ func (c *Client) handleWebSocketProxy(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	// Connect to the backend WebSocket
-	backendURL := strings.Replace(c.ServiceURL, "http://", "ws://", 1) + r.URL.Path
+	// Use the same path for backend connection
+	backendPath := "/api/script/ws/execute"
+
+	// Convert HTTP URL to WebSocket URL more robustly
+	backendURL := c.ServiceURL
+	if strings.HasPrefix(backendURL, "http://") {
+		backendURL = strings.Replace(backendURL, "http://", "ws://", 1)
+	} else if strings.HasPrefix(backendURL, "https://") {
+		backendURL = strings.Replace(backendURL, "https://", "wss://", 1)
+	} else {
+		// If no protocol, assume ws://
+		backendURL = "ws://" + backendURL
+	}
+	backendURL += backendPath
+
 	backendConn, _, err := websocket.DefaultDialer.Dial(backendURL, nil)
 	if err != nil {
 		conn.WriteMessage(websocket.TextMessage, []byte("Failed to connect to backend service"))
