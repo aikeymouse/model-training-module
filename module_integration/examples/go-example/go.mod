@@ -10,4 +10,4 @@ require (
 )
 
 // Use local development version instead of published version
-replace github.com/aikeymouse/model-training-module/module_integration/examples/go-module => ../go-module
+// replace github.com/aikeymouse/model-training-module/module_integration/examples/go-module => ../go-module
