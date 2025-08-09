@@ -11,7 +11,10 @@ Write-Host "📁 Creating directories..." -ForegroundColor Yellow
 # Create persistent directories for data
 New-Item -ItemType Directory -Path "models" -Force | Out-Null
 New-Item -ItemType Directory -Path "logs" -Force | Out-Null
+New-Item -ItemType Directory -Path "frontend" -Force | Out-Null
 New-Item -ItemType Directory -Path "frontend\config" -Force | Out-Null
+New-Item -ItemType Directory -Path "training_scripts" -Force | Out-Null
+New-Item -ItemType Directory -Path "training_scripts\data" -Force | Out-Null
 New-Item -ItemType Directory -Path "training_scripts\data\cursors" -Force | Out-Null
 New-Item -ItemType Directory -Path "training_scripts\data\backgrounds" -Force | Out-Null
 
