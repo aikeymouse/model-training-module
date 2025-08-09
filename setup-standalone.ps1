@@ -7,7 +7,7 @@ Write-Host "🚀 Setting up Model Training Module (Standalone)..." -ForegroundCo
 New-Item -ItemType Directory -Path "model-training-module" -Force | Out-Null
 Set-Location "model-training-module"
 
-Write-Host "📁 Creating directories..." -Force -ForegroundColor Yellow
+Write-Host "📁 Creating directories..." -ForegroundColor Yellow
 # Create persistent directories for data - using full paths to ensure creation
 $basePath = Get-Location
 New-Item -ItemType Directory -Path "$basePath\models" -Force | Out-Null
