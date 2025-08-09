@@ -49,12 +49,6 @@ curl -s -o models/cursor_model_20250804_074007.txt https://raw.githubusercontent
 echo "✅ Setup complete!"
 echo ""
 echo "🎯 Next steps:"
-echo "1. Start the training module:"
-echo "   docker compose pull && docker compose up"
-echo ""
-echo "2. Open the interface:"
-echo "   http://localhost:3000/container"
-echo ""
 echo "📁 Your directory structure:"
 echo "model-training-module/"
 echo "├── models/                    # 📁 Your trained models (persistent)"
@@ -69,3 +63,39 @@ echo "│   └── data/                # 📁 Training data (ready to use)"
 echo "│       ├── cursors/         # 🖱️  Sample cursor images"
 echo "│       └── backgrounds/     # 🖼️  Sample background images"
 echo "└── docker-compose.yml        # 🐳 Container configuration"
+echo ""
+
+# Ask user if they want to start Docker containers
+echo "🐳 Would you like to start the Docker containers now? [Y/n]"
+read -r response
+
+# Default to yes if no input or if input starts with y/Y
+if [[ -z "$response" ]] || [[ "$response" =~ ^[Yy] ]]; then
+    echo ""
+    echo "🚀 Starting Docker containers..."
+    
+    echo "🛑 Stopping any running training module containers..."
+    docker compose down 2>/dev/null || true
+    
+    echo "🧹 Cleaning up old training module images..."
+    # Remove old training module images specifically
+    docker images --filter=reference="aikeymouse/training-module-*" --format "table {{.Repository}}:{{.Tag}}" | grep -v REPOSITORY | xargs -r docker rmi 2>/dev/null || true
+    docker image prune -f --filter label=project=model-training-module 2>/dev/null || true
+    
+    echo "📥 Pulling latest images..."
+    docker compose pull
+    
+    echo ""
+    echo "🏃 Starting containers..."
+    echo "📱 Open http://localhost:3000/container when ready"
+    echo ""
+    docker compose up
+else
+    echo ""
+    echo "⏸️  Containers not started."
+    echo "📋 To start manually, run:"
+    echo "   cd model-training-module"
+    echo "   docker compose pull && docker compose up"
+    echo ""
+    echo "📱 Then open: http://localhost:3000/container"
+fi
