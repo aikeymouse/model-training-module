@@ -305,7 +305,6 @@ docker compose up --build
 - **Training Data Management** - Web UI for uploading, reviewing, and managing training datasets in the training_scripts/data folder
 - **Advanced Model Support** - Integration with various model architectures and AI fine-tuning scripts
 - **Cross-Platform Integration** - Support for different platforms and deployment environments
-- **Automated Multi-Platform Builds** - GitHub Actions workflow for Intel/AMD64 and ARM64 Docker images
 - **Model Versioning** - Model comparison features and version management
 - **Performance Optimization** - Training speed improvements and resource optimization
 - **Testing & Documentation** - Comprehensive test suites and expanded examples
