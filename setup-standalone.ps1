@@ -120,43 +120,29 @@ if ([string]::IsNullOrEmpty($response) -or $response -match "^[Yy]") {
     Write-Host "🚀 Starting Docker containers..." -ForegroundColor Green
     
     Write-Host "🛑 Stopping any running training module containers..." -ForegroundColor Yellow
-    try {
-        docker compose down 2>$null
-    } catch {
-        # Ignore if no containers running
-    }
+    # Stop any running containers
+    & docker compose down 2>$null
     
     Write-Host "🧹 Cleaning up old training module images..." -ForegroundColor Yellow
-    try {
-        # Remove old training module images specifically
-        $oldImages = docker images --filter=reference="aikeymouse/training-module-*" --format "{{.Repository}}:{{.Tag}}" 2>$null
-        if ($oldImages) {
-            $oldImages | ForEach-Object { docker rmi $_ 2>$null }
-        }
-        docker image prune -f --filter label=project=model-training-module 2>$null
-    } catch {
-        # Ignore cleanup errors
+    # Remove old training module images specifically
+    $oldImages = & docker images --filter=reference="aikeymouse/training-module-*" --format "{{.Repository}}:{{.Tag}}" 2>$null
+    if ($oldImages) {
+        $oldImages | ForEach-Object { & docker rmi $_ 2>$null }
     }
+    & docker image prune -f --filter label=project=model-training-module 2>$null
     
     Write-Host "📥 Pulling latest images..." -ForegroundColor Yellow
+    & docker compose pull
     
-    try {
-        docker compose pull
-        
-        Write-Host ""
-        Write-Host "🏃 Starting containers..." -ForegroundColor Yellow
-        Write-Host "📱 Open http://localhost:3000/container when ready" -ForegroundColor Cyan
-        Write-Host ""
-        docker compose up
-    } catch {
-        Write-Host "❌ Failed to start Docker containers: $_" -ForegroundColor Red
-        Write-Host "📋 To start manually, run:" -ForegroundColor Yellow
-        Write-Host "   cd model-training-module" -ForegroundColor Gray
-        Write-Host "   docker compose pull; docker compose up" -ForegroundColor Gray
-        Write-Host ""
-        Write-Host "📱 Then open: http://localhost:3000/container" -ForegroundColor Cyan
-    }
-} else {
+    Write-Host ""
+    Write-Host "🏃 Starting containers..." -ForegroundColor Yellow
+    Write-Host "📱 Open http://localhost:3000/container when ready" -ForegroundColor Cyan
+    Write-Host ""
+    
+    # Start containers
+    & docker compose up
+}
+else {
     Write-Host ""
     Write-Host "⏸️  Containers not started." -ForegroundColor Yellow
     Write-Host "📋 To start manually, run:" -ForegroundColor Cyan
