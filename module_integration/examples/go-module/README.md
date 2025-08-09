@@ -30,7 +30,7 @@ This will create folders and download the latest docker images (v1.0.4).
 Update your `go.mod`:
 
 ```go
-require github.com/aikeymouse/model-training-module/module_integration/examples/go-module v1.0.2
+require github.com/aikeymouse/model-training-module/module_integration/examples/go-module v1.0.3
 ```
 
 ### 3. Update HTML Template
@@ -228,6 +228,7 @@ See the [go-example](../go-example/) directory for a complete working example.
 
 ## Version History
 
+- **v1.0.3**: Removed redundant config.json APIs, streamlined pipeline configuration, cleaned up asset routes
 - **v1.0.2**: Complete conflict prevention, comprehensive API coverage, asset proxy fixes
 - **v1.0.1**: Removed legacy prefix support, production cleanup  
 - **v1.0.0**: Initial release
