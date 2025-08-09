@@ -8,35 +8,12 @@ New-Item -ItemType Directory -Path "model-training-module" -Force | Out-Null
 Set-Location "model-training-module"
 
 Write-Host "📁 Creating directories..." -ForegroundColor Yellow
-# Create persistent directories for data - using full paths to ensure creation
-$basePath = Get-Location
-New-Item -ItemType Directory -Path "$basePath\models" -Force | Out-Null
-New-Item -ItemType Directory -Path "$basePath\logs" -Force | Out-Null
-New-Item -ItemType Directory -Path "$basePath\frontend" -Force | Out-Null
-New-Item -ItemType Directory -Path "$basePath\frontend\config" -Force | Out-Null
-New-Item -ItemType Directory -Path "$basePath\training_scripts" -Force | Out-Null
-New-Item -ItemType Directory -Path "$basePath\training_scripts\data" -Force | Out-Null
-New-Item -ItemType Directory -Path "$basePath\training_scripts\data\cursors" -Force | Out-Null
-New-Item -ItemType Directory -Path "$basePath\training_scripts\data\backgrounds" -Force | Out-Null
-
-# Verify directories were created
-Write-Host "📋 Verifying directory structure..." -ForegroundColor Yellow
-$directories = @(
-    "models",
-    "logs", 
-    "frontend\config",
-    "training_scripts\data\cursors",
-    "training_scripts\data\backgrounds"
-)
-
-foreach ($dir in $directories) {
-    if (Test-Path $dir) {
-        Write-Host "  ✅ $dir" -ForegroundColor Green
-    } else {
-        Write-Host "  ❌ Failed to create $dir" -ForegroundColor Red
-        exit 1
-    }
-}
+# Create persistent directories for data
+New-Item -ItemType Directory -Path "models" -Force | Out-Null
+New-Item -ItemType Directory -Path "logs" -Force | Out-Null
+New-Item -ItemType Directory -Path "frontend\config" -Force | Out-Null
+New-Item -ItemType Directory -Path "training_scripts\data\cursors" -Force | Out-Null
+New-Item -ItemType Directory -Path "training_scripts\data\backgrounds" -Force | Out-Null
 
 Write-Host "📥 Downloading configuration files..." -ForegroundColor Yellow
 # Download production Docker Compose file
