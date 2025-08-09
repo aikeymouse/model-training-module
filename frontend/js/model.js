@@ -51,33 +51,6 @@ function removeNotification(notification) {
     }
 }
 
-// Helper function to make a POST request to set the model
-async function setModel(modelPath) {
-    try {
-        const response = await fetch('/api/model/set', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ path: modelPath }),
-        });
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-        }
-        const result = await response.json();
-        // Assuming there is a global function to log messages
-        if (window.addLogMessage) {
-            window.addLogMessage(`${result.message}`);
-        }
-    } catch (error) {
-        console.error('Error setting model:', error);
-        if (window.addLogMessage) {
-            window.addLogMessage(`Error setting model: ${error.message}`);
-        }
-    }
-}
-
 let activeModelPath = '';
 let models = []; // Store models at a higher scope
 
@@ -207,9 +180,6 @@ function renderModelList() {
                     }
                     
                     const loadResult = await loadResponse.json();
-                    
-                    // Update the backend's active model for training
-                    await setModel(modelPath);
                     
                     // Update the pipeline configuration if reference exists
                     if (pipelineConfig && pipelineConfig.config && pipelineConfig.config.pipeline) {

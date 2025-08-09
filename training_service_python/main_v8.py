@@ -39,7 +39,6 @@ app = FastAPI(lifespan=lifespan)
 
 MODELS_DIR = "models"
 LOGS_DIR = "logs"
-CONFIG_FILE = "config.json"
 os.makedirs(MODELS_DIR, exist_ok=True)
 os.makedirs(LOGS_DIR, exist_ok=True)
 
@@ -52,17 +51,6 @@ active_processes = {}
 # Global model instance for testing
 loaded_model = None
 loaded_model_path = None
-
-# Configuration storage
-def load_config():
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, 'r') as f:
-            return json.load(f)
-    return {}
-
-def save_config(config):
-    with open(CONFIG_FILE, 'w') as f:
-        json.dump(config, f, indent=2)
 
 def load_pipeline_config_sync():
     """Load pipeline configuration to get selected model"""
@@ -222,19 +210,7 @@ async def get_model_report(model_name: str):
     
     return FileResponse(html_path, media_type="text/html")
 
-@app.get("/api/model/config")
-async def get_config(key: str = None):
-    config = load_config()
-    if key:
-        return {key: config.get(key, "")}
-    return config
 
-@app.post("/api/model/set")
-async def set_yolo_model(req: SetModelRequest):
-    config = load_config()
-    config['yolo_model'] = req.path
-    save_config(config)
-    return {"message": f"YOLO model set to: {req.path}"}
 
 @app.post("/api/pipeline/save")
 async def save_pipeline_config(pipeline_config: dict):
@@ -289,12 +265,6 @@ async def delete_yolo_model(req: DeleteModelRequest):
         if os.path.exists(txt_path):
             os.remove(txt_path)
             print(f"Removed info file: {txt_path}")
-        
-        # If this was the active model, clear the config
-        config = load_config()
-        if config.get('yolo_model') == req.name:
-            config['yolo_model'] = ''
-            save_config(config)
         
         return {"message": f"Model {req.name} and related files deleted successfully"}
     else:

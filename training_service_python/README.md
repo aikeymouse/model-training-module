@@ -55,23 +55,6 @@ Get information about the currently loaded model.
 }
 ```
 
-#### `POST /api/model/set`
-Set the active YOLO model in configuration.
-
-**Request Body:**
-```json
-{
-  "path": "cursor_model_20250805_123456.pt"
-}
-```
-
-**Response:**
-```json
-{
-  "message": "YOLO model set to: cursor_model_20250805_123456.pt"
-}
-```
-
 #### `POST /api/model/delete`
 Delete a model and its associated files (HTML report, info file).
 
@@ -96,19 +79,6 @@ Serve the HTML training report for a specific model.
 - `model_name`: Name of the model file (with or without .pt extension)
 
 **Response:** HTML file containing training metrics and visualizations
-
-#### `GET /api/model/config`
-Get model configuration settings.
-
-**Query Parameters:**
-- `key` (optional): Specific configuration key to retrieve
-
-**Response:**
-```json
-{
-  "yolo_model": "cursor_model_20250805_123456.pt"
-}
-```
 
 ### Model Testing and Inference
 
@@ -165,6 +135,8 @@ Detect targets in an image and return the highest confidence detection with cent
 ```
 
 ### Pipeline Management
+
+Pipeline configuration is the single source of truth for all training module settings, including model selection and confidence thresholds.
 
 #### `GET /api/pipeline/load`
 Load the training pipeline configuration.
@@ -303,3 +275,14 @@ The service expects model files to follow this naming convention:
 2. Load a model using `/api/model/load`
 3. Test the model using `/api/model/test` or `/api/model/detect`
 4. Execute training scripts using WebSocket `/api/script/ws/execute`
+5. Manage pipeline configuration using `/api/pipeline/load` and `/api/pipeline/save`
+
+## Configuration
+
+The service uses `training-pipeline.json` as the single source of configuration truth. This file contains:
+- Model selection preferences
+- Confidence thresholds for detection
+- Training pipeline stages and variables
+- UI display settings
+
+Configuration is accessed via the pipeline endpoints rather than separate config endpoints.

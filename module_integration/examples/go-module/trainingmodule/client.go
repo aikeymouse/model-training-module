@@ -55,7 +55,6 @@ func (c *Client) RegisterAssetProxies(mux *http.ServeMux) {
 
 	// Register frontend asset routes with /model-training prefix only
 	mux.HandleFunc("/model-training/", c.handleAssetProxy)
-	mux.HandleFunc("/model-training/config/", c.handleAssetProxy)
 	mux.HandleFunc("/model-training/css/", c.handleAssetProxy)
 	mux.HandleFunc("/model-training/js/", c.handleAssetProxy)
 
