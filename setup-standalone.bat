@@ -69,18 +69,18 @@ echo.
 echo Next steps:
 echo Your directory structure:
 echo model-training-module/
-echo ├── models/                    # Your trained models (persistent)
-echo │   ├── yolov8n.pt           # Base YOLOv8 model for training
-echo │   └── cursor_model_*.pt    # Example trained cursor models
-echo ├── logs/                     # Training logs (persistent)
-echo ├── frontend/config/          # Configuration files (editable)
-echo ├── training_scripts/         # Python scripts and data (editable)
-echo │   ├── train_yolov8.py      # Main training script
-echo │   ├── generate_dataset.py  # Dataset generation
-echo │   └── data/                # Training data (ready to use)
-echo │       ├── cursors/         # Sample cursor images
-echo │       └── backgrounds/     # Sample background images
-echo └── docker-compose.yml        # Container configuration
+echo +-- models/                    # Your trained models (persistent)
+echo +-----yolov8n.pt           # Base YOLOv8 model for training
+echo +-----cursor_model_*.pt    # Example trained cursor models
+echo +-- logs/                     # Training logs (persistent)
+echo +-- frontend/config/          # Configuration files (editable)
+echo +-- training_scripts/         # Python scripts and data (editable)
+echo +-----train_yolov8.py      # Main training script
+echo +-----generate_dataset.py  # Dataset generation
+echo +-----data/                # Training data (ready to use)
+echo +----------cursors/         # Sample cursor images
+echo +----------backgrounds/     # Sample background images
+echo +-- docker-compose.yml        # Container configuration
 echo.
 
 REM Ask user if they want to start Docker containers
