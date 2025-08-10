@@ -83,8 +83,48 @@ echo │       └── backgrounds/     # Sample background images
 echo └── docker-compose.yml        # Container configuration
 echo.
 
-REM Docker functionality disabled for testing
-echo Docker startup is currently disabled for testing
+REM Ask user if they want to start Docker containers
+set /p response="Would you like to start the Docker containers now? [Y/n]: "
+
+REM Default to yes if no input or if input starts with y/Y
+if "!response!"=="" set response=Y
+if /i "!response:~0,1!"=="Y" (
+    echo.
+    echo Starting Docker containers...
+    
+    echo Stopping any running training module containers...
+    docker compose down >nul 2>&1
+    
+    echo Cleaning up old training module images...
+    REM Remove old training module images specifically
+    for /f "tokens=*" %%i in ('docker images --filter=reference="aikeymouse/training-module-*" --format "{{.Repository}}:{{.Tag}}" 2^>nul') do (
+        docker rmi %%i >nul 2>&1
+    )
+    docker image prune -f --filter label=project=model-training-module >nul 2>&1
+    
+    echo Pulling latest images...
+    docker compose pull
+    if errorlevel 1 (
+        echo Failed to pull Docker images
+        goto :manual
+    )
+    
+    echo.
+    echo Starting containers...
+    echo Open http://localhost:3000/container when ready
+    echo.
+    
+    REM Start containers
+    docker compose up
+) else (
+    goto :manual
+)
+
+goto :end
+
+:manual
+echo.
+echo Containers not started.
 echo To start manually when ready, run:
 echo    cd "%BASE_DIR%\model-training-module"
 echo    docker compose pull ^&^& docker compose up
