@@ -1780,6 +1780,78 @@ button:hover {
     flex-direction: column;
 }
 
+/* Dataset Tabs */
+.mt-dataset-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    background-color: #f8f9fa;
+    flex-shrink: 0;
+}
+
+.mt-switch-label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.mt-switch-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.mt-radio-text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1em;
+    text-align: center;
+    display: block;
+    padding: 8px 16px;
+    cursor: pointer;
+    background-color: #fff;
+    color: #007bff;
+    transition: background-color 0.2s, color 0.2s;
+    user-select: none;
+    border-left: 1px solid #007bff;
+    width: 100%;
+}
+
+.mt-switch-label:first-child .mt-radio-text {
+    border-left: none;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+.mt-switch-label:last-child .mt-radio-text {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.mt-switch-label input[type="radio"]:checked + .mt-radio-text {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Tab Content */
+.mt-tab-content {
+    display: none;
+}
+
+.mt-tab-content.active {
+    display: block;
+}
+
+.mt-custom-dataset-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #666;
+    font-style: italic;
+    font-size: 1.1em;
+}
+
 .mt-dataset-body {
     flex: 1;
     overflow-y: auto;

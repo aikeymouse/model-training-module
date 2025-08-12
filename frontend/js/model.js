@@ -2667,6 +2667,27 @@ async function deleteCurrentImage() {
 }
 
 function setupDatasetModalEventListeners() {
+    // Tab switching functionality with radio buttons
+    const tabRadios = document.querySelectorAll('input[name="dataset-tab"]');
+    const tabContents = document.querySelectorAll('.mt-tab-content');
+    
+    tabRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.checked) {
+                const targetTab = radio.value;
+                
+                // Hide all tab contents
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Show the selected tab content
+                const targetContent = document.getElementById(`mt-${targetTab}-tab`);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            }
+        });
+    });
+    
     // Pagination buttons
     const prevPageBtn = document.getElementById('mt-dataset-prev-page');
     const nextPageBtn = document.getElementById('mt-dataset-next-page');
