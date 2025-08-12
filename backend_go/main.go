@@ -175,6 +175,11 @@ func main() {
 	// Handle WebSocket connections for script execution
 	http.HandleFunc("/api/script/ws/execute", handleScriptExecution)
 
+	// Favicon handler to prevent 404 errors
+	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+
 	// Health check endpoint
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
