@@ -2216,6 +2216,12 @@ async function loadDatasetPage(page) {
         
         if (datasetState.currentImages.length > 0) {
             showCurrentImage();
+            
+            // Enable bounding box toggle when images are available
+            const bboxToggle = document.getElementById('mt-show-bboxes');
+            if (bboxToggle) {
+                bboxToggle.disabled = false;
+            }
         }
         
         updateDatasetLoadingState(false);
@@ -2513,6 +2519,14 @@ function showNoDatasetMessage() {
     // Disable delete button
     const deleteBtn = document.getElementById('mt-delete-current-image');
     if (deleteBtn) deleteBtn.disabled = true;
+    
+    // Disable and uncheck bounding box toggle
+    const bboxToggle = document.getElementById('mt-show-bboxes');
+    if (bboxToggle) {
+        bboxToggle.disabled = true;
+        bboxToggle.checked = false;
+        datasetState.showBoundingBoxes = false;
+    }
     
     // Hide image information (name and size)
     const imageNameEl = document.getElementById('mt-current-image-name');
