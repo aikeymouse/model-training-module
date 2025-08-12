@@ -2496,7 +2496,7 @@ function setupDatasetModalEventListeners() {
         bboxToggle.addEventListener('change', (e) => {
             datasetState.showBoundingBoxes = e.target.checked;
             showCurrentImage(); // Refresh current image
-            updateThumbnails(); // Refresh all thumbnails
+            loadThumbnails(); // Refresh all thumbnails
         });
     }
 }
