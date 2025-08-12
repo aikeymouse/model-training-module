@@ -1097,6 +1097,23 @@ body {
     min-width: 160px;
 }
 
+/* Test Actions Styles */
+.mt-test-actions {
+    text-align: left;
+    margin-left: 0;
+    padding-left: 0;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.mt-test-actions button {
+    width: 160px;
+}
+
 /* Add Stage Form Styles */
 .mt-add-stage-form {
     border: 2px solid #007bff;
