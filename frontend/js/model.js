@@ -1361,6 +1361,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         configurePipelineBtn.disabled = false;
                     }
                     
+                    // Re-enable manage dataset button
+                    const manageDatasetBtn = document.getElementById('mt-manage-dataset-btn');
+                    if (manageDatasetBtn) {
+                        manageDatasetBtn.disabled = false;
+                    }
+                    
                     return;
                 }
                 
@@ -1372,6 +1378,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Disable configure pipeline button during training
                 if (configurePipelineBtn) {
                     configurePipelineBtn.disabled = true;
+                }
+                
+                // Disable manage dataset button during training
+                const manageDatasetBtn = document.getElementById('mt-manage-dataset-btn');
+                if (manageDatasetBtn) {
+                    manageDatasetBtn.disabled = true;
                 }
 
                 const logContainer = document.getElementById('mt-script-log-container');
@@ -1520,6 +1532,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Re-enable configure pipeline button after training
                 if (configurePipelineBtn) {
                     configurePipelineBtn.disabled = false;
+                }
+                
+                // Re-enable manage dataset button after training
+                const manageDatasetBtn = document.getElementById('mt-manage-dataset-btn');
+                if (manageDatasetBtn) {
+                    manageDatasetBtn.disabled = false;
                 }
                 
                 openModal(); // Refresh model list to show new model
