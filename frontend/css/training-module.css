@@ -1107,10 +1107,13 @@ body {
     align-items: flex-start;
     width: 100%;
     max-width: 1000px;
+    gap: 1rem;
 }
 
 .mt-test-actions button {
     width: 160px;
+    height: 36px;
+    min-height: 36px;
 }
 
 /* Add Stage Form Styles */
@@ -1363,6 +1366,31 @@ button:hover {
 }
 
 /* Test Model Styles */
+.mt-manage-dataset-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.mt-manage-dataset-btn:hover {
+    background-color: #0056b3;
+}
+
+.mt-manage-dataset-btn:disabled {
+    background-color: #cccccc !important;
+    color: #666666 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+}
+
+.mt-manage-dataset-btn:disabled:hover {
+    background-color: #cccccc !important;
+}
+
 .mt-test-model-btn {
     background-color: #28a745;
     color: white;
