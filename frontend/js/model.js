@@ -2323,6 +2323,7 @@ function showCurrentImage() {
         if (showBboxes) {
             imageEl.onload = () => loadBoundingBoxZoom(currentImage.name);
         } else {
+            imageEl.onload = null; // Clear any pending onload event
             hideBoundingBoxZoom();
         }
     }
@@ -2361,6 +2362,12 @@ function updateCarouselButtons() {
 
 async function loadBoundingBoxZoom(imageName) {
     try {
+        // Check if bounding boxes are still enabled (prevent race conditions)
+        if (!datasetState.showBoundingBoxes) {
+            hideBoundingBoxZoom();
+            return;
+        }
+        
         const zoomContainer = document.getElementById('mt-bbox-zoom-container');
         const zoomCanvas = document.getElementById('mt-bbox-zoom-canvas');
         
