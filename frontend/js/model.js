@@ -2198,6 +2198,9 @@ async function initializeDatasetModal() {
 
 async function loadDatasetPage(page) {
     try {
+        // Hide zoom container immediately when starting to load new page
+        hideBoundingBoxZoom();
+        
         updateDatasetLoadingState(true);
         
         const response = await fetch(`/api/dataset/images?page=${page}&page_size=${datasetState.pageSize}`);
@@ -2267,7 +2270,7 @@ async function loadThumbnails() {
     const thumbnailsGrid = document.getElementById('mt-thumbnails-grid');
     if (!thumbnailsGrid) return;
     
-    // Show loading message initially
+    // Show loading message for the entire grid
     thumbnailsGrid.innerHTML = '<div class="mt-loading-message">Loading...</div>';
     
     if (datasetState.currentImages.length === 0) {
@@ -2279,8 +2282,9 @@ async function loadThumbnails() {
         return;
     }
     
-    // Clear loading message and load actual thumbnails
-    thumbnailsGrid.innerHTML = '';
+    // Create all thumbnail items and track image loading
+    const thumbnailItems = [];
+    const imageLoadPromises = [];
     
     for (let i = 0; i < datasetState.currentImages.length; i++) {
         const image = datasetState.currentImages[i];
@@ -2293,39 +2297,28 @@ async function loadThumbnails() {
         const imgSrc = datasetState.showBoundingBoxes 
             ? `/api/dataset/image/${image.name}/with-boxes` 
             : `/api/dataset/image/${image.name}`;
-            
-        // Create loading placeholder first
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'mt-thumbnail-loading';
-        loadingDiv.textContent = 'Loading...';
         
-        const labelDiv = document.createElement('div');
-        labelDiv.className = 'mt-thumbnail-label';
-        labelDiv.textContent = image.name;
-        
-        // Create actual image element
+        // Create image element
         const imgElement = document.createElement('img');
-        imgElement.src = imgSrc;
         imgElement.alt = image.name;
-        imgElement.loading = 'lazy';
-        imgElement.style.display = 'none'; // Hide until loaded
+        imgElement.loading = 'eager'; // Load immediately instead of lazy
         
-        // Add both elements to thumbnail item
-        thumbnailItem.appendChild(loadingDiv);
-        thumbnailItem.appendChild(imgElement);
-        thumbnailItem.appendChild(labelDiv);
+        // Create a promise that resolves when this image loads or fails
+        const imageLoadPromise = new Promise((resolve) => {
+            imgElement.onload = () => resolve();
+            imgElement.onerror = () => resolve(); // Resolve even on error so we don't hang
+        });
         
-        // Replace loading placeholder with image when loaded
-        imgElement.onload = () => {
-            loadingDiv.style.display = 'none';
-            imgElement.style.display = 'block';
-        };
+        imageLoadPromises.push(imageLoadPromise);
         
-        // Handle image load error
-        imgElement.onerror = () => {
-            loadingDiv.textContent = 'Error loading image';
-            loadingDiv.className = 'mt-thumbnail-error';
-        };
+        // Set the image source to start loading
+        imgElement.src = imgSrc;
+        
+        // Create thumbnail structure
+        thumbnailItem.innerHTML = `
+            <div class="mt-thumbnail-label">${image.name}</div>
+        `;
+        thumbnailItem.insertBefore(imgElement, thumbnailItem.firstChild);
         
         thumbnailItem.addEventListener('click', () => {
             datasetState.currentImageIndex = i;
@@ -2333,8 +2326,17 @@ async function loadThumbnails() {
             updateThumbnailSelection();
         });
         
-        thumbnailsGrid.appendChild(thumbnailItem);
+        thumbnailItems.push(thumbnailItem);
     }
+    
+    // Wait for all images to finish loading (or fail)
+    await Promise.all(imageLoadPromises);
+    
+    // Now replace loading message with all thumbnails
+    thumbnailsGrid.innerHTML = '';
+    thumbnailItems.forEach(item => {
+        thumbnailsGrid.appendChild(item);
+    });
 }
 
 function showCurrentImage() {
@@ -2362,6 +2364,9 @@ function showCurrentImage() {
             loadingOverlay.style.display = 'flex';
         }
         
+        // Hide zoom container while loading
+        hideBoundingBoxZoom();
+        
         // Check if bounding boxes should be shown
         const showBboxes = datasetState.showBoundingBoxes;
         const imageUrl = showBboxes 
@@ -2384,7 +2389,7 @@ function showCurrentImage() {
             // Show the image
             imageEl.style.display = 'block';
             
-            // Execute original onload if needed
+            // Execute original onload if needed (this will show zoom if bboxes enabled)
             if (originalOnload) {
                 originalOnload();
             }
