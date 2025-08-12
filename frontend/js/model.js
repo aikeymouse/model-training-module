@@ -2142,7 +2142,8 @@ let datasetState = {
     totalPages: 1,
     totalImages: 0,
     currentImages: [],
-    currentImageIndex: 0
+    currentImageIndex: 0,
+    showBoundingBoxes: false
 };
 
 async function openManageDatasetModal() {
@@ -2262,6 +2263,14 @@ async function loadThumbnails() {
     
     thumbnailsGrid.innerHTML = '';
     
+    if (datasetState.currentImages.length === 0) {
+        const noImagesMessage = document.createElement('div');
+        noImagesMessage.className = 'mt-no-images-message';
+        noImagesMessage.textContent = 'No dataset images found.';
+        thumbnailsGrid.appendChild(noImagesMessage);
+        return;
+    }
+    
     for (let i = 0; i < datasetState.currentImages.length; i++) {
         const image = datasetState.currentImages[i];
         const thumbnailItem = document.createElement('div');
@@ -2270,8 +2279,12 @@ async function loadThumbnails() {
             thumbnailItem.classList.add('active');
         }
         
+        const imgSrc = datasetState.showBoundingBoxes 
+            ? `/api/dataset/image/${image.name}/with-boxes` 
+            : `/api/dataset/image/${image.name}`;
+            
         thumbnailItem.innerHTML = `
-            <img src="/api/dataset/image/${image.name}" alt="${image.name}" loading="lazy">
+            <img src="${imgSrc}" alt="${image.name}" loading="lazy">
             <div class="mt-thumbnail-label">${image.name}</div>
         `;
         
@@ -2296,17 +2309,33 @@ function showCurrentImage() {
     const carouselTotalEl = document.getElementById('mt-carousel-total');
     
     if (imageEl) {
-        imageEl.src = `/api/dataset/image/${currentImage.name}`;
+        // Check if bounding boxes should be shown
+        const showBboxes = datasetState.showBoundingBoxes;
+        const imageUrl = showBboxes 
+            ? `/api/dataset/image/${currentImage.name}/with-boxes`
+            : `/api/dataset/image/${currentImage.name}`;
+        
+        imageEl.src = imageUrl;
         imageEl.style.display = 'block';
         imageEl.alt = currentImage.name;
     }
     
-    if (imageNameEl) imageNameEl.textContent = currentImage.name;
-    if (imageSizeEl) imageSizeEl.textContent = `${currentImage.width}x${currentImage.height}`;
+    if (imageNameEl) {
+        imageNameEl.textContent = currentImage.name;
+        imageNameEl.style.display = 'inline';
+    }
+    if (imageSizeEl) {
+        imageSizeEl.textContent = `${currentImage.width}x${currentImage.height}`;
+        imageSizeEl.style.display = 'inline';
+    }
     if (carouselCurrentEl) carouselCurrentEl.textContent = datasetState.currentImageIndex + 1;
     if (carouselTotalEl) carouselTotalEl.textContent = datasetState.currentImages.length;
     
     updateCarouselButtons();
+    
+    // Enable delete button when images are available
+    const deleteBtn = document.getElementById('mt-delete-current-image');
+    if (deleteBtn) deleteBtn.disabled = false;
     updateThumbnailSelection();
 }
 
@@ -2356,6 +2385,32 @@ function showNoDatasetMessage() {
     // Update stats
     const totalCountEl = document.getElementById('mt-dataset-total-count');
     if (totalCountEl) totalCountEl.textContent = '0';
+    
+    // Disable page navigation buttons
+    const prevPageBtn = document.getElementById('mt-dataset-prev-page');
+    const nextPageBtn = document.getElementById('mt-dataset-next-page');
+    if (prevPageBtn) prevPageBtn.disabled = true;
+    if (nextPageBtn) nextPageBtn.disabled = true;
+    
+    // Disable carousel buttons
+    const carouselPrevBtn = document.getElementById('mt-carousel-prev');
+    const carouselNextBtn = document.getElementById('mt-carousel-next');
+    if (carouselPrevBtn) carouselPrevBtn.disabled = true;
+    if (carouselNextBtn) carouselNextBtn.disabled = true;
+    
+    // Disable delete button
+    const deleteBtn = document.getElementById('mt-delete-current-image');
+    if (deleteBtn) deleteBtn.disabled = true;
+    
+    // Hide image information (name and size)
+    const imageNameEl = document.getElementById('mt-current-image-name');
+    const imageSizeEl = document.getElementById('mt-current-image-size');
+    if (imageNameEl) imageNameEl.style.display = 'none';
+    if (imageSizeEl) imageSizeEl.style.display = 'none';
+    
+    // Clear current images and load empty thumbnails to show "No dataset images found." message
+    datasetState.currentImages = [];
+    loadThumbnails();
 }
 
 async function deleteCurrentImage() {
@@ -2433,5 +2488,15 @@ function setupDatasetModalEventListeners() {
     const deleteBtn = document.getElementById('mt-delete-current-image');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', deleteCurrentImage);
+    }
+    
+    // Bounding box toggle
+    const bboxToggle = document.getElementById('mt-show-bboxes');
+    if (bboxToggle) {
+        bboxToggle.addEventListener('change', (e) => {
+            datasetState.showBoundingBoxes = e.target.checked;
+            showCurrentImage(); // Refresh current image
+            updateThumbnails(); // Refresh all thumbnails
+        });
     }
 }

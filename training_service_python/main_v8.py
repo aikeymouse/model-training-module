@@ -11,7 +11,7 @@ import psutil
 from PIL import Image
 import numpy as np
 from fastapi import FastAPI, BackgroundTasks, HTTPException, WebSocket, File, UploadFile, Form
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, StreamingResponse
 from pydantic import BaseModel
 import subprocess
 import datetime
@@ -1037,6 +1037,79 @@ async def get_dataset_image(image_name: str):
         return FileResponse(image_path, media_type="image/jpeg")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get image: {str(e)}")
+
+@app.get("/api/dataset/image/{image_name}/with-boxes")
+async def get_dataset_image_with_boxes(image_name: str):
+    """Get a dataset image with bounding boxes drawn on it"""
+    try:
+        dataset_path = "/app/training_scripts/data/generated_dataset"
+        images_path = os.path.join(dataset_path, "images")
+        labels_path = os.path.join(dataset_path, "labels")
+        
+        image_path = os.path.join(images_path, image_name)
+        label_name = os.path.splitext(image_name)[0] + ".txt"
+        label_path = os.path.join(labels_path, label_name)
+        
+        if not os.path.exists(image_path):
+            raise HTTPException(status_code=404, detail="Image not found")
+        
+        # Load the image
+        image = cv2.imread(image_path)
+        if image is None:
+            raise HTTPException(status_code=500, detail="Failed to load image")
+        
+        height, width = image.shape[:2]
+        
+        # Draw bounding boxes if label file exists
+        if os.path.exists(label_path):
+            with open(label_path, 'r') as f:
+                lines = f.readlines()
+            
+            for line in lines:
+                line = line.strip()
+                if line:
+                    parts = line.split()
+                    if len(parts) >= 5:
+                        class_id = int(parts[0])
+                        x_center = float(parts[1])
+                        y_center = float(parts[2])
+                        box_width = float(parts[3])
+                        box_height = float(parts[4])
+                        
+                        # Convert normalized coordinates to pixel coordinates
+                        x_center_px = int(x_center * width)
+                        y_center_px = int(y_center * height)
+                        box_width_px = int(box_width * width)
+                        box_height_px = int(box_height * height)
+                        
+                        # Calculate top-left and bottom-right corners
+                        x1 = int(x_center_px - box_width_px // 2)
+                        y1 = int(y_center_px - box_height_px // 2)
+                        x2 = int(x_center_px + box_width_px // 2)
+                        y2 = int(y_center_px + box_height_px // 2)
+                        
+                        # Draw rectangle (red color for class 0, other colors for other classes)
+                        color = (0, 0, 255) if class_id == 0 else (0, 255, 0)  # BGR format
+                        cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
+                        
+                        # Add class label
+                        cv2.putText(image, f"Class {class_id}", (x1, y1 - 10), 
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+        
+        # Convert to RGB for PIL
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(image_rgb)
+        
+        # Save to memory buffer
+        img_buffer = io.BytesIO()
+        pil_image.save(img_buffer, format="JPEG", quality=95)
+        img_buffer.seek(0)
+        
+        # Return as response
+        return StreamingResponse(img_buffer, media_type="image/jpeg")
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get image with boxes: {str(e)}")
 
 @app.delete("/api/dataset/image/{image_name}")
 async def delete_dataset_image(image_name: str):

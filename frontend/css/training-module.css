@@ -1816,6 +1816,24 @@ button:hover {
     text-align: right;
 }
 
+.mt-bbox-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9em;
+    color: #333;
+    cursor: pointer;
+}
+
+.mt-bbox-toggle input[type="checkbox"] {
+    margin: 0;
+    transform: scale(1.1);
+}
+
+.mt-bbox-toggle-text {
+    user-select: none;
+}
+
 .mt-dataset-pagination-info {
     font-size: 0.9em;
     color: #666;
@@ -1958,8 +1976,15 @@ button:hover {
     transition: background-color 0.2s;
 }
 
-.mt-delete-btn:hover {
+.mt-delete-btn:hover:not(:disabled) {
     background-color: #c82333;
+}
+
+.mt-delete-btn:disabled {
+    background-color: #6c757d;
+    color: #adb5bd;
+    cursor: not-allowed;
+    opacity: 0.65;
 }
 
 /* Thumbnails Grid */
@@ -1977,6 +2002,17 @@ button:hover {
     overflow-y: hidden;
     white-space: nowrap;
     max-width: 100%;
+}
+
+.mt-no-images-message {
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .mt-thumbnail-item {
