@@ -2267,15 +2267,20 @@ async function loadThumbnails() {
     const thumbnailsGrid = document.getElementById('mt-thumbnails-grid');
     if (!thumbnailsGrid) return;
     
-    thumbnailsGrid.innerHTML = '';
+    // Show loading message initially
+    thumbnailsGrid.innerHTML = '<div class="mt-loading-message">Loading...</div>';
     
     if (datasetState.currentImages.length === 0) {
         const noImagesMessage = document.createElement('div');
         noImagesMessage.className = 'mt-no-images-message';
         noImagesMessage.textContent = 'No dataset images found.';
+        thumbnailsGrid.innerHTML = '';
         thumbnailsGrid.appendChild(noImagesMessage);
         return;
     }
+    
+    // Clear loading message and load actual thumbnails
+    thumbnailsGrid.innerHTML = '';
     
     for (let i = 0; i < datasetState.currentImages.length; i++) {
         const image = datasetState.currentImages[i];
@@ -2289,10 +2294,38 @@ async function loadThumbnails() {
             ? `/api/dataset/image/${image.name}/with-boxes` 
             : `/api/dataset/image/${image.name}`;
             
-        thumbnailItem.innerHTML = `
-            <img src="${imgSrc}" alt="${image.name}" loading="lazy">
-            <div class="mt-thumbnail-label">${image.name}</div>
-        `;
+        // Create loading placeholder first
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'mt-thumbnail-loading';
+        loadingDiv.textContent = 'Loading...';
+        
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'mt-thumbnail-label';
+        labelDiv.textContent = image.name;
+        
+        // Create actual image element
+        const imgElement = document.createElement('img');
+        imgElement.src = imgSrc;
+        imgElement.alt = image.name;
+        imgElement.loading = 'lazy';
+        imgElement.style.display = 'none'; // Hide until loaded
+        
+        // Add both elements to thumbnail item
+        thumbnailItem.appendChild(loadingDiv);
+        thumbnailItem.appendChild(imgElement);
+        thumbnailItem.appendChild(labelDiv);
+        
+        // Replace loading placeholder with image when loaded
+        imgElement.onload = () => {
+            loadingDiv.style.display = 'none';
+            imgElement.style.display = 'block';
+        };
+        
+        // Handle image load error
+        imgElement.onerror = () => {
+            loadingDiv.textContent = 'Error loading image';
+            loadingDiv.className = 'mt-thumbnail-error';
+        };
         
         thumbnailItem.addEventListener('click', () => {
             datasetState.currentImageIndex = i;
@@ -2315,23 +2348,66 @@ function showCurrentImage() {
     const carouselTotalEl = document.getElementById('mt-carousel-total');
     
     if (imageEl) {
+        // Show loading state
+        const imageContainer = document.getElementById('mt-dataset-image-container');
+        if (imageContainer) {
+            // Create or get loading overlay
+            let loadingOverlay = imageContainer.querySelector('.mt-image-loading-overlay');
+            if (!loadingOverlay) {
+                loadingOverlay = document.createElement('div');
+                loadingOverlay.className = 'mt-image-loading-overlay';
+                loadingOverlay.innerHTML = '<div class="mt-image-loading-text">Loading...</div>';
+                imageContainer.appendChild(loadingOverlay);
+            }
+            loadingOverlay.style.display = 'flex';
+        }
+        
         // Check if bounding boxes should be shown
         const showBboxes = datasetState.showBoundingBoxes;
         const imageUrl = showBboxes 
             ? `/api/dataset/image/${currentImage.name}/with-boxes`
             : `/api/dataset/image/${currentImage.name}`;
         
-        imageEl.src = imageUrl;
-        imageEl.style.display = 'block';
-        imageEl.alt = currentImage.name;
+        // Hide image initially
+        imageEl.style.display = 'none';
         
-        // Load bounding box zoom if boxes are enabled
-        if (showBboxes) {
-            imageEl.onload = () => loadBoundingBoxZoom(currentImage.name);
-        } else {
-            imageEl.onload = null; // Clear any pending onload event
+        // Set up load handlers
+        const originalOnload = showBboxes ? () => loadBoundingBoxZoom(currentImage.name) : null;
+        
+        imageEl.onload = () => {
+            // Hide loading overlay
+            const loadingOverlay = imageContainer?.querySelector('.mt-image-loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
+            
+            // Show the image
+            imageEl.style.display = 'block';
+            
+            // Execute original onload if needed
+            if (originalOnload) {
+                originalOnload();
+            }
+        };
+        
+        imageEl.onerror = () => {
+            // Hide loading overlay and show error
+            const loadingOverlay = imageContainer?.querySelector('.mt-image-loading-overlay');
+            if (loadingOverlay) {
+                const loadingText = loadingOverlay.querySelector('.mt-image-loading-text');
+                if (loadingText) {
+                    loadingText.textContent = 'Error loading image';
+                }
+            }
+        };
+        
+        // Clear any pending onload event if boxes are disabled
+        if (!showBboxes) {
             hideBoundingBoxZoom();
         }
+        
+        imageEl.src = imageUrl;
+        imageEl.alt = currentImage.name;
     }
     
     if (imageNameEl) {

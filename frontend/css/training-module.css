@@ -1943,6 +1943,53 @@ button:hover {
     text-align: center;
 }
 
+/* Loading Indicators */
+.mt-loading-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #666;
+    font-style: italic;
+    font-size: 1.1em;
+}
+
+.mt-thumbnail-loading,
+.mt-thumbnail-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    color: #666;
+    font-style: italic;
+    font-size: 0.9em;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.mt-thumbnail-error {
+    color: #dc3545;
+}
+
+.mt-image-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(248, 249, 250, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.mt-image-loading-text {
+    color: #666;
+    font-style: italic;
+    font-size: 1.2em;
+}
+
 /* Bounding Box Zoom Container */
 .mt-bbox-zoom-container {
     position: absolute;
