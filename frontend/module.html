@@ -288,15 +288,26 @@
             <div class="mt-dataset-body">
                 <div class="mt-dataset-info">
                     <div class="mt-dataset-stats">
-                        <span id="mt-dataset-total-count">Loading...</span> images total
-                        <span class="mt-dataset-pagination-info">
-                            Showing <span id="mt-dataset-current-range">1-25</span> 
-                            (Page <span id="mt-dataset-current-page">1</span> of <span id="mt-dataset-total-pages">1</span>)
-                        </span>
+                        <div class="mt-dataset-stats-left">
+                            Images total: <span id="mt-dataset-total-count">Loading...</span>
+                        </div>
+                        <div class="mt-dataset-stats-right">
+                            <span class="mt-dataset-pagination-info">
+                                Showing <span id="mt-dataset-current-range">1-25</span> 
+                                (Page <span id="mt-dataset-current-page">1</span> of <span id="mt-dataset-total-pages">1</span>)
+                            </span>
+                            <div class="mt-dataset-pagination">
+                                <button id="mt-dataset-prev-page" class="mt-pagination-btn" disabled>← Previous</button>
+                                <button id="mt-dataset-next-page" class="mt-pagination-btn">Next →</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mt-dataset-pagination">
-                        <button id="mt-dataset-prev-page" class="mt-pagination-btn" disabled>← Previous</button>
-                        <button id="mt-dataset-next-page" class="mt-pagination-btn">Next →</button>
+                </div>
+
+                <!-- Thumbnails Grid -->
+                <div class="mt-dataset-thumbnails">
+                    <div id="mt-thumbnails-grid" class="mt-thumbnails-grid">
+                        <!-- Thumbnails will be loaded here -->
                     </div>
                 </div>
 
@@ -326,13 +337,6 @@
                         <div class="mt-image-actions">
                             <button id="mt-delete-current-image" class="mt-delete-btn">Delete Image</button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Thumbnails Grid -->
-                <div class="mt-dataset-thumbnails">
-                    <div id="mt-thumbnails-grid" class="mt-thumbnails-grid">
-                        <!-- Thumbnails will be loaded here -->
                     </div>
                 </div>
             </div>
