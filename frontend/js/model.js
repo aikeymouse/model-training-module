@@ -2318,6 +2318,13 @@ function showCurrentImage() {
         imageEl.src = imageUrl;
         imageEl.style.display = 'block';
         imageEl.alt = currentImage.name;
+        
+        // Load bounding box zoom if boxes are enabled
+        if (showBboxes) {
+            imageEl.onload = () => loadBoundingBoxZoom(currentImage.name);
+        } else {
+            hideBoundingBoxZoom();
+        }
     }
     
     if (imageNameEl) {
@@ -2349,6 +2356,104 @@ function updateCarouselButtons() {
     
     if (nextBtn) {
         nextBtn.disabled = datasetState.currentImageIndex >= datasetState.currentImages.length - 1;
+    }
+}
+
+async function loadBoundingBoxZoom(imageName) {
+    try {
+        const zoomContainer = document.getElementById('mt-bbox-zoom-container');
+        const zoomCanvas = document.getElementById('mt-bbox-zoom-canvas');
+        
+        if (!zoomContainer || !zoomCanvas) return;
+        
+        // Load the labels for this image
+        const response = await fetch(`/api/dataset/image/${imageName}/labels`);
+        if (!response.ok) {
+            hideBoundingBoxZoom();
+            return;
+        }
+        
+        const labels = await response.json();
+        if (!labels || labels.length === 0) {
+            hideBoundingBoxZoom();
+            return;
+        }
+        
+        // Use the first bounding box for zoom (can be enhanced to show all boxes)
+        const firstLabel = labels[0];
+        
+        // Load the original image (without boxes) for cropping
+        const originalImg = new Image();
+        originalImg.crossOrigin = 'anonymous';
+        
+        originalImg.onload = () => {
+            const canvas = zoomCanvas;
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to match container
+            canvas.width = 150;
+            canvas.height = 130; // Leave space for label at bottom
+            
+            // Calculate bounding box in pixel coordinates
+            const imgWidth = originalImg.naturalWidth;
+            const imgHeight = originalImg.naturalHeight;
+            
+            const centerX = firstLabel.x_center * imgWidth;
+            const centerY = firstLabel.y_center * imgHeight;
+            const boxWidth = firstLabel.width * imgWidth;
+            const boxHeight = firstLabel.height * imgHeight;
+            
+            // Calculate crop area around the bounding box
+            const cropSize = Math.max(boxWidth, boxHeight) * 1.5; // 50% padding around the box
+            const cropX = Math.max(0, centerX - cropSize/2);
+            const cropY = Math.max(0, centerY - cropSize/2);
+            const actualCropWidth = Math.min(imgWidth - cropX, cropSize);
+            const actualCropHeight = Math.min(imgHeight - cropY, cropSize);
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw the cropped and zoomed image
+            ctx.drawImage(
+                originalImg,
+                cropX, cropY, actualCropWidth, actualCropHeight,  // Source crop area
+                0, 0, canvas.width, canvas.height                 // Destination (fill canvas)
+            );
+            
+            // Calculate bounding box position in the zoomed view
+            const zoomFactorX = canvas.width / actualCropWidth;
+            const zoomFactorY = canvas.height / actualCropHeight;
+            
+            const boxInCropX = (centerX - boxWidth/2 - cropX) * zoomFactorX;
+            const boxInCropY = (centerY - boxHeight/2 - cropY) * zoomFactorY;
+            const boxZoomedWidth = boxWidth * zoomFactorX;
+            const boxZoomedHeight = boxHeight * zoomFactorY;
+            
+            // Draw red bounding box overlay
+            ctx.strokeStyle = '#FF0000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(boxInCropX, boxInCropY, boxZoomedWidth, boxZoomedHeight);
+            
+            // Show the zoom container
+            zoomContainer.style.display = 'block';
+        };
+        
+        originalImg.onerror = () => {
+            hideBoundingBoxZoom();
+        };
+        
+        originalImg.src = `/api/dataset/image/${imageName}`;
+        
+    } catch (error) {
+        console.error('Error loading bounding box zoom:', error);
+        hideBoundingBoxZoom();
+    }
+}
+
+function hideBoundingBoxZoom() {
+    const zoomContainer = document.getElementById('mt-bbox-zoom-container');
+    if (zoomContainer) {
+        zoomContainer.style.display = 'none';
     }
 }
 

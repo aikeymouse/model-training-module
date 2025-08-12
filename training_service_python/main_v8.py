@@ -1115,6 +1115,41 @@ async def get_dataset_image_with_boxes(image_name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get image with boxes: {str(e)}")
 
+@app.get("/api/dataset/image/{image_name}/labels")
+async def get_dataset_image_labels(image_name: str):
+    """Get label data for a specific dataset image"""
+    try:
+        dataset_path = "/app/training_scripts/data/generated_dataset"
+        labels_path = os.path.join(dataset_path, "labels")
+        
+        label_name = os.path.splitext(image_name)[0] + ".txt"
+        label_path = os.path.join(labels_path, label_name)
+        
+        if not os.path.exists(label_path):
+            return []  # No labels found
+        
+        labels = []
+        with open(label_path, 'r') as f:
+            lines = f.readlines()
+        
+        for line in lines:
+            line = line.strip()
+            if line:
+                parts = line.split()
+                if len(parts) >= 5:
+                    labels.append({
+                        "class_id": int(parts[0]),
+                        "x_center": float(parts[1]),
+                        "y_center": float(parts[2]),
+                        "width": float(parts[3]),
+                        "height": float(parts[4])
+                    })
+        
+        return labels
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get image labels: {str(e)}")
+
 @app.delete("/api/dataset/image/{image_name}")
 async def delete_dataset_image(image_name: str):
     """Delete a specific dataset image and its corresponding label"""

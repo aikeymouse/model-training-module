@@ -1941,6 +1941,41 @@ button:hover {
     text-align: center;
 }
 
+/* Bounding Box Zoom Container */
+.mt-bbox-zoom-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 150px;
+    height: 150px;
+    background-color: white;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    z-index: 10;
+}
+
+.mt-bbox-zoom-canvas {
+    width: 100%;
+    height: calc(100% - 20px);
+    display: block;
+}
+
+.mt-bbox-zoom-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px;
+    line-height: 1;
+}
+
 .mt-dataset-image-info {
     display: flex;
     justify-content: space-between;
