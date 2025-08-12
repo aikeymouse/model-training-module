@@ -1090,12 +1090,16 @@ async def get_dataset_image_with_boxes(image_name: str):
                         
                         # Draw rectangle (red color for class 0, other colors for other classes)
                         color = (0, 0, 255) if class_id == 0 else (0, 255, 0)  # BGR format
-                        cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
+                        cv2.rectangle(image, (x1, y1), (x2, y2), color, 1)
                         
-                        # Add class label
-                        cv2.putText(image, f"Class {class_id}", (x1, y1 - 10), 
-                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-        
+                        # Add styled class label with background
+                        label = f"Class {class_id}"
+                        label_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)[0]
+                        cv2.rectangle(image, (x1, y1 - label_size[1] - 10), 
+                                    (x1 + label_size[0], y1), color, -1)
+                        cv2.putText(image, label, (x1, y1 - 5), 
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+
         # Convert to RGB for PIL
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         pil_image = Image.fromarray(image_rgb)
