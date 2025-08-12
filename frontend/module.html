@@ -278,7 +278,68 @@
         </div>
     </div>
 
-    <script type="module" src="js/model.js"></script>
+    <!-- Manage Dataset Modal -->
+    <div id="mt-manage-dataset-modal" class="mt-modal-overlay" style="display: none;">
+        <div class="mt-modal-content mt-dataset-modal-content">
+            <span class="mt-close-button" onclick="closeManageDatasetModal()">&times;</span>
+            <div class="mt-modal-header">
+                <h3>Manage Dataset</h3>
+            </div>
+            <div class="mt-dataset-body">
+                <div class="mt-dataset-info">
+                    <div class="mt-dataset-stats">
+                        <span id="mt-dataset-total-count">Loading...</span> images total
+                        <span class="mt-dataset-pagination-info">
+                            Showing <span id="mt-dataset-current-range">1-25</span> 
+                            (Page <span id="mt-dataset-current-page">1</span> of <span id="mt-dataset-total-pages">1</span>)
+                        </span>
+                    </div>
+                    <div class="mt-dataset-pagination">
+                        <button id="mt-dataset-prev-page" class="mt-pagination-btn" disabled>← Previous</button>
+                        <button id="mt-dataset-next-page" class="mt-pagination-btn">Next →</button>
+                    </div>
+                </div>
+
+                <!-- Image Carousel -->
+                <div class="mt-dataset-carousel-container">
+                    <div class="mt-carousel-navigation">
+                        <button id="mt-carousel-prev" class="mt-carousel-btn" disabled>‹</button>
+                        <span class="mt-carousel-indicator">
+                            <span id="mt-carousel-current">1</span> / <span id="mt-carousel-total">25</span>
+                        </span>
+                        <button id="mt-carousel-next" class="mt-carousel-btn">›</button>
+                    </div>
+                    
+                    <div class="mt-dataset-image-container">
+                        <img id="mt-dataset-current-image" alt="Dataset image" style="display: none;">
+                        <div id="mt-dataset-loading" class="mt-loading-indicator">Loading images...</div>
+                        <div id="mt-dataset-no-images" class="mt-no-content" style="display: none;">
+                            No dataset images found. Generate a dataset first.
+                        </div>
+                    </div>
+
+                    <div class="mt-dataset-image-info">
+                        <div class="mt-image-details">
+                            <span id="mt-current-image-name">image.jpg</span>
+                            <span id="mt-current-image-size">1024x768</span>
+                        </div>
+                        <div class="mt-image-actions">
+                            <button id="mt-delete-current-image" class="mt-delete-btn">Delete Image</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thumbnails Grid -->
+                <div class="mt-dataset-thumbnails">
+                    <div id="mt-thumbnails-grid" class="mt-thumbnails-grid">
+                        <!-- Thumbnails will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/model.js"></script></script>
 </body>
 
 </html>

@@ -1333,6 +1333,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTestModelButtonState();
     }
 
+    const manageDatasetBtn = document.getElementById('mt-manage-dataset-btn');
+    if (manageDatasetBtn) {
+        manageDatasetBtn.addEventListener('click', openManageDatasetModal);
+    }
+
     const trainModelBtn = document.getElementById('mt-train-model-btn');
         let currentExecutor = null; // Track the current pipeline executor for cancellation
         
@@ -2129,3 +2134,304 @@ function closeModelReportModal() {
 
 // Make closeModelReportModal globally available for the HTML onclick
 window.closeModelReportModal = closeModelReportModal;
+
+// Dataset Management Functions
+let datasetState = {
+    currentPage: 1,
+    pageSize: 25,
+    totalPages: 1,
+    totalImages: 0,
+    currentImages: [],
+    currentImageIndex: 0
+};
+
+async function openManageDatasetModal() {
+    const modal = document.getElementById('mt-manage-dataset-modal');
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    
+    // Initialize dataset modal
+    await initializeDatasetModal();
+    
+    // Set up event listeners for dataset modal
+    setupDatasetModalEventListeners();
+}
+
+function closeManageDatasetModal() {
+    const modal = document.getElementById('mt-manage-dataset-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Make closeManageDatasetModal globally available for the HTML onclick
+window.closeManageDatasetModal = closeManageDatasetModal;
+
+async function initializeDatasetModal() {
+    try {
+        // Show loading state
+        updateDatasetLoadingState(true);
+        
+        // Get dataset info
+        const response = await fetch('/api/dataset/info');
+        const datasetInfo = await response.json();
+        
+        if (!datasetInfo.dataset_exists || datasetInfo.total_images === 0) {
+            showNoDatasetMessage();
+            return;
+        }
+        
+        datasetState.totalImages = datasetInfo.total_images;
+        datasetState.totalPages = Math.ceil(datasetInfo.total_images / datasetState.pageSize);
+        
+        // Load first page
+        await loadDatasetPage(1);
+        
+    } catch (error) {
+        console.error('Error initializing dataset modal:', error);
+        showNotification('Failed to load dataset information', 'error');
+        showNoDatasetMessage();
+    }
+}
+
+async function loadDatasetPage(page) {
+    try {
+        updateDatasetLoadingState(true);
+        
+        const response = await fetch(`/api/dataset/images?page=${page}&page_size=${datasetState.pageSize}`);
+        const data = await response.json();
+        
+        datasetState.currentPage = page;
+        datasetState.currentImages = data.images;
+        datasetState.totalImages = data.total;
+        datasetState.totalPages = data.total_pages;
+        datasetState.currentImageIndex = 0;
+        
+        // Update UI
+        updateDatasetInfo();
+        updatePaginationButtons();
+        await loadThumbnails();
+        
+        if (datasetState.currentImages.length > 0) {
+            showCurrentImage();
+        }
+        
+        updateDatasetLoadingState(false);
+        
+    } catch (error) {
+        console.error('Error loading dataset page:', error);
+        showNotification('Failed to load dataset images', 'error');
+        updateDatasetLoadingState(false);
+    }
+}
+
+function updateDatasetInfo() {
+    const totalCountEl = document.getElementById('mt-dataset-total-count');
+    const currentRangeEl = document.getElementById('mt-dataset-current-range');
+    const currentPageEl = document.getElementById('mt-dataset-current-page');
+    const totalPagesEl = document.getElementById('mt-dataset-total-pages');
+    
+    if (totalCountEl) totalCountEl.textContent = datasetState.totalImages;
+    if (currentPageEl) currentPageEl.textContent = datasetState.currentPage;
+    if (totalPagesEl) totalPagesEl.textContent = datasetState.totalPages;
+    
+    if (currentRangeEl && datasetState.currentImages.length > 0) {
+        const start = (datasetState.currentPage - 1) * datasetState.pageSize + 1;
+        const end = Math.min(start + datasetState.currentImages.length - 1, datasetState.totalImages);
+        currentRangeEl.textContent = `${start}-${end}`;
+    }
+}
+
+function updatePaginationButtons() {
+    const prevBtn = document.getElementById('mt-dataset-prev-page');
+    const nextBtn = document.getElementById('mt-dataset-next-page');
+    
+    if (prevBtn) {
+        prevBtn.disabled = datasetState.currentPage <= 1;
+    }
+    
+    if (nextBtn) {
+        nextBtn.disabled = datasetState.currentPage >= datasetState.totalPages;
+    }
+}
+
+async function loadThumbnails() {
+    const thumbnailsGrid = document.getElementById('mt-thumbnails-grid');
+    if (!thumbnailsGrid) return;
+    
+    thumbnailsGrid.innerHTML = '';
+    
+    for (let i = 0; i < datasetState.currentImages.length; i++) {
+        const image = datasetState.currentImages[i];
+        const thumbnailItem = document.createElement('div');
+        thumbnailItem.className = 'mt-thumbnail-item';
+        if (i === datasetState.currentImageIndex) {
+            thumbnailItem.classList.add('active');
+        }
+        
+        thumbnailItem.innerHTML = `
+            <img src="/api/dataset/image/${image.name}" alt="${image.name}" loading="lazy">
+            <div class="mt-thumbnail-label">${image.name}</div>
+        `;
+        
+        thumbnailItem.addEventListener('click', () => {
+            datasetState.currentImageIndex = i;
+            showCurrentImage();
+            updateThumbnailSelection();
+        });
+        
+        thumbnailsGrid.appendChild(thumbnailItem);
+    }
+}
+
+function showCurrentImage() {
+    if (datasetState.currentImages.length === 0) return;
+    
+    const currentImage = datasetState.currentImages[datasetState.currentImageIndex];
+    const imageEl = document.getElementById('mt-dataset-current-image');
+    const imageNameEl = document.getElementById('mt-current-image-name');
+    const imageSizeEl = document.getElementById('mt-current-image-size');
+    const carouselCurrentEl = document.getElementById('mt-carousel-current');
+    const carouselTotalEl = document.getElementById('mt-carousel-total');
+    
+    if (imageEl) {
+        imageEl.src = `/api/dataset/image/${currentImage.name}`;
+        imageEl.style.display = 'block';
+        imageEl.alt = currentImage.name;
+    }
+    
+    if (imageNameEl) imageNameEl.textContent = currentImage.name;
+    if (imageSizeEl) imageSizeEl.textContent = `${currentImage.width}x${currentImage.height}`;
+    if (carouselCurrentEl) carouselCurrentEl.textContent = datasetState.currentImageIndex + 1;
+    if (carouselTotalEl) carouselTotalEl.textContent = datasetState.currentImages.length;
+    
+    updateCarouselButtons();
+    updateThumbnailSelection();
+}
+
+function updateCarouselButtons() {
+    const prevBtn = document.getElementById('mt-carousel-prev');
+    const nextBtn = document.getElementById('mt-carousel-next');
+    
+    if (prevBtn) {
+        prevBtn.disabled = datasetState.currentImageIndex <= 0;
+    }
+    
+    if (nextBtn) {
+        nextBtn.disabled = datasetState.currentImageIndex >= datasetState.currentImages.length - 1;
+    }
+}
+
+function updateThumbnailSelection() {
+    const thumbnails = document.querySelectorAll('.mt-thumbnail-item');
+    thumbnails.forEach((thumb, index) => {
+        thumb.classList.toggle('active', index === datasetState.currentImageIndex);
+    });
+}
+
+function updateDatasetLoadingState(loading) {
+    const loadingEl = document.getElementById('mt-dataset-loading');
+    const imageEl = document.getElementById('mt-dataset-current-image');
+    const noImagesEl = document.getElementById('mt-dataset-no-images');
+    
+    if (loading) {
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (imageEl) imageEl.style.display = 'none';
+        if (noImagesEl) noImagesEl.style.display = 'none';
+    } else {
+        if (loadingEl) loadingEl.style.display = 'none';
+    }
+}
+
+function showNoDatasetMessage() {
+    const loadingEl = document.getElementById('mt-dataset-loading');
+    const imageEl = document.getElementById('mt-dataset-current-image');
+    const noImagesEl = document.getElementById('mt-dataset-no-images');
+    
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (imageEl) imageEl.style.display = 'none';
+    if (noImagesEl) noImagesEl.style.display = 'block';
+    
+    // Update stats
+    const totalCountEl = document.getElementById('mt-dataset-total-count');
+    if (totalCountEl) totalCountEl.textContent = '0';
+}
+
+async function deleteCurrentImage() {
+    if (datasetState.currentImages.length === 0) return;
+    
+    const currentImage = datasetState.currentImages[datasetState.currentImageIndex];
+    
+    if (!confirm(`Are you sure you want to delete "${currentImage.name}" and its corresponding label?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/dataset/image/${currentImage.name}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            showNotification(`Successfully deleted ${currentImage.name}`, 'success');
+            
+            // Reload current page
+            await loadDatasetPage(datasetState.currentPage);
+        } else {
+            throw new Error('Failed to delete image');
+        }
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        showNotification('Failed to delete image', 'error');
+    }
+}
+
+function setupDatasetModalEventListeners() {
+    // Pagination buttons
+    const prevPageBtn = document.getElementById('mt-dataset-prev-page');
+    const nextPageBtn = document.getElementById('mt-dataset-next-page');
+    
+    if (prevPageBtn) {
+        prevPageBtn.addEventListener('click', async () => {
+            if (datasetState.currentPage > 1) {
+                await loadDatasetPage(datasetState.currentPage - 1);
+            }
+        });
+    }
+    
+    if (nextPageBtn) {
+        nextPageBtn.addEventListener('click', async () => {
+            if (datasetState.currentPage < datasetState.totalPages) {
+                await loadDatasetPage(datasetState.currentPage + 1);
+            }
+        });
+    }
+    
+    // Carousel buttons
+    const carouselPrevBtn = document.getElementById('mt-carousel-prev');
+    const carouselNextBtn = document.getElementById('mt-carousel-next');
+    
+    if (carouselPrevBtn) {
+        carouselPrevBtn.addEventListener('click', () => {
+            if (datasetState.currentImageIndex > 0) {
+                datasetState.currentImageIndex--;
+                showCurrentImage();
+            }
+        });
+    }
+    
+    if (carouselNextBtn) {
+        carouselNextBtn.addEventListener('click', () => {
+            if (datasetState.currentImageIndex < datasetState.currentImages.length - 1) {
+                datasetState.currentImageIndex++;
+                showCurrentImage();
+            }
+        });
+    }
+    
+    // Delete button
+    const deleteBtn = document.getElementById('mt-delete-current-image');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', deleteCurrentImage);
+    }
+}

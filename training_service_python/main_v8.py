@@ -944,3 +944,133 @@ async def detect_target(image: UploadFile = File(...), confidence: float = Form(
         raise HTTPException(status_code=500, detail=f"Required packages not installed: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Target detection failed: {str(e)}")
+
+# Dataset management endpoints
+@app.get("/api/dataset/info")
+async def get_dataset_info():
+    """Get dataset information including total count of images"""
+    try:
+        dataset_path = "/app/training_scripts/data/generated_dataset"
+        images_path = os.path.join(dataset_path, "images")
+        
+        if not os.path.exists(images_path):
+            return {"total_images": 0, "dataset_exists": False}
+        
+        # Count total images
+        image_extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif'}
+        total_images = sum(1 for f in os.listdir(images_path) 
+                          if os.path.splitext(f.lower())[1] in image_extensions)
+        
+        return {
+            "total_images": total_images,
+            "dataset_exists": True,
+            "dataset_path": dataset_path
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get dataset info: {str(e)}")
+
+@app.get("/api/dataset/images")
+async def get_dataset_images(page: int = 1, page_size: int = 25):
+    """Get paginated list of dataset images"""
+    try:
+        dataset_path = "/app/training_scripts/data/generated_dataset"
+        images_path = os.path.join(dataset_path, "images")
+        
+        if not os.path.exists(images_path):
+            return {"images": [], "total": 0, "page": page, "page_size": page_size, "total_pages": 0}
+        
+        # Get all image files
+        image_extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif'}
+        all_images = [f for f in os.listdir(images_path) 
+                     if os.path.splitext(f.lower())[1] in image_extensions]
+        all_images.sort()  # Sort alphabetically
+        
+        total_images = len(all_images)
+        total_pages = (total_images + page_size - 1) // page_size
+        
+        # Calculate pagination
+        start_idx = (page - 1) * page_size
+        end_idx = min(start_idx + page_size, total_images)
+        page_images = all_images[start_idx:end_idx]
+        
+        # Get image details
+        images_data = []
+        for img_name in page_images:
+            img_path = os.path.join(images_path, img_name)
+            try:
+                with Image.open(img_path) as img:
+                    width, height = img.size
+                file_size = os.path.getsize(img_path)
+                
+                images_data.append({
+                    "name": img_name,
+                    "width": width,
+                    "height": height,
+                    "size": file_size,
+                    "path": f"images/{img_name}"
+                })
+            except Exception as e:
+                print(f"Error reading image {img_name}: {e}")
+                continue
+        
+        return {
+            "images": images_data,
+            "total": total_images,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get dataset images: {str(e)}")
+
+@app.get("/api/dataset/image/{image_name}")
+async def get_dataset_image(image_name: str):
+    """Get a specific dataset image file"""
+    try:
+        dataset_path = "/app/training_scripts/data/generated_dataset"
+        images_path = os.path.join(dataset_path, "images")
+        image_path = os.path.join(images_path, image_name)
+        
+        if not os.path.exists(image_path):
+            raise HTTPException(status_code=404, detail="Image not found")
+        
+        return FileResponse(image_path, media_type="image/jpeg")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get image: {str(e)}")
+
+@app.delete("/api/dataset/image/{image_name}")
+async def delete_dataset_image(image_name: str):
+    """Delete a specific dataset image and its corresponding label"""
+    try:
+        dataset_path = "/app/training_scripts/data/generated_dataset"
+        images_path = os.path.join(dataset_path, "images")
+        labels_path = os.path.join(dataset_path, "labels")
+        
+        image_path = os.path.join(images_path, image_name)
+        
+        # Get corresponding label file (same name but .txt extension)
+        base_name = os.path.splitext(image_name)[0]
+        label_path = os.path.join(labels_path, f"{base_name}.txt")
+        
+        deleted_files = []
+        
+        # Delete image file
+        if os.path.exists(image_path):
+            os.remove(image_path)
+            deleted_files.append(f"images/{image_name}")
+        
+        # Delete corresponding label file
+        if os.path.exists(label_path):
+            os.remove(label_path)
+            deleted_files.append(f"labels/{base_name}.txt")
+        
+        if not deleted_files:
+            raise HTTPException(status_code=404, detail="Image not found")
+        
+        return {
+            "status": "success",
+            "deleted_files": deleted_files,
+            "message": f"Successfully deleted {image_name} and its label"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete image: {str(e)}")
