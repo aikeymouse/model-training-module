@@ -2972,7 +2972,7 @@ function renderCustomCursorThumbnails() {
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'mt-thumbnail-delete';
         deleteBtn.innerHTML = '×';
-        deleteBtn.title = 'Delete cursor';
+        deleteBtn.title = 'Delete target';
         deleteBtn.onclick = (e) => {
             e.stopPropagation();
             deleteCustomCursor(index);
