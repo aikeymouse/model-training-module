@@ -62,6 +62,7 @@ func (c *Client) RegisterAssetProxies(mux *http.ServeMux) {
 	mux.HandleFunc("/api/models", c.handleAPIProxy)                      // Specific endpoint
 	mux.HandleFunc("/api/model/", c.handleAPIProxy)                      // All /api/model/* endpoints
 	mux.HandleFunc("/api/pipeline/", c.handleAPIProxy)                   // All /api/pipeline/* endpoints
+	mux.HandleFunc("/api/dataset/", c.handleAPIProxy)                    // All /api/dataset/* endpoints
 	mux.HandleFunc("/config/training-pipeline.json", c.handleAssetProxy) // Specific config file
 }
 
