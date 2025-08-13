@@ -1975,8 +1975,7 @@ button:hover {
     flex-wrap: wrap;
 }
 
-/* More specific selector for custom dataset image actions */
-.mt-custom-tab .mt-dataset-image-info .mt-image-actions {
+#mt-manage-dataset-modal #mt-custom-tab .mt-dataset-image-info .mt-image-actions {
     display: flex !important;
     gap: 1rem !important;
     flex-wrap: wrap !important;
