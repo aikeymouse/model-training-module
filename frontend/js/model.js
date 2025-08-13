@@ -2168,7 +2168,8 @@ let datasetState = {
 let customDatasetState = {
     backgrounds: [],
     cursors: [],
-    currentBackgroundIndex: 0
+    currentBackgroundIndex: 0,
+    selectedTargetIndex: -1 // -1 means no target selected
 };
 
 async function openManageDatasetModal() {
@@ -2887,9 +2888,11 @@ async function loadCustomCursors() {
         
         const data = await response.json();
         customDatasetState.cursors = data.targets || [];
+        customDatasetState.selectedTargetIndex = -1; // Reset selection when loading new data
         
         updateCustomCursorCount();
         renderCustomCursorThumbnails();
+        resetSelectedTargetDisplay(); // Reset selection display since selection is reset
     } catch (error) {
         console.error('Error loading custom targets:', error);
         if (loadingElement) {
@@ -2972,6 +2975,20 @@ function renderCustomCursorThumbnails() {
         const thumbnailContainer = document.createElement('div');
         thumbnailContainer.className = 'mt-thumbnail-container';
         
+        // Add selected class if this is the selected target
+        if (index === customDatasetState.selectedTargetIndex) {
+            thumbnailContainer.classList.add('mt-thumbnail-selected');
+        }
+        
+        // Add click event to select this target
+        thumbnailContainer.onclick = (e) => {
+            if (!e.target.classList.contains('mt-thumbnail-delete')) {
+                selectCustomTarget(index);
+            }
+        };
+        
+        thumbnailContainer.style.cursor = 'pointer';
+        
         const img = document.createElement('img');
         img.className = 'mt-thumbnail-image';
         img.src = `/api/dataset/custom/targets/${cursor.filename}`;
@@ -2991,6 +3008,32 @@ function renderCustomCursorThumbnails() {
         thumbnailContainer.appendChild(deleteBtn);
         gridElement.appendChild(thumbnailContainer);
     });
+}
+
+function selectCustomTarget(index) {
+    // Update the selected target index
+    customDatasetState.selectedTargetIndex = index;
+    
+    // Re-render thumbnails to update visual selection
+    renderCustomCursorThumbnails();
+    
+    // Update the selected target name in stats
+    const selectedTarget = customDatasetState.cursors[index];
+    if (selectedTarget) {
+        const targetNameElement = document.getElementById('mt-selected-target-name');
+        if (targetNameElement) {
+            targetNameElement.textContent = selectedTarget.filename;
+        }
+        
+        console.log('Selected target:', selectedTarget.filename);
+    }
+}
+
+function resetSelectedTargetDisplay() {
+    const targetNameElement = document.getElementById('mt-selected-target-name');
+    if (targetNameElement) {
+        targetNameElement.textContent = 'None';
+    }
 }
 
 function updateCustomBackgroundCount() {
