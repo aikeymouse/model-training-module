@@ -2195,11 +2195,9 @@ function closeManageDatasetModal() {
 window.closeManageDatasetModal = closeManageDatasetModal;
 
 async function initializeDatasetModal() {
-    console.log('Initializing dataset modal');
     try {
         // Check which tab is currently selected
         const selectedTab = document.querySelector('input[name="dataset-tab"]:checked');
-        console.log('Currently selected tab:', selectedTab ? selectedTab.value : 'none');
         
         // Always start by loading the synthetic dataset since it's the default
         // The user can switch to custom tab afterwards
@@ -2210,7 +2208,6 @@ async function initializeDatasetModal() {
         if (customTabContent) customTabContent.classList.remove('active');
         if (syntheticTabContent) syntheticTabContent.classList.add('active');
         
-        console.log('Loading synthetic dataset as default');
         // Show loading state
         updateDatasetLoadingState(true);
         
@@ -2693,38 +2690,26 @@ function setupDatasetModalEventListeners() {
     const tabRadios = document.querySelectorAll('input[name="dataset-tab"]');
     const tabContents = document.querySelectorAll('.mt-tab-content');
     
-    console.log('Setting up tab event listeners. Found radios:', tabRadios.length, 'contents:', tabContents.length);
-    
     tabRadios.forEach((radio, index) => {
-        console.log(`Radio ${index}: value=${radio.value}, checked=${radio.checked}`);
-        
         radio.addEventListener('change', async () => {
-            console.log('Tab changed!', radio.value, 'checked:', radio.checked);
-            
             if (radio.checked) {
                 const targetTab = radio.value;
-                console.log('Switching to tab:', targetTab);
                 
                 // Hide all tab contents
                 tabContents.forEach(content => {
                     content.classList.remove('active');
-                    console.log('Removed active from:', content.id);
                 });
                 
                 // Show the selected tab content
                 const targetContent = document.getElementById(`mt-${targetTab}-tab`);
-                console.log('Target content element:', targetContent);
                 
                 if (targetContent) {
                     targetContent.classList.add('active');
-                    console.log('Added active to:', targetContent.id);
                     
                     // Load data for the selected tab
                     if (targetTab === 'custom') {
-                        console.log('Loading custom dataset...');
                         await loadCustomDataset();
                     } else if (targetTab === 'synthetic') {
-                        console.log('Loading synthetic dataset...');
                         // Reload synthetic dataset
                         try {
                             updateDatasetLoadingState(true);
@@ -2837,13 +2822,11 @@ function setupDatasetModalEventListeners() {
 
 // Custom Dataset Functions
 async function loadCustomDataset() {
-    console.log('=== loadCustomDataset() called ===');
     try {
         await Promise.all([
             loadCustomBackgrounds(),
             loadCustomCursors()
         ]);
-        console.log('=== Custom dataset loaded successfully ===');
     } catch (error) {
         console.error('Error loading custom dataset:', error);
         showNotification('Failed to load custom dataset', 'error');
@@ -2851,16 +2834,9 @@ async function loadCustomDataset() {
 }
 
 async function loadCustomBackgrounds() {
-    console.log('--- loadCustomBackgrounds() called ---');
     const loadingElement = document.getElementById('mt-custom-loading');
     const noImagesElement = document.getElementById('mt-custom-no-images');
     const imageElement = document.getElementById('mt-custom-current-image');
-    
-    console.log('Elements found:', {
-        loading: !!loadingElement,
-        noImages: !!noImagesElement, 
-        image: !!imageElement
-    });
     
     if (loadingElement) loadingElement.style.display = 'block';
     if (noImagesElement) noImagesElement.style.display = 'none';
@@ -2874,16 +2850,12 @@ async function loadCustomBackgrounds() {
         customDatasetState.backgrounds = data.backgrounds || [];
         customDatasetState.currentBackgroundIndex = 0;
         
-        console.log('Loaded backgrounds:', customDatasetState.backgrounds.length);
-        
         updateCustomBackgroundCount();
         updateCustomBackgroundNavigation();
         
         if (customDatasetState.backgrounds.length > 0) {
-            console.log('Showing first background');
             showCurrentCustomBackground();
         } else {
-            console.log('No backgrounds found, showing no images message');
             if (loadingElement) loadingElement.style.display = 'none';
             if (noImagesElement) noImagesElement.style.display = 'block';
         }
@@ -2895,14 +2867,8 @@ async function loadCustomBackgrounds() {
 }
 
 async function loadCustomCursors() {
-    console.log('--- loadCustomCursors() called ---');
     const loadingElement = document.getElementById('mt-custom-cursors-loading');
     const gridElement = document.getElementById('mt-custom-cursors-grid');
-    
-    console.log('Cursor elements found:', {
-        loading: !!loadingElement,
-        grid: !!gridElement
-    });
     
     if (loadingElement) loadingElement.style.display = 'block';
     
@@ -2912,8 +2878,6 @@ async function loadCustomCursors() {
         
         const data = await response.json();
         customDatasetState.cursors = data.targets || [];
-        
-        console.log('Loaded cursors/targets:', customDatasetState.cursors.length);
         
         updateCustomCursorCount();
         renderCustomCursorThumbnails();
@@ -2926,48 +2890,32 @@ async function loadCustomCursors() {
 }
 
 function showCurrentCustomBackground() {
-    console.log('--- showCurrentCustomBackground() called ---');
     const loadingElement = document.getElementById('mt-custom-loading');
     const imageElement = document.getElementById('mt-custom-current-image');
     const nameElement = document.getElementById('mt-custom-image-name');
     const sizeElement = document.getElementById('mt-custom-image-size');
     
-    console.log('Background elements found:', {
-        loading: !!loadingElement,
-        image: !!imageElement,
-        name: !!nameElement,
-        size: !!sizeElement
-    });
-    
     if (customDatasetState.backgrounds.length === 0) {
-        console.log('No backgrounds available, hiding loading');
         if (loadingElement) loadingElement.style.display = 'none';
         return;
     }
     
     const currentBackground = customDatasetState.backgrounds[customDatasetState.currentBackgroundIndex];
-    console.log('Showing background:', currentBackground.filename);
     
     if (imageElement) {
-        console.log('Setting up image loading for:', currentBackground.filename);
         if (loadingElement) {
-            console.log('Showing loading state');
             loadingElement.style.display = 'block';
         }
         imageElement.style.display = 'none';
         
         imageElement.onload = () => {
-            console.log('Background image loaded successfully:', currentBackground.filename);
             if (loadingElement) {
-                console.log('Hiding loading state');
                 loadingElement.style.display = 'none';
             }
-            console.log('Showing image element');
             imageElement.style.display = 'block';
             
             if (sizeElement) {
                 const size = `${imageElement.naturalWidth}x${imageElement.naturalHeight}`;
-                console.log('Setting image size:', size);
                 sizeElement.textContent = size;
             }
         };
@@ -2975,34 +2923,24 @@ function showCurrentCustomBackground() {
         imageElement.onerror = () => {
             console.error('Failed to load background image:', currentBackground.filename);
             if (loadingElement) {
-                console.log('Hiding loading state due to error');
                 loadingElement.style.display = 'none';
             }
         };
         
         const imageUrl = `/api/dataset/custom/backgrounds/${currentBackground.filename}`;
-        console.log('Setting image src to:', imageUrl);
         imageElement.src = imageUrl;
     }
     
     if (nameElement) {
-        console.log('Setting background name:', currentBackground.filename);
         nameElement.textContent = currentBackground.filename;
     }
     
-    console.log('Updating background navigation');
     updateCustomBackgroundNavigation();
 }
 
 function renderCustomCursorThumbnails() {
-    console.log('--- renderCustomCursorThumbnails() called ---');
     const gridElement = document.getElementById('mt-custom-cursors-grid');
     const loadingElement = document.getElementById('mt-custom-cursors-loading');
-    
-    console.log('Cursor thumbnail elements found:', {
-        grid: !!gridElement,
-        loading: !!loadingElement
-    });
     
     if (!gridElement) {
         console.error('Cursor grid element not found!');
@@ -3010,24 +2948,18 @@ function renderCustomCursorThumbnails() {
     }
     
     if (loadingElement) {
-        console.log('Hiding cursor loading element');
         loadingElement.style.display = 'none';
     }
     
     // Clear existing thumbnails
-    console.log('Clearing existing thumbnails');
     gridElement.innerHTML = '';
     
     if (customDatasetState.cursors.length === 0) {
-        console.log('No cursors found, showing no content message');
         gridElement.innerHTML = '<div class="mt-no-content">No cursor images found</div>';
         return;
     }
     
-    console.log('Rendering', customDatasetState.cursors.length, 'cursor thumbnails');
-    
     customDatasetState.cursors.forEach((cursor, index) => {
-        console.log(`Creating thumbnail ${index + 1}:`, cursor.filename);
         const thumbnailContainer = document.createElement('div');
         thumbnailContainer.className = 'mt-thumbnail-container';
         
@@ -3050,31 +2982,23 @@ function renderCustomCursorThumbnails() {
         thumbnailContainer.appendChild(deleteBtn);
         gridElement.appendChild(thumbnailContainer);
     });
-    
-    console.log('Cursor thumbnails rendered successfully');
 }
 
 function updateCustomBackgroundCount() {
-    console.log('--- updateCustomBackgroundCount() called ---');
     const countElement = document.getElementById('mt-custom-backgrounds-count');
     const count = customDatasetState.backgrounds.length;
-    console.log('Updating background count to:', count, 'element found:', !!countElement);
     if (countElement) {
         countElement.textContent = count;
-        console.log('Background count updated successfully');
     } else {
         console.error('mt-custom-backgrounds-count element not found!');
     }
 }
 
 function updateCustomCursorCount() {
-    console.log('--- updateCustomCursorCount() called ---');
     const countElement = document.getElementById('mt-custom-cursors-count');
     const count = customDatasetState.cursors.length;
-    console.log('Updating cursor count to:', count, 'element found:', !!countElement);
     if (countElement) {
         countElement.textContent = count;
-        console.log('Cursor count updated successfully');
     } else {
         console.error('mt-custom-cursors-count element not found!');
     }
