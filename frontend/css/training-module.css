@@ -1862,6 +1862,21 @@ button:hover {
     font-size: 1.1em;
 }
 
+.mt-selected-target-info {
+    margin-bottom: 15px;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #495057;
+}
+
+.mt-selected-target-info span {
+    font-weight: 500;
+    color: #007bff;
+}
+
 .mt-upload-btn {
     background-color: #28a745;
     color: white;
