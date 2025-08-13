@@ -2125,11 +2125,6 @@ button:hover {
     user-select: none;
 }
 
-.mt-dataset-pagination-info {
-    font-size: 0.9em;
-    color: #666;
-}
-
 .mt-dataset-pagination {
     display: flex;
     gap: 0.5rem;

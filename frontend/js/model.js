@@ -3086,8 +3086,6 @@ function updateCustomCursorCount() {
 function updateCustomBackgroundNavigation() {
     const currentElement = document.getElementById('mt-custom-carousel-current');
     const totalElement = document.getElementById('mt-custom-carousel-total');
-    const currentBgElement = document.getElementById('mt-custom-current-bg');
-    const totalBgElement = document.getElementById('mt-custom-total-bg');
     const prevBtn = document.getElementById('mt-custom-carousel-prev');
     const nextBtn = document.getElementById('mt-custom-carousel-next');
     
@@ -3096,8 +3094,6 @@ function updateCustomBackgroundNavigation() {
     
     if (currentElement) currentElement.textContent = current;
     if (totalElement) totalElement.textContent = total;
-    if (currentBgElement) currentBgElement.textContent = current;
-    if (totalBgElement) totalBgElement.textContent = total;
     
     if (prevBtn) {
         prevBtn.disabled = customDatasetState.currentBackgroundIndex === 0;
