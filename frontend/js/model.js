@@ -2198,33 +2198,42 @@ async function initializeDatasetModal() {
     try {
         // Check which tab is currently selected
         const selectedTab = document.querySelector('input[name="dataset-tab"]:checked');
+        const selectedTabValue = selectedTab ? selectedTab.value : 'synthetic';
         
-        // Always start by loading the synthetic dataset since it's the default
-        // The user can switch to custom tab afterwards
-        
-        // Ensure synthetic tab content is visible by default
+        // Set up tab content visibility based on the selected tab
         const customTabContent = document.getElementById('mt-custom-tab');
         const syntheticTabContent = document.getElementById('mt-synthetic-tab');
-        if (customTabContent) customTabContent.classList.remove('active');
-        if (syntheticTabContent) syntheticTabContent.classList.add('active');
         
-        // Show loading state
-        updateDatasetLoadingState(true);
-        
-        // Get dataset info
-        const response = await fetch('/api/dataset/synthetic/info');
-        const datasetInfo = await response.json();
-        
-        if (!datasetInfo.dataset_exists || datasetInfo.total_images === 0) {
-            showNoDatasetMessage();
-            return;
+        if (selectedTabValue === 'custom') {
+            // Custom tab is selected
+            if (customTabContent) customTabContent.classList.add('active');
+            if (syntheticTabContent) syntheticTabContent.classList.remove('active');
+            
+            // Load custom dataset data
+            await loadCustomDataset();
+        } else {
+            // Synthetic tab is selected (default)
+            if (customTabContent) customTabContent.classList.remove('active');
+            if (syntheticTabContent) syntheticTabContent.classList.add('active');
+            
+            // Show loading state
+            updateDatasetLoadingState(true);
+            
+            // Get dataset info
+            const response = await fetch('/api/dataset/synthetic/info');
+            const datasetInfo = await response.json();
+            
+            if (!datasetInfo.dataset_exists || datasetInfo.total_images === 0) {
+                showNoDatasetMessage();
+                return;
+            }
+            
+            datasetState.totalImages = datasetInfo.total_images;
+            datasetState.totalPages = Math.ceil(datasetInfo.total_images / datasetState.pageSize);
+            
+            // Load first page
+            await loadDatasetPage(1);
         }
-        
-        datasetState.totalImages = datasetInfo.total_images;
-        datasetState.totalPages = Math.ceil(datasetInfo.total_images / datasetState.pageSize);
-        
-        // Load first page
-        await loadDatasetPage(1);
         
     } catch (error) {
         console.error('Error initializing dataset modal:', error);
