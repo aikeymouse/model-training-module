@@ -8,6 +8,7 @@ import cv2
 import pty
 import select
 import psutil
+import random
 from PIL import Image
 import numpy as np
 from fastapi import FastAPI, BackgroundTasks, HTTPException, WebSocket, File, UploadFile, Form
@@ -113,6 +114,13 @@ class ExecuteScriptRequest(BaseModel):
 class DeleteModelRequest(BaseModel):
     name: str
 
+class GenerateDatasetRequest(BaseModel):
+    target_filename: str
+    background_filename: str
+    num_images: int
+    width: int
+    height: int
+
 def parse_model_metrics(model_filename):
     """
     Parse metrics from the corresponding model info file.
@@ -171,6 +179,62 @@ def has_html_report(model_filename):
     html_filename = f"{base_name}.html"
     html_path = os.path.join(MODELS_DIR, html_filename)
     return os.path.exists(html_path)
+
+def resize_with_aspect_ratio(image, target_size, method='pad'):
+    """
+    Resize image while maintaining aspect ratio.
+    
+    Args:
+        image: PIL Image to resize
+        target_size: (width, height) tuple for target size
+        method: 'pad' (add black borders) or 'crop' (center crop)
+    
+    Returns:
+        tuple: (resized_image, scale_x, scale_y)
+    """
+    original_width, original_height = image.size
+    target_width, target_height = target_size
+    
+    # Calculate scale factors
+    scale_x = target_width / original_width
+    scale_y = target_height / original_height
+    
+    if method == 'pad':
+        # Use the smaller scale to fit the image within target size
+        scale = min(scale_x, scale_y)
+        new_width = int(original_width * scale)
+        new_height = int(original_height * scale)
+        
+        # Resize the image
+        resized = image.resize((new_width, new_height), Image.LANCZOS)
+        
+        # Create a new image with target size and paste the resized image
+        final_image = Image.new('RGBA', target_size, (0, 0, 0, 255))
+        paste_x = (target_width - new_width) // 2
+        paste_y = (target_height - new_height) // 2
+        final_image.paste(resized, (paste_x, paste_y))
+        
+        # Return actual scale factors used
+        return final_image, scale, scale
+        
+    elif method == 'crop':
+        # Use the larger scale to fill the target size, then crop
+        scale = max(scale_x, scale_y)
+        new_width = int(original_width * scale)
+        new_height = int(original_height * scale)
+        
+        # Resize the image
+        resized = image.resize((new_width, new_height), Image.LANCZOS)
+        
+        # Calculate crop coordinates (center crop)
+        crop_x = (new_width - target_width) // 2
+        crop_y = (new_height - target_height) // 2
+        final_image = resized.crop((crop_x, crop_y, crop_x + target_width, crop_y + target_height))
+        
+        return final_image, scale, scale
+    
+    else:
+        raise ValueError("Method must be 'pad' or 'crop'")
 
 @app.get("/models")
 async def get_models():
@@ -1334,3 +1398,131 @@ async def delete_custom_target(filename: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to delete target image: {str(e)}")
+
+@app.post("/api/dataset/custom/generate")
+async def generate_custom_dataset(request: GenerateDatasetRequest):
+    """Generate synthetic dataset using selected target and background"""
+    try:
+        backgrounds_path = "/app/training_scripts/data/backgrounds"
+        targets_path = "/app/training_scripts/data/cursors"
+        output_dir = "/app/training_scripts/data/generated_dataset"
+        
+        # Validate input files exist
+        background_file = os.path.join(backgrounds_path, request.background_filename)
+        target_file = os.path.join(targets_path, request.target_filename)
+        
+        if not os.path.exists(background_file):
+            raise HTTPException(status_code=404, detail=f"Background image not found: {request.background_filename}")
+        
+        if not os.path.exists(target_file):
+            raise HTTPException(status_code=404, detail=f"Target image not found: {request.target_filename}")
+        
+        # Setup output directories
+        images_out_dir = os.path.join(output_dir, 'images')
+        labels_out_dir = os.path.join(output_dir, 'labels')
+        
+        # Clean and create output directories
+        if os.path.exists(output_dir):
+            import shutil
+            shutil.rmtree(output_dir)
+        
+        os.makedirs(images_out_dir, exist_ok=True)
+        os.makedirs(labels_out_dir, exist_ok=True)
+        
+        # Load the single background and target images
+        background = Image.open(background_file).convert("RGBA")
+        target = Image.open(target_file).convert("RGBA")
+        
+        img_size = (request.width, request.height)
+        
+        # Generate the specified number of images
+        for i in range(request.num_images):
+            # Create a copy of the background for this iteration
+            bg_copy = background.copy()
+            
+            # Define a realistic, small size for the target (20-40px height)
+            new_target_h = random.randint(20, 40)
+            target_w, target_h = target.size
+            if target_h > 0:
+                aspect_ratio = target_w / target_h
+                new_target_w = int(new_target_h * aspect_ratio)
+            else:
+                new_target_w = 20
+            
+            # Resize the target to its small, realistic size
+            target_resized = target.resize((new_target_w, new_target_h), Image.LANCZOS)
+            
+            # Place the small target on the full-size background
+            bg_w, bg_h = bg_copy.size
+            max_x = bg_w - new_target_w
+            max_y = bg_h - new_target_h
+            
+            # Ensure positioning is valid
+            if max_x < 0 or max_y < 0:
+                paste_x = 0
+                paste_y = 0
+            else:
+                paste_x = random.randint(0, max_x)
+                paste_y = random.randint(0, max_y)
+            
+            # Paste target onto background using alpha channel as mask
+            bg_copy.paste(target_resized, (paste_x, paste_y), target_resized)
+            
+            # Resize maintaining aspect ratio with padding
+            final_image, scale_x, scale_y = resize_with_aspect_ratio(bg_copy, img_size, 'pad')
+            
+            # Convert to RGB for saving as JPEG
+            final_image_rgb = final_image.convert("RGB")
+            
+            # Save image
+            img_filename = f"custom_generated_{i:04d}.jpg"
+            final_image_rgb.save(os.path.join(images_out_dir, img_filename))
+            
+            # Calculate YOLO label coordinates
+            final_x = paste_x * scale_x
+            final_y = paste_y * scale_y
+            final_w = new_target_w * scale_x
+            final_h = new_target_h * scale_y
+            
+            # Account for padding offset when using 'pad' method
+            if scale_x == scale_y:  # pad method
+                actual_scaled_w = bg_w * scale_x
+                actual_scaled_h = bg_h * scale_y
+                pad_x = (img_size[0] - actual_scaled_w) / 2
+                pad_y = (img_size[1] - actual_scaled_h) / 2
+                
+                final_x += pad_x
+                final_y += pad_y
+            
+            # Calculate center coordinates and normalize
+            x_center = final_x + final_w / 2
+            y_center = final_y + final_h / 2
+            
+            x_center_norm = max(0, min(1, x_center / img_size[0]))
+            y_center_norm = max(0, min(1, y_center / img_size[1]))
+            width_norm = max(0, min(1, final_w / img_size[0]))
+            height_norm = max(0, min(1, final_h / img_size[1]))
+            
+            # Save YOLO format label (class 0 for target)
+            label_content = f"0 {x_center_norm:.6f} {y_center_norm:.6f} {width_norm:.6f} {height_norm:.6f}"
+            label_filename = f"custom_generated_{i:04d}.txt"
+            
+            with open(os.path.join(labels_out_dir, label_filename), 'w') as f:
+                f.write(label_content)
+        
+        return {
+            "status": "success",
+            "message": f"Successfully generated {request.num_images} images",
+            "details": {
+                "images_generated": request.num_images,
+                "target_image": request.target_filename,
+                "background_image": request.background_filename,
+                "output_size": f"{request.width}x{request.height}",
+                "output_directory": output_dir
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate dataset: {str(e)}")

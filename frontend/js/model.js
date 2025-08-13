@@ -2819,6 +2819,12 @@ function setupDatasetModalEventListeners() {
         deleteCustomBtn.addEventListener('click', deleteCurrentCustomBackground);
     }
     
+    // Generate Dataset button
+    const generateDatasetBtn = document.getElementById('mt-generate-dataset-btn');
+    if (generateDatasetBtn) {
+        generateDatasetBtn.addEventListener('click', generateCustomDataset);
+    }
+    
     // Bounding box toggle
     const bboxToggle = document.getElementById('mt-show-bboxes');
     if (bboxToggle) {
@@ -3180,5 +3186,107 @@ async function deleteCustomCursor(index) {
     } catch (error) {
         console.error('Error deleting target:', error);
         showNotification('Failed to delete target', 'error');
+    }
+}
+
+async function generateCustomDataset() {
+    try {
+        // Validate prerequisites
+        if (customDatasetState.selectedTargetIndex < 0) {
+            showNotification('Please select a target image first', 'warning');
+            return;
+        }
+        
+        if (customDatasetState.backgrounds.length === 0) {
+            showNotification('No background images available', 'warning');
+            return;
+        }
+        
+        // Get form values
+        const countInput = document.getElementById('mt-dataset-count');
+        const widthInput = document.getElementById('mt-dataset-width');
+        const heightInput = document.getElementById('mt-dataset-height');
+        
+        if (!countInput || !widthInput || !heightInput) {
+            showNotification('Dataset generation form not found', 'error');
+            return;
+        }
+        
+        const numImages = parseInt(countInput.value);
+        const width = parseInt(widthInput.value);
+        const height = parseInt(heightInput.value);
+        
+        // Validate input values
+        if (isNaN(numImages) || numImages < 10) {
+            showNotification('Number of images must be at least 10', 'warning');
+            return;
+        }
+        
+        if (isNaN(width) || width < 64 || isNaN(height) || height < 64) {
+            showNotification('Width and height must be at least 64 pixels', 'warning');
+            return;
+        }
+        
+        // Get selected target and current background
+        const selectedTarget = customDatasetState.cursors[customDatasetState.selectedTargetIndex];
+        const currentBackground = customDatasetState.backgrounds[customDatasetState.currentBackgroundIndex];
+        
+        if (!selectedTarget || !currentBackground) {
+            showNotification('Selected target or background not found', 'error');
+            return;
+        }
+        
+        // Disable the button during generation
+        const generateBtn = document.getElementById('mt-generate-dataset-btn');
+        const originalText = generateBtn.textContent;
+        generateBtn.disabled = true;
+        generateBtn.textContent = 'Generating...';
+        
+        // Show progress notification
+        showNotification(`Generating ${numImages} images with ${selectedTarget.filename}...`, 'info');
+        
+        // Make API call
+        const response = await fetch('/api/dataset/custom/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                target_filename: selectedTarget.filename,
+                background_filename: currentBackground.filename,
+                num_images: numImages,
+                width: width,
+                height: height
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to generate dataset');
+        }
+        
+        const result = await response.json();
+        
+        // Show success notification with details
+        showNotification(
+            `Successfully generated ${result.details.images_generated} images (${result.details.output_size})`,
+            'success'
+        );
+        
+        console.log('Dataset generation completed:', result);
+        
+    } catch (error) {
+        console.error('Error generating dataset:', error);
+        showNotification(`Failed to generate dataset: ${error.message}`, 'error');
+    } finally {
+        // Re-enable the button
+        const generateBtn = document.getElementById('mt-generate-dataset-btn');
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.textContent = 'Generate Dataset';
+            
+            // Update button state based on current conditions
+            updateDatasetGenerationControls();
+        }
     }
 }
