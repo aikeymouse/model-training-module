@@ -2164,6 +2164,13 @@ let datasetState = {
     showBoundingBoxes: false
 };
 
+// Custom Dataset State
+let customDatasetState = {
+    backgrounds: [],
+    cursors: [],
+    currentBackgroundIndex: 0
+};
+
 async function openManageDatasetModal() {
     const modal = document.getElementById('mt-manage-dataset-modal');
     if (!modal) return;
@@ -2188,12 +2195,27 @@ function closeManageDatasetModal() {
 window.closeManageDatasetModal = closeManageDatasetModal;
 
 async function initializeDatasetModal() {
+    console.log('Initializing dataset modal');
     try {
+        // Check which tab is currently selected
+        const selectedTab = document.querySelector('input[name="dataset-tab"]:checked');
+        console.log('Currently selected tab:', selectedTab ? selectedTab.value : 'none');
+        
+        // Always start by loading the synthetic dataset since it's the default
+        // The user can switch to custom tab afterwards
+        
+        // Ensure synthetic tab content is visible by default
+        const customTabContent = document.getElementById('mt-custom-tab');
+        const syntheticTabContent = document.getElementById('mt-synthetic-tab');
+        if (customTabContent) customTabContent.classList.remove('active');
+        if (syntheticTabContent) syntheticTabContent.classList.add('active');
+        
+        console.log('Loading synthetic dataset as default');
         // Show loading state
         updateDatasetLoadingState(true);
         
         // Get dataset info
-        const response = await fetch('/api/dataset/info');
+        const response = await fetch('/api/dataset/synthetic/info');
         const datasetInfo = await response.json();
         
         if (!datasetInfo.dataset_exists || datasetInfo.total_images === 0) {
@@ -2221,7 +2243,7 @@ async function loadDatasetPage(page) {
         
         updateDatasetLoadingState(true);
         
-        const response = await fetch(`/api/dataset/images?page=${page}&page_size=${datasetState.pageSize}`);
+        const response = await fetch(`/api/dataset/synthetic/images?page=${page}&page_size=${datasetState.pageSize}`);
         const data = await response.json();
         
         datasetState.currentPage = page;
@@ -2313,8 +2335,8 @@ async function loadThumbnails() {
         }
         
         const imgSrc = datasetState.showBoundingBoxes 
-            ? `/api/dataset/image/${image.name}/with-boxes` 
-            : `/api/dataset/image/${image.name}`;
+            ? `/api/dataset/synthetic/image/${image.name}/with-boxes` 
+            : `/api/dataset/synthetic/image/${image.name}`;
         
         // Create image element
         const imgElement = document.createElement('img');
@@ -2388,8 +2410,8 @@ function showCurrentImage() {
         // Check if bounding boxes should be shown
         const showBboxes = datasetState.showBoundingBoxes;
         const imageUrl = showBboxes 
-            ? `/api/dataset/image/${currentImage.name}/with-boxes`
-            : `/api/dataset/image/${currentImage.name}`;
+            ? `/api/dataset/synthetic/image/${currentImage.name}/with-boxes`
+            : `/api/dataset/synthetic/image/${currentImage.name}`;
         
         // Hide image initially
         imageEl.style.display = 'none';
@@ -2479,7 +2501,7 @@ async function loadBoundingBoxZoom(imageName) {
         if (!zoomContainer || !zoomCanvas) return;
         
         // Load the labels for this image
-        const response = await fetch(`/api/dataset/image/${imageName}/labels`);
+        const response = await fetch(`/api/dataset/synthetic/image/${imageName}/labels`);
         if (!response.ok) {
             hideBoundingBoxZoom();
             return;
@@ -2554,7 +2576,7 @@ async function loadBoundingBoxZoom(imageName) {
             hideBoundingBoxZoom();
         };
         
-        originalImg.src = `/api/dataset/image/${imageName}`;
+        originalImg.src = `/api/dataset/synthetic/image/${imageName}`;
         
     } catch (error) {
         console.error('Error loading bounding box zoom:', error);
@@ -2648,7 +2670,7 @@ async function deleteCurrentImage() {
     }
     
     try {
-        const response = await fetch(`/api/dataset/image/${currentImage.name}`, {
+        const response = await fetch(`/api/dataset/synthetic/image/${currentImage.name}`, {
             method: 'DELETE'
         });
         
@@ -2671,24 +2693,62 @@ function setupDatasetModalEventListeners() {
     const tabRadios = document.querySelectorAll('input[name="dataset-tab"]');
     const tabContents = document.querySelectorAll('.mt-tab-content');
     
-    tabRadios.forEach(radio => {
-        radio.addEventListener('change', () => {
+    console.log('Setting up tab event listeners. Found radios:', tabRadios.length, 'contents:', tabContents.length);
+    
+    tabRadios.forEach((radio, index) => {
+        console.log(`Radio ${index}: value=${radio.value}, checked=${radio.checked}`);
+        
+        radio.addEventListener('change', async () => {
+            console.log('Tab changed!', radio.value, 'checked:', radio.checked);
+            
             if (radio.checked) {
                 const targetTab = radio.value;
+                console.log('Switching to tab:', targetTab);
                 
                 // Hide all tab contents
-                tabContents.forEach(content => content.classList.remove('active'));
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    console.log('Removed active from:', content.id);
+                });
                 
                 // Show the selected tab content
                 const targetContent = document.getElementById(`mt-${targetTab}-tab`);
+                console.log('Target content element:', targetContent);
+                
                 if (targetContent) {
                     targetContent.classList.add('active');
+                    console.log('Added active to:', targetContent.id);
+                    
+                    // Load data for the selected tab
+                    if (targetTab === 'custom') {
+                        console.log('Loading custom dataset...');
+                        await loadCustomDataset();
+                    } else if (targetTab === 'synthetic') {
+                        console.log('Loading synthetic dataset...');
+                        // Reload synthetic dataset
+                        try {
+                            updateDatasetLoadingState(true);
+                            const response = await fetch('/api/dataset/synthetic/info');
+                            const datasetInfo = await response.json();
+                            
+                            if (!datasetInfo.dataset_exists || datasetInfo.total_images === 0) {
+                                showNoDatasetMessage();
+                                return;
+                            }
+                            
+                            datasetState.totalImages = datasetInfo.total_images;
+                            datasetState.totalPages = Math.ceil(datasetInfo.total_images / datasetState.pageSize);
+                            await loadDatasetPage(1);
+                        } catch (error) {
+                            console.error('Error loading synthetic dataset:', error);
+                        }
+                    }
                 }
             }
         });
     });
     
-    // Pagination buttons
+    // Pagination buttons (synthetic dataset)
     const prevPageBtn = document.getElementById('mt-dataset-prev-page');
     const nextPageBtn = document.getElementById('mt-dataset-next-page');
     
@@ -2708,7 +2768,7 @@ function setupDatasetModalEventListeners() {
         });
     }
     
-    // Carousel buttons
+    // Carousel buttons (synthetic dataset)
     const carouselPrevBtn = document.getElementById('mt-carousel-prev');
     const carouselNextBtn = document.getElementById('mt-carousel-next');
     
@@ -2730,10 +2790,38 @@ function setupDatasetModalEventListeners() {
         });
     }
     
-    // Delete button
+    // Custom dataset carousel buttons
+    const customCarouselPrevBtn = document.getElementById('mt-custom-carousel-prev');
+    const customCarouselNextBtn = document.getElementById('mt-custom-carousel-next');
+    
+    if (customCarouselPrevBtn) {
+        customCarouselPrevBtn.addEventListener('click', () => {
+            if (customDatasetState.currentBackgroundIndex > 0) {
+                customDatasetState.currentBackgroundIndex--;
+                showCurrentCustomBackground();
+            }
+        });
+    }
+    
+    if (customCarouselNextBtn) {
+        customCarouselNextBtn.addEventListener('click', () => {
+            if (customDatasetState.currentBackgroundIndex < customDatasetState.backgrounds.length - 1) {
+                customDatasetState.currentBackgroundIndex++;
+                showCurrentCustomBackground();
+            }
+        });
+    }
+    
+    // Delete button (synthetic dataset)
     const deleteBtn = document.getElementById('mt-delete-current-image');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', deleteCurrentImage);
+    }
+    
+    // Delete button (custom dataset)
+    const deleteCustomBtn = document.getElementById('mt-delete-custom-background');
+    if (deleteCustomBtn) {
+        deleteCustomBtn.addEventListener('click', deleteCurrentCustomBackground);
     }
     
     // Bounding box toggle
@@ -2744,5 +2832,350 @@ function setupDatasetModalEventListeners() {
             showCurrentImage(); // Refresh current image
             loadThumbnails(); // Refresh all thumbnails
         });
+    }
+}
+
+// Custom Dataset Functions
+async function loadCustomDataset() {
+    console.log('=== loadCustomDataset() called ===');
+    try {
+        await Promise.all([
+            loadCustomBackgrounds(),
+            loadCustomCursors()
+        ]);
+        console.log('=== Custom dataset loaded successfully ===');
+    } catch (error) {
+        console.error('Error loading custom dataset:', error);
+        showNotification('Failed to load custom dataset', 'error');
+    }
+}
+
+async function loadCustomBackgrounds() {
+    console.log('--- loadCustomBackgrounds() called ---');
+    const loadingElement = document.getElementById('mt-custom-loading');
+    const noImagesElement = document.getElementById('mt-custom-no-images');
+    const imageElement = document.getElementById('mt-custom-current-image');
+    
+    console.log('Elements found:', {
+        loading: !!loadingElement,
+        noImages: !!noImagesElement, 
+        image: !!imageElement
+    });
+    
+    if (loadingElement) loadingElement.style.display = 'block';
+    if (noImagesElement) noImagesElement.style.display = 'none';
+    if (imageElement) imageElement.style.display = 'none';
+    
+    try {
+        const response = await fetch('/api/dataset/custom/backgrounds');
+        if (!response.ok) throw new Error('Failed to fetch backgrounds');
+        
+        const data = await response.json();
+        customDatasetState.backgrounds = data.backgrounds || [];
+        customDatasetState.currentBackgroundIndex = 0;
+        
+        console.log('Loaded backgrounds:', customDatasetState.backgrounds.length);
+        
+        updateCustomBackgroundCount();
+        updateCustomBackgroundNavigation();
+        
+        if (customDatasetState.backgrounds.length > 0) {
+            console.log('Showing first background');
+            showCurrentCustomBackground();
+        } else {
+            console.log('No backgrounds found, showing no images message');
+            if (loadingElement) loadingElement.style.display = 'none';
+            if (noImagesElement) noImagesElement.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error loading custom backgrounds:', error);
+        if (loadingElement) loadingElement.style.display = 'none';
+        if (noImagesElement) noImagesElement.style.display = 'block';
+    }
+}
+
+async function loadCustomCursors() {
+    console.log('--- loadCustomCursors() called ---');
+    const loadingElement = document.getElementById('mt-custom-cursors-loading');
+    const gridElement = document.getElementById('mt-custom-cursors-grid');
+    
+    console.log('Cursor elements found:', {
+        loading: !!loadingElement,
+        grid: !!gridElement
+    });
+    
+    if (loadingElement) loadingElement.style.display = 'block';
+    
+    try {
+        const response = await fetch('/api/dataset/custom/targets');
+        if (!response.ok) throw new Error('Failed to fetch targets');
+        
+        const data = await response.json();
+        customDatasetState.cursors = data.targets || [];
+        
+        console.log('Loaded cursors/targets:', customDatasetState.cursors.length);
+        
+        updateCustomCursorCount();
+        renderCustomCursorThumbnails();
+    } catch (error) {
+        console.error('Error loading custom targets:', error);
+        if (loadingElement) {
+            loadingElement.textContent = 'Failed to load target images';
+        }
+    }
+}
+
+function showCurrentCustomBackground() {
+    console.log('--- showCurrentCustomBackground() called ---');
+    const loadingElement = document.getElementById('mt-custom-loading');
+    const imageElement = document.getElementById('mt-custom-current-image');
+    const nameElement = document.getElementById('mt-custom-image-name');
+    const sizeElement = document.getElementById('mt-custom-image-size');
+    
+    console.log('Background elements found:', {
+        loading: !!loadingElement,
+        image: !!imageElement,
+        name: !!nameElement,
+        size: !!sizeElement
+    });
+    
+    if (customDatasetState.backgrounds.length === 0) {
+        console.log('No backgrounds available, hiding loading');
+        if (loadingElement) loadingElement.style.display = 'none';
+        return;
+    }
+    
+    const currentBackground = customDatasetState.backgrounds[customDatasetState.currentBackgroundIndex];
+    console.log('Showing background:', currentBackground.filename);
+    
+    if (imageElement) {
+        console.log('Setting up image loading for:', currentBackground.filename);
+        if (loadingElement) {
+            console.log('Showing loading state');
+            loadingElement.style.display = 'block';
+        }
+        imageElement.style.display = 'none';
+        
+        imageElement.onload = () => {
+            console.log('Background image loaded successfully:', currentBackground.filename);
+            if (loadingElement) {
+                console.log('Hiding loading state');
+                loadingElement.style.display = 'none';
+            }
+            console.log('Showing image element');
+            imageElement.style.display = 'block';
+            
+            if (sizeElement) {
+                const size = `${imageElement.naturalWidth}x${imageElement.naturalHeight}`;
+                console.log('Setting image size:', size);
+                sizeElement.textContent = size;
+            }
+        };
+        
+        imageElement.onerror = () => {
+            console.error('Failed to load background image:', currentBackground.filename);
+            if (loadingElement) {
+                console.log('Hiding loading state due to error');
+                loadingElement.style.display = 'none';
+            }
+        };
+        
+        const imageUrl = `/api/dataset/custom/backgrounds/${currentBackground.filename}`;
+        console.log('Setting image src to:', imageUrl);
+        imageElement.src = imageUrl;
+    }
+    
+    if (nameElement) {
+        console.log('Setting background name:', currentBackground.filename);
+        nameElement.textContent = currentBackground.filename;
+    }
+    
+    console.log('Updating background navigation');
+    updateCustomBackgroundNavigation();
+}
+
+function renderCustomCursorThumbnails() {
+    console.log('--- renderCustomCursorThumbnails() called ---');
+    const gridElement = document.getElementById('mt-custom-cursors-grid');
+    const loadingElement = document.getElementById('mt-custom-cursors-loading');
+    
+    console.log('Cursor thumbnail elements found:', {
+        grid: !!gridElement,
+        loading: !!loadingElement
+    });
+    
+    if (!gridElement) {
+        console.error('Cursor grid element not found!');
+        return;
+    }
+    
+    if (loadingElement) {
+        console.log('Hiding cursor loading element');
+        loadingElement.style.display = 'none';
+    }
+    
+    // Clear existing thumbnails
+    console.log('Clearing existing thumbnails');
+    gridElement.innerHTML = '';
+    
+    if (customDatasetState.cursors.length === 0) {
+        console.log('No cursors found, showing no content message');
+        gridElement.innerHTML = '<div class="mt-no-content">No cursor images found</div>';
+        return;
+    }
+    
+    console.log('Rendering', customDatasetState.cursors.length, 'cursor thumbnails');
+    
+    customDatasetState.cursors.forEach((cursor, index) => {
+        console.log(`Creating thumbnail ${index + 1}:`, cursor.filename);
+        const thumbnailContainer = document.createElement('div');
+        thumbnailContainer.className = 'mt-thumbnail-container';
+        
+        const img = document.createElement('img');
+        img.className = 'mt-thumbnail-image';
+        img.src = `/api/dataset/custom/targets/${cursor.filename}`;
+        img.alt = cursor.filename;
+        img.title = cursor.filename;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'mt-thumbnail-delete';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.title = 'Delete cursor';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteCustomCursor(index);
+        };
+        
+        thumbnailContainer.appendChild(img);
+        thumbnailContainer.appendChild(deleteBtn);
+        gridElement.appendChild(thumbnailContainer);
+    });
+    
+    console.log('Cursor thumbnails rendered successfully');
+}
+
+function updateCustomBackgroundCount() {
+    console.log('--- updateCustomBackgroundCount() called ---');
+    const countElement = document.getElementById('mt-custom-backgrounds-count');
+    const count = customDatasetState.backgrounds.length;
+    console.log('Updating background count to:', count, 'element found:', !!countElement);
+    if (countElement) {
+        countElement.textContent = count;
+        console.log('Background count updated successfully');
+    } else {
+        console.error('mt-custom-backgrounds-count element not found!');
+    }
+}
+
+function updateCustomCursorCount() {
+    console.log('--- updateCustomCursorCount() called ---');
+    const countElement = document.getElementById('mt-custom-cursors-count');
+    const count = customDatasetState.cursors.length;
+    console.log('Updating cursor count to:', count, 'element found:', !!countElement);
+    if (countElement) {
+        countElement.textContent = count;
+        console.log('Cursor count updated successfully');
+    } else {
+        console.error('mt-custom-cursors-count element not found!');
+    }
+}
+
+function updateCustomBackgroundNavigation() {
+    const currentElement = document.getElementById('mt-custom-carousel-current');
+    const totalElement = document.getElementById('mt-custom-carousel-total');
+    const currentBgElement = document.getElementById('mt-custom-current-bg');
+    const totalBgElement = document.getElementById('mt-custom-total-bg');
+    const prevBtn = document.getElementById('mt-custom-carousel-prev');
+    const nextBtn = document.getElementById('mt-custom-carousel-next');
+    
+    const current = customDatasetState.currentBackgroundIndex + 1;
+    const total = customDatasetState.backgrounds.length;
+    
+    if (currentElement) currentElement.textContent = current;
+    if (totalElement) totalElement.textContent = total;
+    if (currentBgElement) currentBgElement.textContent = current;
+    if (totalBgElement) totalBgElement.textContent = total;
+    
+    if (prevBtn) {
+        prevBtn.disabled = customDatasetState.currentBackgroundIndex === 0;
+    }
+    
+    if (nextBtn) {
+        nextBtn.disabled = customDatasetState.currentBackgroundIndex >= total - 1;
+    }
+}
+
+async function deleteCurrentCustomBackground() {
+    if (customDatasetState.backgrounds.length === 0) return;
+    
+    const currentBackground = customDatasetState.backgrounds[customDatasetState.currentBackgroundIndex];
+    
+    if (!confirm(`Are you sure you want to delete "${currentBackground.filename}"?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/dataset/custom/backgrounds/${currentBackground.filename}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error('Failed to delete background');
+        
+        // Remove from local state
+        customDatasetState.backgrounds.splice(customDatasetState.currentBackgroundIndex, 1);
+        
+        // Adjust current index if necessary
+        if (customDatasetState.currentBackgroundIndex >= customDatasetState.backgrounds.length) {
+            customDatasetState.currentBackgroundIndex = Math.max(0, customDatasetState.backgrounds.length - 1);
+        }
+        
+        updateCustomBackgroundCount();
+        updateCustomBackgroundNavigation();
+        
+        if (customDatasetState.backgrounds.length > 0) {
+            showCurrentCustomBackground();
+        } else {
+            const loadingElement = document.getElementById('mt-custom-loading');
+            const noImagesElement = document.getElementById('mt-custom-no-images');
+            const imageElement = document.getElementById('mt-custom-current-image');
+            
+            if (loadingElement) loadingElement.style.display = 'none';
+            if (noImagesElement) noImagesElement.style.display = 'block';
+            if (imageElement) imageElement.style.display = 'none';
+        }
+        
+        showNotification('Background deleted successfully', 'success');
+    } catch (error) {
+        console.error('Error deleting background:', error);
+        showNotification('Failed to delete background', 'error');
+    }
+}
+
+async function deleteCustomCursor(index) {
+    if (index < 0 || index >= customDatasetState.cursors.length) return;
+    
+    const cursor = customDatasetState.cursors[index];
+    
+    if (!confirm(`Are you sure you want to delete "${cursor.filename}"?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/dataset/custom/targets/${cursor.filename}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error('Failed to delete target');
+        
+        // Remove from local state
+        customDatasetState.cursors.splice(index, 1);
+        
+        updateCustomCursorCount();
+        renderCustomCursorThumbnails();
+        
+        showNotification('Target deleted successfully', 'success');
+    } catch (error) {
+        console.error('Error deleting target:', error);
+        showNotification('Failed to delete target', 'error');
     }
 }

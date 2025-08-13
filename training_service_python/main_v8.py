@@ -946,7 +946,7 @@ async def detect_target(image: UploadFile = File(...), confidence: float = Form(
         raise HTTPException(status_code=500, detail=f"Target detection failed: {str(e)}")
 
 # Dataset management endpoints
-@app.get("/api/dataset/info")
+@app.get("/api/dataset/synthetic/info")
 async def get_dataset_info():
     """Get dataset information including total count of images"""
     try:
@@ -969,7 +969,7 @@ async def get_dataset_info():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get dataset info: {str(e)}")
 
-@app.get("/api/dataset/images")
+@app.get("/api/dataset/synthetic/images")
 async def get_dataset_images(page: int = 1, page_size: int = 25):
     """Get paginated list of dataset images"""
     try:
@@ -1023,7 +1023,7 @@ async def get_dataset_images(page: int = 1, page_size: int = 25):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get dataset images: {str(e)}")
 
-@app.get("/api/dataset/image/{image_name}")
+@app.get("/api/dataset/synthetic/image/{image_name}")
 async def get_dataset_image(image_name: str):
     """Get a specific dataset image file"""
     try:
@@ -1038,7 +1038,7 @@ async def get_dataset_image(image_name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get image: {str(e)}")
 
-@app.get("/api/dataset/image/{image_name}/with-boxes")
+@app.get("/api/dataset/synthetic/image/{image_name}/with-boxes")
 async def get_dataset_image_with_boxes(image_name: str):
     """Get a dataset image with bounding boxes drawn on it"""
     try:
@@ -1115,7 +1115,7 @@ async def get_dataset_image_with_boxes(image_name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get image with boxes: {str(e)}")
 
-@app.get("/api/dataset/image/{image_name}/labels")
+@app.get("/api/dataset/synthetic/image/{image_name}/labels")
 async def get_dataset_image_labels(image_name: str):
     """Get label data for a specific dataset image"""
     try:
@@ -1150,7 +1150,7 @@ async def get_dataset_image_labels(image_name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get image labels: {str(e)}")
 
-@app.delete("/api/dataset/image/{image_name}")
+@app.delete("/api/dataset/synthetic/image/{image_name}")
 async def delete_dataset_image(image_name: str):
     """Delete a specific dataset image and its corresponding label"""
     try:
@@ -1186,3 +1186,151 @@ async def delete_dataset_image(image_name: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to delete image: {str(e)}")
+
+# Custom Dataset API Endpoints
+
+@app.get("/api/dataset/custom/backgrounds")
+async def get_custom_backgrounds():
+    """Get list of custom background images"""
+    try:
+        backgrounds_path = "/app/training_scripts/data/backgrounds"
+        
+        if not os.path.exists(backgrounds_path):
+            return {"backgrounds": []}
+        
+        backgrounds = []
+        for filename in os.listdir(backgrounds_path):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):
+                file_path = os.path.join(backgrounds_path, filename)
+                if os.path.isfile(file_path):
+                    stat = os.stat(file_path)
+                    backgrounds.append({
+                        "filename": filename,
+                        "size": stat.st_size,
+                        "created": datetime.datetime.fromtimestamp(stat.st_ctime).isoformat()
+                    })
+        
+        # Sort by filename for consistent ordering
+        backgrounds.sort(key=lambda x: x["filename"])
+        
+        return {"backgrounds": backgrounds}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get backgrounds: {str(e)}")
+
+@app.get("/api/dataset/custom/targets")
+async def get_custom_targets():
+    """Get list of custom target images"""
+    try:
+        targets_path = "/app/training_scripts/data/cursors"
+        
+        if not os.path.exists(targets_path):
+            return {"targets": []}
+        
+        targets = []
+        for filename in os.listdir(targets_path):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):
+                file_path = os.path.join(targets_path, filename)
+                if os.path.isfile(file_path):
+                    stat = os.stat(file_path)
+                    targets.append({
+                        "filename": filename,
+                        "size": stat.st_size,
+                        "created": datetime.datetime.fromtimestamp(stat.st_ctime).isoformat()
+                    })
+        
+        # Sort by filename for consistent ordering
+        targets.sort(key=lambda x: x["filename"])
+        
+        return {"targets": targets}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get targets: {str(e)}")
+
+@app.get("/api/dataset/custom/backgrounds/{filename}")
+async def get_custom_background_image(filename: str):
+    """Serve a custom background image"""
+    try:
+        backgrounds_path = "/app/training_scripts/data/backgrounds"
+        file_path = os.path.join(backgrounds_path, filename)
+        
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="Background image not found")
+        
+        # Security check - ensure filename doesn't contain path traversal
+        if ".." in filename or "/" in filename or "\\" in filename:
+            raise HTTPException(status_code=400, detail="Invalid filename")
+        
+        return FileResponse(file_path)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to serve background image: {str(e)}")
+
+@app.get("/api/dataset/custom/targets/{filename}")
+async def get_custom_target_image(filename: str):
+    """Serve a custom target image"""
+    try:
+        targets_path = "/app/training_scripts/data/cursors"
+        file_path = os.path.join(targets_path, filename)
+        
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="Target image not found")
+        
+        # Security check - ensure filename doesn't contain path traversal
+        if ".." in filename or "/" in filename or "\\" in filename:
+            raise HTTPException(status_code=400, detail="Invalid filename")
+        
+        return FileResponse(file_path)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to serve target image: {str(e)}")
+
+@app.delete("/api/dataset/custom/backgrounds/{filename}")
+async def delete_custom_background(filename: str):
+    """Delete a custom background image"""
+    try:
+        backgrounds_path = "/app/training_scripts/data/backgrounds"
+        file_path = os.path.join(backgrounds_path, filename)
+        
+        # Security check - ensure filename doesn't contain path traversal
+        if ".." in filename or "/" in filename or "\\" in filename:
+            raise HTTPException(status_code=400, detail="Invalid filename")
+        
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="Background image not found")
+        
+        os.remove(file_path)
+        
+        return {
+            "status": "success",
+            "message": f"Successfully deleted background image: {filename}"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete background image: {str(e)}")
+
+@app.delete("/api/dataset/custom/targets/{filename}")
+async def delete_custom_target(filename: str):
+    """Delete a custom target image"""
+    try:
+        targets_path = "/app/training_scripts/data/cursors"
+        file_path = os.path.join(targets_path, filename)
+        
+        # Security check - ensure filename doesn't contain path traversal
+        if ".." in filename or "/" in filename or "\\" in filename:
+            raise HTTPException(status_code=400, detail="Invalid filename")
+        
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="Target image not found")
+        
+        os.remove(file_path)
+        
+        return {
+            "status": "success",
+            "message": f"Successfully deleted target image: {filename}"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete target image: {str(e)}")

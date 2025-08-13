@@ -366,8 +366,61 @@
                 
                 <!-- Custom Dataset Tab Content -->
                 <div id="mt-custom-tab" class="mt-tab-content">
-                    <div class="mt-custom-dataset-placeholder">
-                        <p>Custom Dataset functionality coming soon...</p>
+                    <div class="mt-dataset-info">
+                        <div class="mt-dataset-stats">
+                            <div class="mt-dataset-stats-left">
+                                Backgrounds: <span id="mt-custom-backgrounds-count">Loading...</span> | 
+                                Targets: <span id="mt-custom-cursors-count">Loading...</span>
+                            </div>
+                            <div class="mt-dataset-stats-right">
+                                <span class="mt-dataset-pagination-info">
+                                    Background <span id="mt-custom-current-bg">1</span> of <span id="mt-custom-total-bg">1</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Background Image Carousel -->
+                    <div class="mt-dataset-carousel-container">
+                        <div class="mt-carousel-navigation">
+                            <button id="mt-custom-carousel-prev" class="mt-carousel-btn" disabled>‹</button>
+                            <span class="mt-carousel-indicator">
+                                Background <span id="mt-custom-carousel-current">1</span> / <span id="mt-custom-carousel-total">1</span>
+                            </span>
+                            <button id="mt-custom-carousel-next" class="mt-carousel-btn">›</button>
+                        </div>
+                        
+                        <div class="mt-dataset-image-container">
+                            <img id="mt-custom-current-image" alt="Background image" style="display: none;">
+                            <div id="mt-custom-loading" class="mt-loading-indicator">Loading background images...</div>
+                            <div id="mt-custom-no-images" class="mt-no-content" style="display: none;">
+                                No background images found.
+                            </div>
+                        </div>
+
+                        <div class="mt-dataset-image-info">
+                            <div class="mt-image-details">
+                                <span id="mt-custom-image-name">background.jpg</span>
+                                <span id="mt-custom-image-size">1024x768</span>
+                            </div>
+                            <div class="mt-image-actions">
+                                <button id="mt-upload-background" class="mt-upload-btn">Upload Background</button>
+                                <button id="mt-delete-custom-background" class="mt-delete-btn">Delete Background</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Target Thumbnails Grid -->
+                    <div class="mt-custom-cursors-section">
+                        <div class="mt-section-header">
+                            <h4>Target Images</h4>
+                            <button id="mt-upload-cursor" class="mt-upload-btn">Upload Target</button>
+                        </div>
+                        <div class="mt-dataset-thumbnails">
+                            <div id="mt-custom-cursors-grid" class="mt-thumbnails-grid">
+                                <div id="mt-custom-cursors-loading" class="mt-loading-message">Loading target images...</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
