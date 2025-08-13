@@ -1977,18 +1977,20 @@ button:hover {
     border-radius: 8px;
     border: 1px solid #dee2e6;
     padding: 1rem;
+    margin-bottom: 1rem;
 }
 
 .mt-custom-cursors-grid {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.5rem;
     padding: 1rem;
     background-color: #f8f9fa;
     border-radius: 8px;
-    max-height: 200px;
-    overflow-y: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     justify-content: flex-start;
+    white-space: nowrap;
 }
 
 .mt-custom-cursors-grid .mt-no-content {
