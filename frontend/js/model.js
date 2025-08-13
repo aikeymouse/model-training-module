@@ -2837,6 +2837,9 @@ async function loadCustomDataset() {
             loadCustomBackgrounds(),
             loadCustomCursors()
         ]);
+        
+        // Ensure dataset generation controls are properly initialized
+        updateDatasetGenerationControls();
     } catch (error) {
         console.error('Error loading custom dataset:', error);
         showNotification('Failed to load custom dataset', 'error');
@@ -2869,6 +2872,9 @@ async function loadCustomBackgrounds() {
             if (loadingElement) loadingElement.style.display = 'none';
             if (noImagesElement) noImagesElement.style.display = 'block';
         }
+        
+        // Update dataset generation controls when backgrounds are loaded
+        updateDatasetGenerationControls();
     } catch (error) {
         console.error('Error loading custom backgrounds:', error);
         if (loadingElement) loadingElement.style.display = 'none';
@@ -3027,12 +3033,33 @@ function selectCustomTarget(index) {
         
         console.log('Selected target:', selectedTarget.filename);
     }
+    
+    // Update dataset generation controls
+    updateDatasetGenerationControls();
 }
 
 function resetSelectedTargetDisplay() {
     const targetNameElement = document.getElementById('mt-selected-target-name');
     if (targetNameElement) {
         targetNameElement.textContent = 'None';
+    }
+    
+    // Update dataset generation controls
+    updateDatasetGenerationControls();
+}
+
+function updateDatasetGenerationControls() {
+    const countInput = document.getElementById('mt-dataset-count');
+    const generateBtn = document.getElementById('mt-generate-dataset-btn');
+    
+    if (countInput && generateBtn) {
+        // Enable only if target is selected AND there's at least 1 background
+        const hasSelectedTarget = customDatasetState.selectedTargetIndex >= 0;
+        const hasBackgrounds = customDatasetState.backgrounds.length > 0;
+        const shouldEnable = hasSelectedTarget && hasBackgrounds;
+        
+        countInput.disabled = !shouldEnable;
+        generateBtn.disabled = !shouldEnable;
     }
 }
 
