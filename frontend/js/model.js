@@ -3050,15 +3050,19 @@ function resetSelectedTargetDisplay() {
 
 function updateDatasetGenerationControls() {
     const countInput = document.getElementById('mt-dataset-count');
+    const widthInput = document.getElementById('mt-dataset-width');
+    const heightInput = document.getElementById('mt-dataset-height');
     const generateBtn = document.getElementById('mt-generate-dataset-btn');
     
-    if (countInput && generateBtn) {
+    if (countInput && widthInput && heightInput && generateBtn) {
         // Enable only if target is selected AND there's at least 1 background
         const hasSelectedTarget = customDatasetState.selectedTargetIndex >= 0;
         const hasBackgrounds = customDatasetState.backgrounds.length > 0;
         const shouldEnable = hasSelectedTarget && hasBackgrounds;
         
         countInput.disabled = !shouldEnable;
+        widthInput.disabled = !shouldEnable;
+        heightInput.disabled = !shouldEnable;
         generateBtn.disabled = !shouldEnable;
     }
 }

@@ -2080,6 +2080,11 @@ button:hover {
     font-size: 0.9em;
 }
 
+.mt-dataset-generation input[type="number"]#mt-dataset-width,
+.mt-dataset-generation input[type="number"]#mt-dataset-height {
+    width: 90px;
+}
+
 .mt-dataset-generation input[type="number"]:disabled {
     background-color: #f5f5f5;
     color: #999;
