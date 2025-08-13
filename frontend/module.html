@@ -285,7 +285,7 @@
             <div class="mt-modal-header">
                 <h3>Manage Dataset</h3>
             </div>
-            
+
             <!-- Dataset Tabs -->
             <div class="mt-dataset-tabs">
                 <label class="mt-switch-label">
@@ -297,7 +297,7 @@
                     <span class="mt-radio-text">Custom Dataset</span>
                 </label>
             </div>
-            
+
             <div class="mt-dataset-body">
                 <!-- Synthetic Dataset Tab Content -->
                 <div id="mt-synthetic-tab" class="mt-tab-content active">
@@ -312,60 +312,64 @@
                                     <span class="mt-bbox-toggle-text">Show Bounding Boxes</span>
                                 </label>
                                 <span class="mt-dataset-pagination-info">
-                                    Showing <span id="mt-dataset-current-range">1-25</span> 
-                                    (Page <span id="mt-dataset-current-page">1</span> of <span id="mt-dataset-total-pages">1</span>)
+                                    Showing <span id="mt-dataset-current-range">1-25</span>
+                                    (Page <span id="mt-dataset-current-page">1</span> of <span
+                                        id="mt-dataset-total-pages">1</span>)
                                 </span>
                                 <div class="mt-dataset-pagination">
-                                    <button id="mt-dataset-prev-page" class="mt-pagination-btn" disabled>← Previous</button>
+                                    <button id="mt-dataset-prev-page" class="mt-pagination-btn" disabled>←
+                                        Previous</button>
                                     <button id="mt-dataset-next-page" class="mt-pagination-btn">Next →</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                <!-- Thumbnails Grid -->
-                <div class="mt-dataset-thumbnails">
-                    <div id="mt-thumbnails-grid" class="mt-thumbnails-grid">
-                        <!-- Thumbnails will be loaded here -->
-                    </div>
-                </div>
-
-                <!-- Image Carousel -->
-                <div class="mt-dataset-carousel-container">
-                    <div class="mt-carousel-navigation">
-                        <button id="mt-carousel-prev" class="mt-carousel-btn" disabled>‹</button>
-                        <span class="mt-carousel-indicator">
-                            <span id="mt-carousel-current">1</span> / <span id="mt-carousel-total">25</span>
-                        </span>
-                        <button id="mt-carousel-next" class="mt-carousel-btn">›</button>
-                    </div>
-                    
-                    <div class="mt-dataset-image-container">
-                        <img id="mt-dataset-current-image" alt="Dataset image" style="display: none;">
-                        <div id="mt-dataset-loading" class="mt-loading-indicator">Loading images...</div>
-                        <div id="mt-dataset-no-images" class="mt-no-content" style="display: none;">
-                            No dataset images found. Generate a dataset first.
-                        </div>
-                        <!-- Zoomed bounding box preview -->
-                        <div id="mt-bbox-zoom-container" class="mt-bbox-zoom-container" style="display: none;">
-                            <canvas id="mt-bbox-zoom-canvas"></canvas>
-                            <div class="mt-bbox-zoom-label">100x Zoom</div>
+                    <!-- Thumbnails Grid -->
+                    <div class="mt-dataset-thumbnails">
+                        <div id="mt-thumbnails-grid" class="mt-thumbnails-grid">
+                            <!-- Thumbnails will be loaded here -->
                         </div>
                     </div>
 
-                    <div class="mt-dataset-image-info">
-                        <div class="mt-image-details">
-                            <span id="mt-current-image-name">image.jpg</span>
-                            <span id="mt-current-image-size">1024x768</span>
+                    <!-- Image Carousel -->
+                    <div class="mt-dataset-carousel-container">
+                        <div class="mt-carousel-navigation">
+                            <button id="mt-carousel-prev" class="mt-carousel-btn" disabled>‹</button>
+                            <span class="mt-carousel-indicator">
+                                <span id="mt-carousel-current">1</span> / <span id="mt-carousel-total">25</span>
+                            </span>
+                            <button id="mt-carousel-next" class="mt-carousel-btn">›</button>
                         </div>
-                        <div class="mt-image-actions">
-                            <button id="mt-delete-current-image" class="mt-delete-btn">Delete Image</button>
+
+                        <div class="mt-dataset-image-container">
+                            <img id="mt-dataset-current-image" alt="Dataset image" style="display: none;">
+                            <div id="mt-dataset-loading" class="mt-loading-indicator">Loading images...</div>
+                            <div id="mt-dataset-no-images" class="mt-no-content" style="display: none;">
+                                No dataset images found. Generate a dataset first.
+                            </div>
+                            <!-- Zoomed bounding box preview -->
+                            <div id="mt-bbox-zoom-container" class="mt-bbox-zoom-container" style="display: none;">
+                                <canvas id="mt-bbox-zoom-canvas"></canvas>
+                                <div class="mt-bbox-zoom-label">100x Zoom</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-dataset-image-info">
+                            <div class="mt-image-details">
+                                <span id="mt-current-image-name">image.jpg</span>
+                                <span id="mt-current-image-size">1024x768</span>
+                            </div>
+                            <div class="mt-image-actions">
+                                <button id="mt-delete-current-image" class="mt-delete-btn">Delete Image</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Custom Dataset Tab Content -->
                 <div id="mt-custom-tab" class="mt-tab-content">
+                    <!-- Stats Header -->
                     <div class="mt-dataset-info">
                         <div class="mt-dataset-stats">
                             <div class="mt-dataset-stats-left">
@@ -380,7 +384,20 @@
                         </div>
                     </div>
 
-                    <!-- Background Image Carousel -->
+                    <!-- Target Images Section -->
+                    <div class="mt-custom-cursors-section">
+                        <div class="mt-section-header">
+                            <h4>Target Images</h4>
+                            <button id="mt-upload-cursor" class="mt-upload-btn">Upload Target</button>
+                        </div>
+                        <div class="mt-dataset-thumbnails">
+                            <div id="mt-custom-cursors-grid" class="mt-custom-cursors-grid">
+                                <div id="mt-custom-cursors-loading" class="mt-loading-message">Loading target images...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Background Images Section -->
                     <div class="mt-dataset-carousel-container">
                         <div class="mt-carousel-navigation">
                             <button id="mt-custom-carousel-prev" class="mt-carousel-btn" disabled>‹</button>
@@ -394,7 +411,7 @@
                             <img id="mt-custom-current-image" alt="Background image" style="display: none;">
                             <div id="mt-custom-loading" class="mt-loading-indicator">Loading background images...</div>
                             <div id="mt-custom-no-images" class="mt-no-content" style="display: none;">
-                                No background images found.
+                                No background images found. Upload some backgrounds to get started.
                             </div>
                         </div>
 
@@ -409,25 +426,12 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Target Thumbnails Grid -->
-                    <div class="mt-custom-cursors-section">
-                        <div class="mt-section-header">
-                            <h4>Target Images</h4>
-                            <button id="mt-upload-cursor" class="mt-upload-btn">Upload Target</button>
-                        </div>
-                        <div class="mt-dataset-thumbnails">
-                            <div id="mt-custom-cursors-grid" class="mt-thumbnails-grid">
-                                <div id="mt-custom-cursors-loading" class="mt-loading-message">Loading target images...</div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script type="module" src="js/model.js"></script></script>
+        <script type="module" src="js/model.js"></script>
+        </script>
 </body>
 
 </html>
