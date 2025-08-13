@@ -1405,7 +1405,7 @@ async def generate_custom_dataset(request: GenerateDatasetRequest):
     try:
         backgrounds_path = "/app/training_scripts/data/backgrounds"
         targets_path = "/app/training_scripts/data/cursors"
-        output_dir = "/app/training_scripts/data/generated_dataset"
+        output_dir = "/app/training_scripts/data/custom_dataset"
         
         # Validate input files exist
         background_file = os.path.join(backgrounds_path, request.background_filename)
