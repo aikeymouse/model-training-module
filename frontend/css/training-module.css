@@ -1871,6 +1871,9 @@ button:hover {
     cursor: pointer;
     font-size: 0.9em;
     transition: background-color 0.2s;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .mt-upload-btn:hover {
@@ -2273,7 +2276,7 @@ button:hover {
 }
 
 .mt-delete-btn {
-    padding: 6px 12px;
+    padding: 8px 16px;
     background-color: #dc3545;
     color: white;
     border: none;
@@ -2281,6 +2284,9 @@ button:hover {
     cursor: pointer;
     font-size: 0.9em;
     transition: background-color 0.2s;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .mt-delete-btn:hover:not(:disabled) {
