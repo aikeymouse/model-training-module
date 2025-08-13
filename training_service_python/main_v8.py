@@ -9,6 +9,7 @@ import pty
 import select
 import psutil
 import random
+import shutil
 from PIL import Image
 import numpy as np
 from fastapi import FastAPI, BackgroundTasks, HTTPException, WebSocket, File, UploadFile, Form
@@ -1009,12 +1010,20 @@ async def detect_target(image: UploadFile = File(...), confidence: float = Form(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Target detection failed: {str(e)}")
 
-# Dataset management endpoints
-@app.get("/api/dataset/synthetic/info")
-async def get_dataset_info():
+# Dataset management generic methods
+def get_dataset_path(dataset_type: str) -> str:
+    """Get the dataset path based on type (synthetic or custom)"""
+    if dataset_type == "synthetic":
+        return "/app/training_scripts/data/generated_dataset"
+    elif dataset_type == "custom":
+        return "/app/training_scripts/data/custom_dataset"
+    else:
+        raise ValueError(f"Invalid dataset type: {dataset_type}")
+
+def get_dataset_info_generic(dataset_type: str):
     """Get dataset information including total count of images"""
     try:
-        dataset_path = "/app/training_scripts/data/generated_dataset"
+        dataset_path = get_dataset_path(dataset_type)
         images_path = os.path.join(dataset_path, "images")
         
         if not os.path.exists(images_path):
@@ -1031,13 +1040,12 @@ async def get_dataset_info():
             "dataset_path": dataset_path
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get dataset info: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get {dataset_type} dataset info: {str(e)}")
 
-@app.get("/api/dataset/synthetic/images")
-async def get_dataset_images(page: int = 1, page_size: int = 25):
+def get_dataset_images_generic(dataset_type: str, page: int = 1, page_size: int = 25):
     """Get paginated list of dataset images"""
     try:
-        dataset_path = "/app/training_scripts/data/generated_dataset"
+        dataset_path = get_dataset_path(dataset_type)
         images_path = os.path.join(dataset_path, "images")
         
         if not os.path.exists(images_path):
@@ -1085,13 +1093,12 @@ async def get_dataset_images(page: int = 1, page_size: int = 25):
             "total_pages": total_pages
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get dataset images: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get {dataset_type} dataset images: {str(e)}")
 
-@app.get("/api/dataset/synthetic/image/{image_name}")
-async def get_dataset_image(image_name: str):
+def get_dataset_image_generic(dataset_type: str, image_name: str):
     """Get a specific dataset image file"""
     try:
-        dataset_path = "/app/training_scripts/data/generated_dataset"
+        dataset_path = get_dataset_path(dataset_type)
         images_path = os.path.join(dataset_path, "images")
         image_path = os.path.join(images_path, image_name)
         
@@ -1100,13 +1107,12 @@ async def get_dataset_image(image_name: str):
         
         return FileResponse(image_path, media_type="image/jpeg")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get image: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get {dataset_type} dataset image: {str(e)}")
 
-@app.get("/api/dataset/synthetic/image/{image_name}/with-boxes")
-async def get_dataset_image_with_boxes(image_name: str):
+def get_dataset_image_with_boxes_generic(dataset_type: str, image_name: str):
     """Get a dataset image with bounding boxes drawn on it"""
     try:
-        dataset_path = "/app/training_scripts/data/generated_dataset"
+        dataset_path = get_dataset_path(dataset_type)
         images_path = os.path.join(dataset_path, "images")
         labels_path = os.path.join(dataset_path, "labels")
         
@@ -1177,13 +1183,12 @@ async def get_dataset_image_with_boxes(image_name: str):
         return StreamingResponse(img_buffer, media_type="image/jpeg")
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get image with boxes: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get {dataset_type} dataset image with boxes: {str(e)}")
 
-@app.get("/api/dataset/synthetic/image/{image_name}/labels")
-async def get_dataset_image_labels(image_name: str):
+def get_dataset_image_labels_generic(dataset_type: str, image_name: str):
     """Get label data for a specific dataset image"""
     try:
-        dataset_path = "/app/training_scripts/data/generated_dataset"
+        dataset_path = get_dataset_path(dataset_type)
         labels_path = os.path.join(dataset_path, "labels")
         
         label_name = os.path.splitext(image_name)[0] + ".txt"
@@ -1212,13 +1217,12 @@ async def get_dataset_image_labels(image_name: str):
         return labels
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get image labels: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get {dataset_type} dataset image labels: {str(e)}")
 
-@app.delete("/api/dataset/synthetic/image/{image_name}")
-async def delete_dataset_image(image_name: str):
+def delete_dataset_image_generic(dataset_type: str, image_name: str):
     """Delete a specific dataset image and its corresponding label"""
     try:
-        dataset_path = "/app/training_scripts/data/generated_dataset"
+        dataset_path = get_dataset_path(dataset_type)
         images_path = os.path.join(dataset_path, "images")
         labels_path = os.path.join(dataset_path, "labels")
         
@@ -1246,10 +1250,41 @@ async def delete_dataset_image(image_name: str):
         return {
             "status": "success",
             "deleted_files": deleted_files,
-            "message": f"Successfully deleted {image_name} and its label"
+            "message": f"Successfully deleted {image_name} and its label from {dataset_type} dataset"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete image: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete {dataset_type} dataset image: {str(e)}")
+
+# Dataset API endpoints using generic methods
+@app.get("/api/dataset/synthetic/info")
+async def get_dataset_info():
+    """Get synthetic dataset information including total count of images"""
+    return get_dataset_info_generic("synthetic")
+
+@app.get("/api/dataset/synthetic/images")
+async def get_dataset_images(page: int = 1, page_size: int = 25):
+    """Get paginated list of synthetic dataset images"""
+    return get_dataset_images_generic("synthetic", page, page_size)
+
+@app.get("/api/dataset/synthetic/image/{image_name}")
+async def get_dataset_image(image_name: str):
+    """Get a specific synthetic dataset image file"""
+    return get_dataset_image_generic("synthetic", image_name)
+
+@app.get("/api/dataset/synthetic/image/{image_name}/with-boxes")
+async def get_dataset_image_with_boxes(image_name: str):
+    """Get a synthetic dataset image with bounding boxes drawn on it"""
+    return get_dataset_image_with_boxes_generic("synthetic", image_name)
+
+@app.get("/api/dataset/synthetic/image/{image_name}/labels")
+async def get_dataset_image_labels(image_name: str):
+    """Get label data for a specific synthetic dataset image"""
+    return get_dataset_image_labels_generic("synthetic", image_name)
+
+@app.delete("/api/dataset/synthetic/image/{image_name}")
+async def delete_dataset_image(image_name: str):
+    """Delete a specific synthetic dataset image and its corresponding label"""
+    return delete_dataset_image_generic("synthetic", image_name)
 
 # Custom Dataset API Endpoints
 
@@ -1421,11 +1456,7 @@ async def generate_custom_dataset(request: GenerateDatasetRequest):
         images_out_dir = os.path.join(output_dir, 'images')
         labels_out_dir = os.path.join(output_dir, 'labels')
         
-        # Clean and create output directories
-        if os.path.exists(output_dir):
-            import shutil
-            shutil.rmtree(output_dir)
-        
+        # Create output directories (preserve existing files)
         os.makedirs(images_out_dir, exist_ok=True)
         os.makedirs(labels_out_dir, exist_ok=True)
         
@@ -1526,3 +1557,35 @@ async def generate_custom_dataset(request: GenerateDatasetRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate dataset: {str(e)}")
+
+# Custom Dataset Viewing Endpoints (for viewing generated custom datasets)
+
+@app.get("/api/dataset/custom/info")
+async def get_custom_dataset_info():
+    """Get custom dataset information including total count of images"""
+    return get_dataset_info_generic("custom")
+
+@app.get("/api/dataset/custom/images")
+async def get_custom_dataset_images(page: int = 1, page_size: int = 25):
+    """Get paginated list of custom dataset images"""
+    return get_dataset_images_generic("custom", page, page_size)
+
+@app.get("/api/dataset/custom/image/{image_name}")
+async def get_custom_dataset_image(image_name: str):
+    """Get a specific custom dataset image file"""
+    return get_dataset_image_generic("custom", image_name)
+
+@app.get("/api/dataset/custom/image/{image_name}/with-boxes")
+async def get_custom_dataset_image_with_boxes(image_name: str):
+    """Get a custom dataset image with bounding boxes drawn on it"""
+    return get_dataset_image_with_boxes_generic("custom", image_name)
+
+@app.get("/api/dataset/custom/image/{image_name}/labels")
+async def get_custom_dataset_image_labels(image_name: str):
+    """Get label data for a specific custom dataset image"""
+    return get_dataset_image_labels_generic("custom", image_name)
+
+@app.delete("/api/dataset/custom/image/{image_name}")
+async def delete_custom_dataset_image(image_name: str):
+    """Delete a specific custom dataset image and its corresponding label"""
+    return delete_dataset_image_generic("custom", image_name)

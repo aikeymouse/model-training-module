@@ -2161,7 +2161,8 @@ let datasetState = {
     totalImages: 0,
     currentImages: [],
     currentImageIndex: 0,
-    showBoundingBoxes: false
+    showBoundingBoxes: false,
+    datasetSource: 'synthetic' // 'synthetic' or 'custom'
 };
 
 // Custom Dataset State
@@ -2221,7 +2222,7 @@ async function initializeDatasetModal() {
             updateDatasetLoadingState(true);
             
             // Get dataset info
-            const response = await fetch('/api/dataset/synthetic/info');
+            const response = await fetch(getDatasetApiUrl('info'));
             const datasetInfo = await response.json();
             
             if (!datasetInfo.dataset_exists || datasetInfo.total_images === 0) {
@@ -2250,7 +2251,7 @@ async function loadDatasetPage(page) {
         
         updateDatasetLoadingState(true);
         
-        const response = await fetch(`/api/dataset/synthetic/images?page=${page}&page_size=${datasetState.pageSize}`);
+        const response = await fetch(getDatasetApiUrl(`images?page=${page}&page_size=${datasetState.pageSize}`));
         const data = await response.json();
         
         datasetState.currentPage = page;
@@ -2342,8 +2343,8 @@ async function loadThumbnails() {
         }
         
         const imgSrc = datasetState.showBoundingBoxes 
-            ? `/api/dataset/synthetic/image/${image.name}/with-boxes` 
-            : `/api/dataset/synthetic/image/${image.name}`;
+            ? getDatasetApiUrl(`image/${image.name}/with-boxes`)
+            : getDatasetApiUrl(`image/${image.name}`);
         
         // Create image element
         const imgElement = document.createElement('img');
@@ -2417,8 +2418,8 @@ function showCurrentImage() {
         // Check if bounding boxes should be shown
         const showBboxes = datasetState.showBoundingBoxes;
         const imageUrl = showBboxes 
-            ? `/api/dataset/synthetic/image/${currentImage.name}/with-boxes`
-            : `/api/dataset/synthetic/image/${currentImage.name}`;
+            ? getDatasetApiUrl(`image/${currentImage.name}/with-boxes`)
+            : getDatasetApiUrl(`image/${currentImage.name}`);
         
         // Hide image initially
         imageEl.style.display = 'none';
@@ -2508,7 +2509,7 @@ async function loadBoundingBoxZoom(imageName) {
         if (!zoomContainer || !zoomCanvas) return;
         
         // Load the labels for this image
-        const response = await fetch(`/api/dataset/synthetic/image/${imageName}/labels`);
+        const response = await fetch(getDatasetApiUrl(`image/${imageName}/labels`));
         if (!response.ok) {
             hideBoundingBoxZoom();
             return;
@@ -2583,7 +2584,7 @@ async function loadBoundingBoxZoom(imageName) {
             hideBoundingBoxZoom();
         };
         
-        originalImg.src = `/api/dataset/synthetic/image/${imageName}`;
+        originalImg.src = getDatasetApiUrl(`image/${imageName}`);
         
     } catch (error) {
         console.error('Error loading bounding box zoom:', error);
@@ -2677,7 +2678,7 @@ async function deleteCurrentImage() {
     }
     
     try {
-        const response = await fetch(`/api/dataset/synthetic/image/${currentImage.name}`, {
+        const response = await fetch(getDatasetApiUrl(`image/${currentImage.name}`), {
             method: 'DELETE'
         });
         
@@ -2723,7 +2724,7 @@ function setupDatasetModalEventListeners() {
                         // Reload synthetic dataset
                         try {
                             updateDatasetLoadingState(true);
-                            const response = await fetch('/api/dataset/synthetic/info');
+                            const response = await fetch(getDatasetApiUrl('info'));
                             const datasetInfo = await response.json();
                             
                             if (!datasetInfo.dataset_exists || datasetInfo.total_images === 0) {
@@ -2834,6 +2835,48 @@ function setupDatasetModalEventListeners() {
             loadThumbnails(); // Refresh all thumbnails
         });
     }
+    
+    // Dataset source switch
+    const datasetSourceInputs = document.querySelectorAll('input[name="dataset-source"]');
+    datasetSourceInputs.forEach(input => {
+        input.addEventListener('change', async (e) => {
+            if (e.target.checked) {
+                datasetState.datasetSource = e.target.value;
+                datasetState.currentPage = 1; // Reset to first page
+                datasetState.currentImageIndex = 0;
+                
+                // Reload dataset with new source
+                try {
+                    updateDatasetLoadingState(true);
+                    const response = await fetch(getDatasetApiUrl('info'));
+                    const datasetInfo = await response.json();
+                    
+                    if (!datasetInfo.dataset_exists || datasetInfo.total_images === 0) {
+                        showNoDatasetMessage();
+                        return;
+                    }
+                    
+                    datasetState.totalImages = datasetInfo.total_images;
+                    datasetState.totalPages = Math.ceil(datasetInfo.total_images / datasetState.pageSize);
+                    
+                    // Load first page
+                    await loadDatasetPage(1);
+                } catch (error) {
+                    console.error('Error switching dataset source:', error);
+                    showNotification('Failed to switch dataset source', 'error');
+                    showNoDatasetMessage();
+                }
+            }
+        });
+    });
+}
+
+// Helper function to get API URL based on dataset source
+function getDatasetApiUrl(endpoint) {
+    const baseUrl = datasetState.datasetSource === 'custom' 
+        ? '/api/dataset/custom' 
+        : '/api/dataset/synthetic';
+    return `${baseUrl}/${endpoint}`;
 }
 
 // Custom Dataset Functions
