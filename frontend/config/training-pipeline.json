@@ -37,7 +37,9 @@
               "--resize-method",
               "pad",
               "--target-name",
-              "{target_name}"
+              "{target_name}",
+              "--custom-dataset",
+              "{custom_dataset_path}"
             ]
           }
         ],
@@ -119,6 +121,12 @@
         "type": "text",
         "label": "Target Name",
         "default": "cursor",
+        "display_in_ui": false
+      },
+      "custom_dataset_path": {
+        "type": "text",
+        "label": "Custom Dataset Path",
+        "default": "data/custom_dataset",
         "display_in_ui": false
       }
     }
