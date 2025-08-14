@@ -1460,6 +1460,9 @@ async def generate_custom_dataset(request: GenerateDatasetRequest):
         os.makedirs(images_out_dir, exist_ok=True)
         os.makedirs(labels_out_dir, exist_ok=True)
         
+        # Generate timestamp for this generation batch
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        
         # Load the single background and target images
         background = Image.open(background_file).convert("RGBA")
         target = Image.open(target_file).convert("RGBA")
@@ -1505,8 +1508,8 @@ async def generate_custom_dataset(request: GenerateDatasetRequest):
             # Convert to RGB for saving as JPEG
             final_image_rgb = final_image.convert("RGB")
             
-            # Save image
-            img_filename = f"custom_generated_{i:04d}.jpg"
+            # Save image with timestamp
+            img_filename = f"custom_{timestamp}_{i:04d}.jpg"
             final_image_rgb.save(os.path.join(images_out_dir, img_filename))
             
             # Calculate YOLO label coordinates
@@ -1536,7 +1539,7 @@ async def generate_custom_dataset(request: GenerateDatasetRequest):
             
             # Save YOLO format label (class 0 for target)
             label_content = f"0 {x_center_norm:.6f} {y_center_norm:.6f} {width_norm:.6f} {height_norm:.6f}"
-            label_filename = f"custom_generated_{i:04d}.txt"
+            label_filename = f"custom_{timestamp}_{i:04d}.txt"
             
             with open(os.path.join(labels_out_dir, label_filename), 'w') as f:
                 f.write(label_content)
