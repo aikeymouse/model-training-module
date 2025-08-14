@@ -126,7 +126,7 @@
       "custom_dataset_path": {
         "type": "text",
         "label": "Custom Dataset Path",
-        "default": "data/custom_dataset",
+        "default": "/app/training_scripts/data/custom_dataset",
         "display_in_ui": false
       }
     }
