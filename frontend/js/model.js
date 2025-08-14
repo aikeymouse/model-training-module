@@ -1338,6 +1338,29 @@ document.addEventListener('DOMContentLoaded', () => {
         manageDatasetBtn.addEventListener('click', openManageDatasetModal);
     }
 
+    // Upload button handlers
+    const uploadTargetBtn = document.getElementById('mt-upload-cursor');
+    if (uploadTargetBtn) {
+        uploadTargetBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = handleTargetUpload;
+            input.click();
+        });
+    }
+
+    const uploadBackgroundBtn = document.getElementById('mt-upload-background');
+    if (uploadBackgroundBtn) {
+        uploadBackgroundBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = handleBackgroundUpload;
+            input.click();
+        });
+    }
+
     const trainModelBtn = document.getElementById('mt-train-model-btn');
         let currentExecutor = null; // Track the current pipeline executor for cancellation
         
@@ -2884,7 +2907,7 @@ async function loadCustomDataset() {
     try {
         await Promise.all([
             loadCustomBackgrounds(),
-            loadCustomCursors()
+            loadCustomTargets()
         ]);
         
         // Ensure dataset generation controls are properly initialized
@@ -2931,7 +2954,7 @@ async function loadCustomBackgrounds() {
     }
 }
 
-async function loadCustomCursors() {
+async function loadCustomTargets() {
     const loadingElement = document.getElementById('mt-custom-cursors-loading');
     const gridElement = document.getElementById('mt-custom-cursors-grid');
     
@@ -3332,4 +3355,58 @@ async function generateCustomDataset() {
             updateDatasetGenerationControls();
         }
     }
+}
+
+function handleTargetUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/api/dataset/custom/upload/target', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Target file uploaded successfully', 'success');
+            // Refresh the targets list to show the newly uploaded file
+            loadCustomTargets();
+        } else {
+            showNotification('Error uploading target file: ' + (data.message || 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error uploading target file: ' + error.message, 'error');
+        console.error('Upload error:', error);
+    });
+}
+
+function handleBackgroundUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/api/dataset/custom/upload/background', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Background file uploaded successfully', 'success');
+            // Refresh the backgrounds list to show the newly uploaded file
+            loadCustomBackgrounds();
+        } else {
+            showNotification('Error uploading background file: ' + (data.message || 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error uploading background file: ' + error.message, 'error');
+        console.error('Upload error:', error);
+    });
 }

@@ -1592,3 +1592,73 @@ async def get_custom_dataset_image_labels(image_name: str):
 async def delete_custom_dataset_image(image_name: str):
     """Delete a specific custom dataset image and its corresponding label"""
     return delete_dataset_image_generic("custom", image_name)
+
+@app.post("/api/dataset/custom/upload/target")
+async def upload_target_file(file: UploadFile = File(...)):
+    """Upload a target image file for custom dataset generation"""
+    try:
+        # Validate file type
+        if not file.content_type or not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        # Create target directory if it doesn't exist
+        targets_path = "/app/training_scripts/data/cursors"
+        os.makedirs(targets_path, exist_ok=True)
+        
+        # Generate a unique filename with timestamp
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        file_extension = os.path.splitext(file.filename)[1] if file.filename else ".png"
+        safe_filename = f"cursor_{timestamp}{file_extension}"
+        
+        # Save the file
+        file_path = os.path.join(targets_path, safe_filename)
+        
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+        
+        return {
+            "success": True,
+            "message": f"Target file uploaded successfully as {safe_filename}",
+            "filename": safe_filename
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload target file: {str(e)}")
+
+@app.post("/api/dataset/custom/upload/background")
+async def upload_background_file(file: UploadFile = File(...)):
+    """Upload a background image file for custom dataset generation"""
+    try:
+        # Validate file type
+        if not file.content_type or not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        # Create background directory if it doesn't exist
+        backgrounds_path = "/app/training_scripts/data/backgrounds"
+        os.makedirs(backgrounds_path, exist_ok=True)
+        
+        # Generate a unique filename with timestamp
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        file_extension = os.path.splitext(file.filename)[1] if file.filename else ".png"
+        safe_filename = f"background_{timestamp}{file_extension}"
+        
+        # Save the file
+        file_path = os.path.join(backgrounds_path, safe_filename)
+        
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+        
+        return {
+            "success": True,
+            "message": f"Background file uploaded successfully as {safe_filename}",
+            "filename": safe_filename
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload background file: {str(e)}")
