@@ -215,6 +215,293 @@ Execute scripts with real-time output via WebSocket.
 - `MEMORY_MONITOR: <status>` for memory usage updates
 - `HEARTBEAT: Process running...` for connection keepalive
 
+### Dataset Management
+
+The service provides comprehensive dataset management capabilities for both synthetic and custom datasets, including viewing, uploading, generating, and deleting dataset images and labels.
+
+#### Synthetic Dataset Management
+
+##### `GET /api/dataset/synthetic/info`
+Get information about the synthetic dataset.
+
+**Response:**
+```json
+{
+  "total_images": 1250,
+  "dataset_exists": true,
+  "dataset_path": "/app/training_scripts/data/generated_dataset"
+}
+```
+
+##### `GET /api/dataset/synthetic/images`
+Get paginated list of synthetic dataset images.
+
+**Query Parameters:**
+- `page`: Page number (default: 1)
+- `page_size`: Number of images per page (default: 25)
+
+**Response:**
+```json
+{
+  "images": [
+    {
+      "name": "synthetic_20250815_001.jpg",
+      "width": 640,
+      "height": 640,
+      "size": 45123,
+      "path": "images/synthetic_20250815_001.jpg"
+    }
+  ],
+  "total": 1250,
+  "page": 1,
+  "page_size": 25,
+  "total_pages": 50
+}
+```
+
+##### `GET /api/dataset/synthetic/image/{image_name}`
+Get a specific synthetic dataset image file.
+
+**Response:** Image file (JPEG/PNG)
+
+##### `GET /api/dataset/synthetic/image/{image_name}/with-boxes`
+Get a synthetic dataset image with bounding boxes drawn on it.
+
+**Response:** Image file with bounding box annotations
+
+##### `GET /api/dataset/synthetic/image/{image_name}/labels`
+Get label data for a specific synthetic dataset image.
+
+**Response:**
+```json
+[
+  {
+    "class_id": 0,
+    "x_center": 0.5,
+    "y_center": 0.3,
+    "width": 0.1,
+    "height": 0.15
+  }
+]
+```
+
+##### `DELETE /api/dataset/synthetic/image/{image_name}`
+Delete a specific synthetic dataset image and its corresponding label.
+
+**Response:**
+```json
+{
+  "status": "success",
+  "deleted_files": ["images/synthetic_20250815_001.jpg", "labels/synthetic_20250815_001.txt"],
+  "message": "Successfully deleted synthetic_20250815_001.jpg and its label from synthetic dataset"
+}
+```
+
+#### Custom Dataset Management
+
+##### `GET /api/dataset/custom/backgrounds`
+Get list of available background images for custom dataset generation.
+
+**Response:**
+```json
+{
+  "backgrounds": [
+    {
+      "filename": "background_20250815_140523_650074.png",
+      "size": 2048576,
+      "created": "2025-08-15T14:05:23.650074"
+    }
+  ]
+}
+```
+
+##### `GET /api/dataset/custom/targets`
+Get list of available target images for custom dataset generation.
+
+**Response:**
+```json
+{
+  "targets": [
+    {
+      "filename": "cursor_20250815_140523_650074.png",
+      "size": 8192,
+      "created": "2025-08-15T14:05:23.650074"
+    }
+  ]
+}
+```
+
+##### `GET /api/dataset/custom/backgrounds/{filename}`
+Serve a specific background image file.
+
+**Response:** Image file
+
+##### `GET /api/dataset/custom/targets/{filename}`
+Serve a specific target image file.
+
+**Response:** Image file
+
+##### `DELETE /api/dataset/custom/backgrounds/{filename}`
+Delete a background image.
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Successfully deleted background image: background_20250815_140523_650074.png"
+}
+```
+
+##### `DELETE /api/dataset/custom/targets/{filename}`
+Delete a target image.
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Successfully deleted target image: cursor_20250815_140523_650074.png"
+}
+```
+
+##### `POST /api/dataset/custom/upload/target`
+Upload a target image file for custom dataset generation.
+
+**Request:**
+- `file`: Image file (multipart/form-data)
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Target file uploaded successfully as cursor_20250815_140523_650074.png",
+  "filename": "cursor_20250815_140523_650074.png"
+}
+```
+
+##### `POST /api/dataset/custom/upload/background`
+Upload a background image file for custom dataset generation.
+
+**Request:**
+- `file`: Image file (multipart/form-data)
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Background file uploaded successfully as background_20250815_140523_650074.png",
+  "filename": "background_20250815_140523_650074.png"
+}
+```
+
+##### `POST /api/dataset/custom/generate`
+Generate synthetic dataset using selected target and background images.
+
+**Request Body:**
+```json
+{
+  "target_filename": "cursor_20250815_140523_650074.png",
+  "background_filename": "background_20250815_140523_650074.png",
+  "num_images": 100,
+  "width": 640,
+  "height": 640
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Successfully generated 100 images",
+  "details": {
+    "images_generated": 100,
+    "target_image": "cursor_20250815_140523_650074.png",
+    "background_image": "background_20250815_140523_650074.png",
+    "output_size": "640x640",
+    "output_directory": "/app/training_scripts/data/custom_dataset"
+  }
+}
+```
+
+#### Custom Generated Dataset Viewing
+
+These endpoints allow viewing and managing the generated custom dataset:
+
+##### `GET /api/dataset/custom/info`
+Get information about the generated custom dataset.
+
+**Response:**
+```json
+{
+  "total_images": 100,
+  "dataset_exists": true,
+  "dataset_path": "/app/training_scripts/data/custom_dataset"
+}
+```
+
+##### `GET /api/dataset/custom/images`
+Get paginated list of generated custom dataset images.
+
+**Query Parameters:**
+- `page`: Page number (default: 1)
+- `page_size`: Number of images per page (default: 25)
+
+**Response:**
+```json
+{
+  "images": [
+    {
+      "name": "custom_20250815_140523_0001.jpg",
+      "width": 640,
+      "height": 640,
+      "size": 45123,
+      "path": "images/custom_20250815_140523_0001.jpg"
+    }
+  ],
+  "total": 100,
+  "page": 1,
+  "page_size": 25,
+  "total_pages": 4
+}
+```
+
+##### `GET /api/dataset/custom/image/{image_name}`
+Get a specific custom dataset image file.
+
+**Response:** Image file (JPEG/PNG)
+
+##### `GET /api/dataset/custom/image/{image_name}/with-boxes`
+Get a custom dataset image with bounding boxes drawn on it.
+
+**Response:** Image file with bounding box annotations
+
+##### `GET /api/dataset/custom/image/{image_name}/labels`
+Get label data for a specific custom dataset image.
+
+**Response:**
+```json
+[
+  {
+    "class_id": 0,
+    "x_center": 0.5,
+    "y_center": 0.3,
+    "width": 0.1,
+    "height": 0.15
+  }
+]
+```
+
+##### `DELETE /api/dataset/custom/image/{image_name}`
+Delete a specific custom dataset image and its corresponding label.
+
+**Response:**
+```json
+{
+  "status": "success",
+  "deleted_files": ["images/custom_20250815_140523_0001.jpg", "labels/custom_20250815_140523_0001.txt"],
+  "message": "Successfully deleted custom_20250815_140523_0001.jpg and its label from custom dataset"
+}
+```
+
 ### Process Management
 
 #### `GET /api/process/active`
@@ -276,6 +563,9 @@ The service expects model files to follow this naming convention:
 3. Test the model using `/api/model/test` or `/api/model/detect`
 4. Execute training scripts using WebSocket `/api/script/ws/execute`
 5. Manage pipeline configuration using `/api/pipeline/load` and `/api/pipeline/save`
+6. Upload target and background images using `/api/dataset/custom/upload/target` and `/api/dataset/custom/upload/background`
+7. Generate custom datasets using `/api/dataset/custom/generate`
+8. View and manage datasets using the `/api/dataset/synthetic/*` and `/api/dataset/custom/*` endpoints
 
 ## Configuration
 
