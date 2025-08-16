@@ -8,7 +8,7 @@ services:
     depends_on:
       - training_service
     volumes:
-      - ./frontend/config:/app/frontend/config # Only mount config for user customization
+      - ./frontend:/app/frontend # Mount entire frontend for access to module.html, CSS, JS
       - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket for script execution
 
   training_service:
