@@ -24,7 +24,7 @@ docker compose pull
 docker compose up
 ```
 
-This will create folders and download the latest docker images (v1.0.4).
+This will create folders and download the latest docker images (v1.1.0).
 
 ### 2. Install Go Module
 
