@@ -16,11 +16,12 @@ docker compose pull && docker compose up
 ```
 
 **Windows:**
-```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aikeymouse/model-training-module/main/setup-standalone.ps1" -OutFile "setup.ps1"
-.\setup.ps1
+```cmd
+curl -o setup.bat https://raw.githubusercontent.com/aikeymouse/model-training-module/main/setup-standalone.bat
+setup.bat
 cd model-training-module
-docker compose pull; docker compose up
+docker compose pull
+docker compose up
 ```
 
 This will create folders and download the latest docker images (v1.0.4).
@@ -30,7 +31,7 @@ This will create folders and download the latest docker images (v1.0.4).
 Update your `go.mod`:
 
 ```go
-require github.com/aikeymouse/model-training-module/module_integration/examples/go-module v1.0.3
+require github.com/aikeymouse/model-training-module/module_integration/examples/go-module v1.1.0
 ```
 
 ### 3. Update HTML Template
@@ -193,10 +194,37 @@ You should see logs like:
    - `js/model.js` and `js/pipeline-config.js`
 4. Click "Manage Models" button to open Model Training Pipeline
 
+## New in v1.1.0: Dataset Management
+
+Version 1.1.0 introduces comprehensive dataset management capabilities:
+
+### Features Added
+- **Synthetic Dataset Viewing**: Browse and manage generated synthetic datasets
+- **Custom Dataset Creation**: Upload target and background images to create custom datasets
+- **Dataset Generation**: Generate custom training datasets with configurable parameters
+- **Image Management**: View, delete, and organize dataset images with bounding box visualization
+- **API Integration**: Full API coverage for all dataset operations
+
+### Available Operations
+- Upload target/background images for custom dataset generation
+- Generate synthetic datasets with custom parameters (image count, dimensions)
+- View dataset images with bounding box annotations
+- Paginated browsing of large datasets
+- Delete individual images or entire datasets
+- Switch between synthetic and custom dataset sources
+
+### API Endpoints Supported
+All `/api/dataset/*` endpoints are now fully supported:
+- `/api/dataset/synthetic/*` - Synthetic dataset operations
+- `/api/dataset/custom/*` - Custom dataset operations and generation
+- File upload endpoints for images
+- Image serving with optional bounding box overlays
+
 ## Features
 
 - **Conflict-Safe**: Uses specific route patterns to avoid conflicts with your application
-- **Complete API Coverage**: Handles all training module endpoints (`/api/model/*`, `/api/pipeline/*`, etc.)
+- **Complete API Coverage**: Handles all training module endpoints (`/api/model/*`, `/api/pipeline/*`, `/api/dataset/*`, etc.)
+- **Dataset Management**: Full support for synthetic and custom dataset operations, including upload and generation
 - **WebSocket Support**: Real-time script execution and training progress
 - **Asset Management**: Automatic proxying of CSS, JS, and config files
 - **Production Ready**: Clean routes, error handling, and no generic conflicts
@@ -215,6 +243,7 @@ The module registers these routes for you:
 - `/api/models` - Model list
 - `/api/model/*` - All model operations (load, test, delete, etc.)
 - `/api/pipeline/*` - Pipeline operations (load, save)
+- `/api/dataset/*` - Dataset management (synthetic and custom datasets)
 - `/api/script/ws/execute` - WebSocket for training execution
 
 ## Configuration Options
@@ -228,6 +257,7 @@ See the [go-example](../go-example/) directory for a complete working example.
 
 ## Version History
 
+- **v1.1.0**: Added comprehensive dataset management API support (`/api/dataset/*`), including synthetic and custom dataset operations, image upload, generation, and viewing capabilities
 - **v1.0.3**: Removed redundant config.json APIs, streamlined pipeline configuration, cleaned up asset routes
 - **v1.0.2**: Complete conflict prevention, comprehensive API coverage, asset proxy fixes
 - **v1.0.1**: Removed legacy prefix support, production cleanup  
