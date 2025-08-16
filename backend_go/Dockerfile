@@ -1,9 +1,9 @@
 # Build stage
 FROM golang:1.21-alpine AS builder
 WORKDIR /app
-COPY go.mod go.sum ./
+COPY backend_go/go.mod backend_go/go.sum ./
 RUN go mod download
-COPY *.go ./
+COPY backend_go/*.go ./
 RUN CGO_ENABLED=0 GOOS=linux go build -o /yolo-backend
 
 # Final stage
@@ -16,7 +16,8 @@ RUN apk add --no-cache docker-cli
 # Copy the Go binary
 COPY --from=builder /yolo-backend /yolo-backend
 
-# Note: frontend files are mounted as volume in docker-compose.yml
+# Copy frontend files for standalone operation
+COPY frontend ./frontend
 
 # Expose port
 EXPOSE 3000
