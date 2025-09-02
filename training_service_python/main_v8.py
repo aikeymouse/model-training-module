@@ -1662,3 +1662,97 @@ async def upload_background_file(file: UploadFile = File(...)):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload background file: {str(e)}")
+
+@app.post("/api/dataset/custom/upload/labeled-image")
+async def upload_labeled_image(
+    image: UploadFile = File(...),
+    labels: str = Form(...),
+    filename: str = Form(None)
+):
+    """Upload a pre-labeled image directly to the custom dataset"""
+    try:
+        # Validate image file
+        if not image.content_type or not image.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        # Create custom dataset directories if they don't exist
+        custom_dataset_path = "/app/training_scripts/data/custom_dataset"
+        images_path = os.path.join(custom_dataset_path, "images")
+        labels_path = os.path.join(custom_dataset_path, "labels")
+        
+        os.makedirs(images_path, exist_ok=True)
+        os.makedirs(labels_path, exist_ok=True)
+        
+        # Generate filename if not provided
+        if not filename:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            file_extension = os.path.splitext(image.filename)[1] if image.filename else ".jpg"
+            safe_filename = f"labeled_{timestamp}{file_extension}"
+        else:
+            # Sanitize provided filename
+            safe_filename = filename.replace("..", "").replace("/", "").replace("\\", "")
+            if not safe_filename:
+                raise HTTPException(status_code=400, detail="Invalid filename")
+        
+        # Save the image file
+        image_file_path = os.path.join(images_path, safe_filename)
+        with open(image_file_path, "wb") as buffer:
+            content = await image.read()
+            buffer.write(content)
+        
+        # Validate and save the label file
+        try:
+            # Parse labels to validate YOLO format
+            label_lines = labels.strip().split('\n')
+            validated_labels = []
+            
+            for line in label_lines:
+                line = line.strip()
+                if line:
+                    parts = line.split()
+                    if len(parts) != 5:
+                        raise ValueError(f"Invalid label format. Expected 5 values per line, got {len(parts)}")
+                    
+                    # Validate each component
+                    class_id = int(parts[0])
+                    x_center = float(parts[1])
+                    y_center = float(parts[2])
+                    width = float(parts[3])
+                    height = float(parts[4])
+                    
+                    # Validate ranges
+                    if not (0 <= x_center <= 1 and 0 <= y_center <= 1 and 0 <= width <= 1 and 0 <= height <= 1):
+                        raise ValueError("Label coordinates must be normalized between 0 and 1")
+                    
+                    if class_id < 0:
+                        raise ValueError("Class ID must be non-negative")
+                    
+                    validated_labels.append(f"{class_id} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}")
+            
+            # Save label file
+            base_name = os.path.splitext(safe_filename)[0]
+            label_filename = f"{base_name}.txt"
+            label_file_path = os.path.join(labels_path, label_filename)
+            
+            with open(label_file_path, "w") as label_file:
+                label_file.write('\n'.join(validated_labels))
+            
+        except ValueError as e:
+            # Clean up the image file if label validation failed
+            if os.path.exists(image_file_path):
+                os.remove(image_file_path)
+            raise HTTPException(status_code=400, detail=f"Invalid label format: {str(e)}")
+        
+        return {
+            "success": True,
+            "message": f"Labeled image uploaded successfully",
+            "image_filename": safe_filename,
+            "label_filename": label_filename,
+            "labels_count": len(validated_labels),
+            "saved_to": custom_dataset_path
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload labeled image: {str(e)}")
