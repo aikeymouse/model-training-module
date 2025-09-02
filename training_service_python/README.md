@@ -393,6 +393,40 @@ Upload a background image file for custom dataset generation.
 }
 ```
 
+##### `POST /api/dataset/custom/upload/labeled-image`
+Upload a pre-labeled image directly to the custom dataset. Allows external applications to add pre-annotated training data.
+
+**Request:**
+- `image`: Image file (multipart/form-data)
+- `labels`: YOLO format labels as string (Form data) - one per line: `class_id x_center y_center width height`
+- `filename`: Optional custom filename (Form data)
+
+**Example Request:**
+```bash
+curl -X POST "http://localhost:3001/api/dataset/custom/upload/labeled-image" \
+  -F "image=@my_image.jpg" \
+  -F "labels=0 0.5 0.3 0.1 0.15" \
+  -F "filename=my_labeled_image.jpg"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Labeled image uploaded successfully",
+  "image_filename": "my_labeled_image.jpg",
+  "label_filename": "my_labeled_image.txt",
+  "labels_count": 1,
+  "saved_to": "/app/training_scripts/data/custom_dataset"
+}
+```
+
+**Label Format Requirements:**
+- Each line: `class_id x_center y_center width height`
+- All coordinates must be normalized (0.0-1.0)
+- Class IDs must be non-negative integers
+- Multiple objects can be labeled (one per line)
+
 ##### `POST /api/dataset/custom/generate`
 Generate synthetic dataset using selected target and background images.
 
@@ -564,8 +598,9 @@ The service expects model files to follow this naming convention:
 4. Execute training scripts using WebSocket `/api/script/ws/execute`
 5. Manage pipeline configuration using `/api/pipeline/load` and `/api/pipeline/save`
 6. Upload target and background images using `/api/dataset/custom/upload/target` and `/api/dataset/custom/upload/background`
-7. Generate custom datasets using `/api/dataset/custom/generate`
-8. View and manage datasets using the `/api/dataset/synthetic/*` and `/api/dataset/custom/*` endpoints
+7. Upload pre-labeled training data using `/api/dataset/custom/upload/labeled-image`
+8. Generate custom datasets using `/api/dataset/custom/generate`
+9. View and manage datasets using the `/api/dataset/synthetic/*` and `/api/dataset/custom/*` endpoints
 
 ## Configuration
 
