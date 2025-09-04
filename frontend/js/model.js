@@ -3105,8 +3105,6 @@ function selectCustomTarget(index) {
         if (targetNameElement) {
             targetNameElement.textContent = selectedTarget.filename;
         }
-        
-        console.log('Selected target:', selectedTarget.filename);
     }
     
     // Update dataset generation controls
@@ -3341,8 +3339,6 @@ async function generateCustomDataset() {
             `Successfully generated ${result.details.images_generated} images (${result.details.output_size})`,
             'success'
         );
-        
-        console.log('Dataset generation completed:', result);
         
     } catch (error) {
         console.error('Error generating dataset:', error);
