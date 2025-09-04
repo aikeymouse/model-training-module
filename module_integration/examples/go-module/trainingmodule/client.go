@@ -100,6 +100,11 @@ func (c *Client) handleAPIProxy(w http.ResponseWriter, r *http.Request) {
 	targetPath := strings.TrimPrefix(r.URL.Path, "/model-training")
 	targetURL := c.ServiceURL + targetPath
 
+	// Include query parameters if they exist
+	if r.URL.RawQuery != "" {
+		targetURL += "?" + r.URL.RawQuery
+	}
+
 	c.proxyRequest(w, r, targetURL)
 } // handleHealthCheck proxies health check to the backend service
 func (c *Client) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
