@@ -2205,8 +2205,11 @@ async function openManageDatasetModal() {
     // Initialize dataset modal
     await initializeDatasetModal();
     
-    // Set up event listeners for dataset modal
-    setupDatasetModalEventListeners();
+    // Set up event listeners for dataset modal only once
+    if (!window.datasetModalListenersSetup) {
+        setupDatasetModalEventListeners();
+        window.datasetModalListenersSetup = true;
+    }
 }
 
 function closeManageDatasetModal() {
