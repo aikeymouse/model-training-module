@@ -2659,20 +2659,28 @@ async function updateLabelInformation(imageName) {
         } else {
             // Format labels as: "class: confidence (x,y,w,h)"
             const labelStrings = labels.map(label => {
+                // Handle different API response formats
+                // API returns: class_id, x_center, y_center, width, height
+                const classId = label.class_id !== undefined ? label.class_id : (label.class || 'unknown');
+                const x = label.x_center !== undefined ? label.x_center : label.x;
+                const y = label.y_center !== undefined ? label.y_center : label.y;
+                const width = label.width;
+                const height = label.height;
+                
                 // Check if coordinates exist and are numbers
-                const hasCoords = label.x !== undefined && label.y !== undefined && 
-                                label.width !== undefined && label.height !== undefined &&
-                                typeof label.x === 'number' && typeof label.y === 'number' &&
-                                typeof label.width === 'number' && typeof label.height === 'number';
+                const hasCoords = x !== undefined && y !== undefined && 
+                                width !== undefined && height !== undefined &&
+                                typeof x === 'number' && typeof y === 'number' &&
+                                typeof width === 'number' && typeof height === 'number';
                 
                 const coords = hasCoords ? 
-                    `(${label.x.toFixed(3)}, ${label.y.toFixed(3)}, ${label.width.toFixed(3)}, ${label.height.toFixed(3)})` : 
+                    `(${x.toFixed(3)}, ${y.toFixed(3)}, ${width.toFixed(3)}, ${height.toFixed(3)})` : 
                     '(coordinates unavailable)';
                 
                 const confidence = label.confidence && typeof label.confidence === 'number' ? 
                     ` [${(label.confidence * 100).toFixed(1)}%]` : '';
                 
-                return `${label.class || 'unknown'}${confidence} ${coords}`;
+                return `Class ${classId}${confidence} ${coords}`;
             });
             
             labelsContent.textContent = labelStrings.join(' | ');
