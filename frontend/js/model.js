@@ -1191,6 +1191,9 @@ function deleteStage(stageId, stageName) {
     if (stageIndex !== -1) {
         stages.splice(stageIndex, 1);
         
+        // Save the updated configuration
+        savePipelineConfiguration();
+        
         // Refresh the display
         populatePipelineConfigModal();
         
@@ -1227,6 +1230,9 @@ function deleteVariable(variableKey, variableLabel) {
     if (pipelineConfig.variables && pipelineConfig.variables[variableKey] !== undefined) {
         delete pipelineConfig.variables[variableKey];
     }
+    
+    // Save the updated configuration
+    savePipelineConfiguration();
     
     // Refresh the display
     populatePipelineConfigModal();
