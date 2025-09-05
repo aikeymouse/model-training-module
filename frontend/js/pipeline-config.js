@@ -386,22 +386,37 @@ export class PipelineExecutor {
                 const lines = cleanMessage.split('\n').filter(line => line.trim());
                 const latestLine = lines[lines.length - 1];
                 
-                // Detect YOLO training progress patterns like "1/2 0G 2.104 0.7667 0.8836 4 832: 0% 0/40 [00:01<?, ?it/s]"
-                // More flexible pattern to handle variable spacing and content
-                const trainingPattern = /^\s*\d+\/\d+\s+\d+G\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+\d+\s+\d+:\s+\d+%\s+\d+\/\d+\s+\[[^\]]+\]/;
-                const trainingMatch = trainingPattern.test(latestLine);
+                // Detect NEW YOLO training progress patterns like "[22:45:02] [K       1/25         0G      1.391     0.9099      0.808          4        832: 98% ━━━━━━━━━━━╸ 481/492 0.96it/s 8:27<11.4s"
+                const newTrainingPattern = /^\[[\d:]+\]\s*\[K\s+\d+\/\d+\s+\d+G\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+\d+\s+\d+:\s+\d+%\s+[━─╸]+\s+\d+\/\d+/;
+                const newTrainingMatch = newTrainingPattern.test(latestLine);
                 
-                // Detect validation progress patterns like "Class Images Instances Box(P R mAP50 mAP50-95): 100% 5/5 [00:01<00:00, 2.73it/s]"
-                const validationPattern = /^Class\s+Images\s+Instances\s+Box\(P\s+R\s+mAP50\s+mAP50-95\):\s+\d+%\s+\d+\/\d+\s+\[[^\]]+\]/;
-                const validationMatch = validationPattern.test(latestLine);
+                // Detect OLD YOLO training progress patterns like "1/2 0G 2.104 0.7667 0.8836 4 832: 0% 0/40 [00:01<?, ?it/s]"
+                const oldTrainingPattern = /^\s*\d+\/\d+\s+\d+G\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+\d+\s+\d+:\s+\d+%\s+\d+\/\d+\s+\[[^\]]+\]/;
+                const oldTrainingMatch = oldTrainingPattern.test(latestLine);
                 
-                // Detect simple progress patterns like "0% 0/40 [00:00<?, ?it/s]" or "2% 1/40 [00:01<00:40, 1.05s/it]"
-                const simpleProgressPattern = /^\s*\d+%\s+\d+\/\d+\s+\[[^\]]+\]/;
-                const simpleProgressMatch = simpleProgressPattern.test(latestLine);
+                // Detect NEW validation progress patterns like "[22:45:12] [K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 2% ──────────── 1/62 0.56it/s 0.5s<1:49"
+                const newValidationPattern = /^\[[\d:]+\]\s*\[K\s+Class\s+Images\s+Instances\s+Box\(P\s+R\s+mAP50\s+mAP50-95\):\s+\d+%\s+[━─╸]+\s+\d+\/\d+/;
+                const newValidationMatch = newValidationPattern.test(latestLine);
+                
+                // Detect OLD validation progress patterns like "Class Images Instances Box(P R mAP50 mAP50-95): 100% 5/5 [00:01<00:00, 2.73it/s]"
+                const oldValidationPattern = /^Class\s+Images\s+Instances\s+Box\(P\s+R\s+mAP50\s+mAP50-95\):\s+\d+%\s+\d+\/\d+\s+\[[^\]]+\]/;
+                const oldValidationMatch = oldValidationPattern.test(latestLine);
+                
+                // Detect NEW simple progress patterns like "98% ━━━━━━━━━━━╸ 481/492 0.96it/s 8:27<11.4s"
+                const newSimpleProgressPattern = /^\s*\d+%\s+[━─╸]+\s+\d+\/\d+/;
+                const newSimpleProgressMatch = newSimpleProgressPattern.test(latestLine);
+                
+                // Detect OLD simple progress patterns like "0% 0/40 [00:00<?, ?it/s]" or "2% 1/40 [00:01<00:40, 1.05s/it]"
+                const oldSimpleProgressPattern = /^\s*\d+%\s+\d+\/\d+\s+\[[^\]]+\]/;
+                const oldSimpleProgressMatch = oldSimpleProgressPattern.test(latestLine);
+                
+                // Combine all patterns
+                const trainingMatch = newTrainingMatch || oldTrainingMatch || newSimpleProgressMatch || oldSimpleProgressMatch;
+                const validationMatch = newValidationMatch || oldValidationMatch;
                 
                 return {
-                    isProgress: trainingMatch || validationMatch || simpleProgressMatch,
-                    isTraining: trainingMatch || simpleProgressMatch,
+                    isProgress: trainingMatch || validationMatch,
+                    isTraining: trainingMatch,
                     isValidation: validationMatch
                 };
             };
