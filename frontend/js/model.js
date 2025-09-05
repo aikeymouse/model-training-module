@@ -51,6 +51,66 @@ function removeNotification(notification) {
     }
 }
 
+// Confirmation Modal System
+function showConfirmationModal(message) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('mt-confirmation-modal');
+        const messageElement = document.getElementById('mt-confirmation-message');
+        const confirmButton = document.getElementById('mt-confirmation-confirm');
+        const cancelButton = document.getElementById('mt-confirmation-cancel');
+        
+        if (!modal || !messageElement || !confirmButton || !cancelButton) {
+            console.warn('Confirmation modal elements not found, falling back to confirm dialog');
+            resolve(confirm(message));
+            return;
+        }
+        
+        // Set the message
+        messageElement.textContent = message;
+        
+        // Show the modal
+        modal.style.display = 'flex';
+        
+        // Handle confirm
+        const handleConfirm = () => {
+            modal.style.display = 'none';
+            confirmButton.removeEventListener('click', handleConfirm);
+            cancelButton.removeEventListener('click', handleCancel);
+            resolve(true);
+        };
+        
+        // Handle cancel
+        const handleCancel = () => {
+            modal.style.display = 'none';
+            confirmButton.removeEventListener('click', handleConfirm);
+            cancelButton.removeEventListener('click', handleCancel);
+            resolve(false);
+        };
+        
+        // Add event listeners
+        confirmButton.addEventListener('click', handleConfirm);
+        cancelButton.addEventListener('click', handleCancel);
+        
+        // Close on overlay click
+        const handleOverlayClick = (e) => {
+            if (e.target === modal) {
+                handleCancel();
+                modal.removeEventListener('click', handleOverlayClick);
+            }
+        };
+        modal.addEventListener('click', handleOverlayClick);
+        
+        // Close on Escape key
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                handleCancel();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    });
+}
+
 let activeModelPath = '';
 let models = []; // Store models at a higher scope
 
@@ -628,19 +688,25 @@ function addPipelineConfigEventListeners() {
 
     // Delete stage buttons
     document.querySelectorAll('.mt-delete-stage-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
+        button.addEventListener('click', async (e) => {
             const stageId = e.target.dataset.stageId;
             const stageName = e.target.dataset.stageName;
-            deleteStage(stageId, stageName);
+            const confirmed = await showConfirmationModal(`Are you sure you want to delete the stage "${stageName}"?`);
+            if (confirmed) {
+                deleteStage(stageId, stageName);
+            }
         });
     });
 
     // Delete variable buttons
     document.querySelectorAll('.mt-delete-variable-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
+        button.addEventListener('click', async (e) => {
             const variableKey = e.target.dataset.variableKey;
             const variableLabel = e.target.dataset.variableLabel;
-            deleteVariable(variableKey, variableLabel);
+            const confirmed = await showConfirmationModal(`Are you sure you want to delete the variable "${variableLabel}"?`);
+            if (confirmed) {
+                deleteVariable(variableKey, variableLabel);
+            }
         });
     });
 
@@ -2699,7 +2765,8 @@ async function deleteCurrentImage() {
     
     const currentImage = datasetState.currentImages[datasetState.currentImageIndex];
     
-    if (!confirm(`Are you sure you want to delete "${currentImage.name}" and its corresponding label?`)) {
+    const confirmed = await showConfirmationModal(`Are you sure you want to delete "${currentImage.name}" and its corresponding label?`);
+    if (!confirmed) {
         return;
     }
     
@@ -3186,7 +3253,8 @@ async function deleteCurrentCustomBackground() {
     
     const currentBackground = customDatasetState.backgrounds[customDatasetState.currentBackgroundIndex];
     
-    if (!confirm(`Are you sure you want to delete "${currentBackground.filename}"?`)) {
+    const confirmed = await showConfirmationModal(`Are you sure you want to delete "${currentBackground.filename}"?`);
+    if (!confirmed) {
         return;
     }
     
@@ -3232,7 +3300,8 @@ async function deleteCustomCursor(index) {
     
     const cursor = customDatasetState.cursors[index];
     
-    if (!confirm(`Are you sure you want to delete "${cursor.filename}"?`)) {
+    const confirmed = await showConfirmationModal(`Are you sure you want to delete "${cursor.filename}"?`);
+    if (!confirmed) {
         return;
     }
     
