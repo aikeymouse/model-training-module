@@ -386,16 +386,16 @@ export class PipelineExecutor {
                 const lines = cleanMessage.split('\n').filter(line => line.trim());
                 const latestLine = lines[lines.length - 1];
                 
-                // Detect NEW YOLO training progress patterns like "[22:45:02] [K       1/25         0G      1.391     0.9099      0.808          4        832: 98% ━━━━━━━━━━━╸ 481/492 0.96it/s 8:27<11.4s"
-                const newTrainingPattern = /^\[[\d:]+\]\s*\[K\s+\d+\/\d+\s+\d+G\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+\d+\s+\d+:\s+\d+%\s+[━─╸]+\s+\d+\/\d+/;
+                // Detect NEW YOLO training progress patterns like "[K 1/2 0G 1.555 1.08 0.8312 2 832: 16% ━╸────────── 52/332 1.0it/s 51.5s<4:43"
+                const newTrainingPattern = /^\[K\s+\d+\/\d+\s+\d+G\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+\d+\s+\d+:\s+\d+%\s+[━─╸]+\s+\d+\/\d+/;
                 const newTrainingMatch = newTrainingPattern.test(latestLine);
                 
                 // Detect OLD YOLO training progress patterns like "1/2 0G 2.104 0.7667 0.8836 4 832: 0% 0/40 [00:01<?, ?it/s]"
                 const oldTrainingPattern = /^\s*\d+\/\d+\s+\d+G\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+\d+\s+\d+:\s+\d+%\s+\d+\/\d+\s+\[[^\]]+\]/;
                 const oldTrainingMatch = oldTrainingPattern.test(latestLine);
                 
-                // Detect NEW validation progress patterns like "[22:45:12] [K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 2% ──────────── 1/62 0.56it/s 0.5s<1:49"
-                const newValidationPattern = /^\[[\d:]+\]\s*\[K\s+Class\s+Images\s+Instances\s+Box\(P\s+R\s+mAP50\s+mAP50-95\):\s+\d+%\s+[━─╸]+\s+\d+\/\d+/;
+                // Detect NEW validation progress patterns like "[K Class Images Instances Box(P R mAP50 mAP50-95): 21% ━━╸───────── 9/42 2.3it/s 3.8s<14.3s"
+                const newValidationPattern = /^\[K\s+Class\s+Images\s+Instances\s+Box\(P\s+R\s+mAP50\s+mAP50-95\):\s+\d+%\s+[━─╸]+\s+\d+\/\d+/;
                 const newValidationMatch = newValidationPattern.test(latestLine);
                 
                 // Detect OLD validation progress patterns like "Class Images Instances Box(P R mAP50 mAP50-95): 100% 5/5 [00:01<00:00, 2.73it/s]"
