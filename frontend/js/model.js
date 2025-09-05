@@ -54,36 +54,61 @@ function removeNotification(notification) {
 // Confirmation Modal System
 function showConfirmationModal(message) {
     return new Promise((resolve) => {
-        const modal = document.getElementById('mt-confirmation-modal');
-        const messageElement = document.getElementById('mt-confirmation-message');
-        const confirmButton = document.getElementById('mt-confirmation-confirm');
-        const cancelButton = document.getElementById('mt-confirmation-cancel');
+        // Create modal if it doesn't exist or recreate it to ensure it's on top
+        let modal = document.getElementById('mt-confirmation-modal');
         
-        if (!modal || !messageElement || !confirmButton || !cancelButton) {
-            console.warn('Confirmation modal elements not found, falling back to confirm dialog');
-            resolve(confirm(message));
-            return;
+        if (modal) {
+            // Remove existing modal to recreate it
+            modal.remove();
         }
         
-        // Set the message
-        messageElement.textContent = message;
+        // Create the modal HTML dynamically
+        modal = document.createElement('div');
+        modal.id = 'mt-confirmation-modal';
+        modal.className = 'mt-modal-overlay';
+        modal.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(0, 0, 0, 0.6) !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            z-index: 99999 !important;
+        `;
         
-        // Show the modal
-        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="mt-modal-content mt-confirmation-modal-content">
+                <div class="mt-modal-header">
+                    <h3>Confirm Deletion</h3>
+                </div>
+                <div class="mt-confirmation-modal-body">
+                    <p id="mt-confirmation-message">${message}</p>
+                </div>
+                <div class="mt-confirmation-modal-actions">
+                    <button id="mt-confirmation-confirm" class="mt-btn mt-btn-danger">Delete</button>
+                    <button id="mt-confirmation-cancel" class="mt-btn mt-btn-secondary">Cancel</button>
+                </div>
+            </div>
+        `;
+        
+        // Append to body to ensure it's on top
+        document.body.appendChild(modal);
+        
+        const confirmButton = modal.querySelector('#mt-confirmation-confirm');
+        const cancelButton = modal.querySelector('#mt-confirmation-cancel');
         
         // Handle confirm
         const handleConfirm = () => {
-            modal.style.display = 'none';
-            confirmButton.removeEventListener('click', handleConfirm);
-            cancelButton.removeEventListener('click', handleCancel);
+            modal.remove();
             resolve(true);
         };
         
         // Handle cancel
         const handleCancel = () => {
-            modal.style.display = 'none';
-            confirmButton.removeEventListener('click', handleConfirm);
-            cancelButton.removeEventListener('click', handleCancel);
+            modal.remove();
             resolve(false);
         };
         
@@ -92,13 +117,11 @@ function showConfirmationModal(message) {
         cancelButton.addEventListener('click', handleCancel);
         
         // Close on overlay click
-        const handleOverlayClick = (e) => {
+        modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 handleCancel();
-                modal.removeEventListener('click', handleOverlayClick);
             }
-        };
-        modal.addEventListener('click', handleOverlayClick);
+        });
         
         // Close on Escape key
         const handleEscape = (e) => {
