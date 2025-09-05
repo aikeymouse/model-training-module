@@ -51,19 +51,24 @@ function removeNotification(notification) {
     }
 }
 
+// Cleanup function to remove any leftover confirmation modals
+function cleanupConfirmationModals() {
+    const existingConfirmationModals = document.querySelectorAll('#mt-confirmation-modal');
+    existingConfirmationModals.forEach(modal => modal.remove());
+}
+
 // Confirmation Modal System
 function showConfirmationModal(message) {
+    // Clean up any existing confirmation modals first
+    cleanupConfirmationModals();
+    
     return new Promise((resolve) => {
-        // Create modal if it doesn't exist or recreate it to ensure it's on top
-        let modal = document.getElementById('mt-confirmation-modal');
-        
-        if (modal) {
-            // Remove existing modal to recreate it
-            modal.remove();
-        }
+        // Remove any existing confirmation modals to prevent duplicates
+        const existingModals = document.querySelectorAll('#mt-confirmation-modal');
+        existingModals.forEach(modal => modal.remove());
         
         // Create the modal HTML dynamically
-        modal = document.createElement('div');
+        const modal = document.createElement('div');
         modal.id = 'mt-confirmation-modal';
         modal.className = 'mt-modal-overlay';
         modal.style.cssText = `
@@ -2289,6 +2294,10 @@ async function openManageDatasetModal() {
     const modal = document.getElementById('mt-manage-dataset-modal');
     if (!modal) return;
     
+    // Clean up any leftover confirmation modals
+    const existingConfirmationModals = document.querySelectorAll('#mt-confirmation-modal');
+    existingConfirmationModals.forEach(confirmModal => confirmModal.remove());
+    
     modal.style.display = 'flex';
     
     // Initialize dataset modal
@@ -2306,6 +2315,10 @@ function closeManageDatasetModal() {
     if (modal) {
         modal.style.display = 'none';
     }
+    
+    // Clean up any leftover confirmation modals
+    const existingConfirmationModals = document.querySelectorAll('#mt-confirmation-modal');
+    existingConfirmationModals.forEach(confirmModal => confirmModal.remove());
 }
 
 // Make closeManageDatasetModal globally available for the HTML onclick
@@ -2586,6 +2599,19 @@ function showCurrentImage() {
         imageSizeEl.textContent = `${currentImage.width}x${currentImage.height}`;
         imageSizeEl.style.display = 'inline';
     }
+    
+    // Show/hide and update label information based on bounding box toggle
+    const labelsContainer = document.getElementById('mt-current-image-labels');
+    const labelsContent = document.getElementById('mt-labels-content');
+    if (labelsContainer && labelsContent) {
+        if (datasetState.showBoundingBoxes) {
+            labelsContainer.style.display = 'block';
+            updateLabelInformation(currentImage.name);
+        } else {
+            labelsContainer.style.display = 'none';
+        }
+    }
+    
     if (carouselCurrentEl) carouselCurrentEl.textContent = datasetState.currentImageIndex + 1;
     if (carouselTotalEl) carouselTotalEl.textContent = datasetState.currentImages.length;
     
@@ -2607,6 +2633,55 @@ function updateCarouselButtons() {
     
     if (nextBtn) {
         nextBtn.disabled = datasetState.currentImageIndex >= datasetState.currentImages.length - 1;
+    }
+}
+
+async function updateLabelInformation(imageName) {
+    const labelsContent = document.getElementById('mt-labels-content');
+    if (!labelsContent) return;
+    
+    try {
+        // Show loading state
+        labelsContent.textContent = 'Loading labels...';
+        labelsContent.style.color = '#6c757d';
+        
+        // Fetch labels for this image
+        const response = await fetch(getDatasetApiUrl(`image/${imageName}/labels`));
+        if (!response.ok) {
+            throw new Error(`Failed to fetch labels: ${response.status}`);
+        }
+        
+        const labels = await response.json();
+        
+        if (!labels || labels.length === 0) {
+            labelsContent.textContent = 'No labels found';
+            labelsContent.style.color = '#dc3545'; // Red color for no labels
+        } else {
+            // Format labels as: "class: confidence (x,y,w,h)"
+            const labelStrings = labels.map(label => {
+                // Check if coordinates exist and are numbers
+                const hasCoords = label.x !== undefined && label.y !== undefined && 
+                                label.width !== undefined && label.height !== undefined &&
+                                typeof label.x === 'number' && typeof label.y === 'number' &&
+                                typeof label.width === 'number' && typeof label.height === 'number';
+                
+                const coords = hasCoords ? 
+                    `(${label.x.toFixed(3)}, ${label.y.toFixed(3)}, ${label.width.toFixed(3)}, ${label.height.toFixed(3)})` : 
+                    '(coordinates unavailable)';
+                
+                const confidence = label.confidence && typeof label.confidence === 'number' ? 
+                    ` [${(label.confidence * 100).toFixed(1)}%]` : '';
+                
+                return `${label.class || 'unknown'}${confidence} ${coords}`;
+            });
+            
+            labelsContent.textContent = labelStrings.join(' | ');
+            labelsContent.style.color = '#28a745'; // Green color for found labels
+        }
+    } catch (error) {
+        console.error('Error loading labels:', error);
+        labelsContent.textContent = 'Error loading labels';
+        labelsContent.style.color = '#dc3545'; // Red color for error
     }
 }
 
